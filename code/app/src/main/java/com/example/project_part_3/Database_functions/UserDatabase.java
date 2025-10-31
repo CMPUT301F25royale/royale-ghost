@@ -17,9 +17,9 @@ public class UserDatabase {
 
     private UserDatabase(){
         database = new ArrayList<>();
-        database.add(new Entrant("john_doe", "test", "john@gmail.com", "7")); // test user
-        database.add(new Organizer("jack_doe", "test", "jack@gmail.com")); // Test organizer
-        database.add(new Admin("jane_doe", "test", "jane@gmail.com", "9")); // Test admin
+        database.add(new User("john_doe", "test", "john@gmail.com", "7", "Entrant")); // test user
+        database.add(new User("jack_doe", "test", "jack@gmail.com", "8", "Organizer")); // Test organizer
+        database.add(new User("jane_doe", "test", "jane@gmail.com", "9", "Admin")); // Test admin
     }
 
     public static synchronized UserDatabase getInstance() {
@@ -57,4 +57,12 @@ public class UserDatabase {
         }
         return false;
     }
+    public User getUser(String name, String password){
+        for (User user : database) {
+            if (user.getName().equals(name) && user.getPassword().equals(password)) {
+                return user;
+            }
+        }
+        return null;
+    };
 }

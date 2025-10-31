@@ -132,13 +132,13 @@
             android:text="@string/sign_up_organizer" />
 
         <Button
-            android:id="@+id/Entrent_button_sign_up"
+            android:id="@+id/Entrant_button_sign_up"
             android:layout_width="0dp"
             android:backgroundTint="@color/black"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="@string/sign_up_entrent" />
+            android:text="@string/sign_up_entrant" />
     </LinearLayout>
     <Button
         android:id="@+id/submit_sign_up"
