@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">code</string>
+    <string name="login_welcome">Login</string>
+    <string name="signup_welcome">Sign up</string>
+    <string name="Welcome_text">Welcome! Please login or sign up if you already have an account</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="name_sign_up">Name</string>
+    <string name="password_sign_up">Password</string>
+    <string name="email_sign_up">Email</string>
+    <string name="phone_num_sign_up">Phone number (optional)</string>
+    <string name="organizer_sign_up">Organizer</string>
+    <string name="entrant_sign_up">Entrant</string>
+    <string name="submit_sign_up">submit</string>
+    <string name="sign_up_entrent">Entrent</string>
+    <string name="sign_up_organizer">Organizer</string>
+    <string name="name_login_text">name</string>
+    <string name="password_login_text">Password</string>
+    <string name="Login_button_submit">Login</string>
+</resources>

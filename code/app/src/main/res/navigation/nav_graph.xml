@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.project_part_3.Enter.WelcomeFragment"
+        android:label="fragment_welcome"
+        tools:layout="@layout/fragment_welcome">
+        <action
+            android:id="@+id/action_welcomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_welcomeFragment_to_sign_up_fragment"
+            app:destination="@id/sign_up_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.project_part_3.Login.Login_view"
+        android:label="login"
+        tools:layout="@layout/login" />
+    <fragment
+        android:id="@+id/sign_up_fragment"
+        android:name="com.example.project_part_3.Signup.Sign_up_view"
+        android:label="sign_up"
+        tools:layout="@layout/sign_up" />
+
+</navigation>
