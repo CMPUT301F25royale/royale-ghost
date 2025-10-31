@@ -6,7 +6,7 @@
     app:startDestination="@id/admin_main_fragment">
     <fragment
         android:id="@+id/admin_main_fragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_main_fragment"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_main_fragment"
         android:label="fragment_admin_main"
         tools:layout="@layout/admin_host" />
 

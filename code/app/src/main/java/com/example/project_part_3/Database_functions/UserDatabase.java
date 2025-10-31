@@ -17,9 +17,9 @@ public class UserDatabase {
 
     private UserDatabase(){
         database = new ArrayList<>();
-        database.add(new User("john_doe", "test", "john@gmail.com", "7", "Entrant")); // test user
-        database.add(new User("jack_doe", "test", "jack@gmail.com", "8", "Organizer")); // Test organizer
-        database.add(new User("jane_doe", "test", "jane@gmail.com", "9", "Admin")); // Test admin
+        database.add(new Entrant("john_doe", "test", "john@gmail.com", "7"));
+        database.add(new Organizer("jack_doe", "test", "jack@gmail.com", "8"));
+        database.add(new Admin("jane_doe", "test", "jane@gmail.com", "9"));
     }
 
     public static synchronized UserDatabase getInstance() {
@@ -35,9 +35,22 @@ public class UserDatabase {
         if (userExists(email)){ // return false if user already their else adds them to the database
             return false;
         }
-        User user = new Entrant(name, password, email, phone);
-        database.add(user);
-        return true;
+        switch (usertype) {
+            case "Admin":
+                User admin = new Admin(name, password, email, phone);
+                database.add(admin);
+                return true;
+            case "Organizer":
+                User organizer= new Organizer(name, password, email, phone);
+                database.add(organizer);
+                return true;
+            case "Entrant":
+                User entrant= new Entrant(name, password, email, phone);
+                database.add(entrant);
+                return true;
+            default:
+                return false;
+        }
     }
     // change to accomodate firebase
     public boolean checkUser(String name, String password){
