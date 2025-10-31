@@ -26,6 +26,12 @@
             app:destination="@id/admin_main"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_loginFragment_to_organizer_main"
+            app:destination="@id/organizer_main"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/sign_up_fragment"
@@ -33,5 +39,6 @@
         android:label="sign_up"
         tools:layout="@layout/sign_up" />
     <include app:graph="@navigation/admin_main" />
+    <include app:graph="@navigation/organizer_main"/>
 
 </navigation>
