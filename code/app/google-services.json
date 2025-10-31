@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "787439703393",
+    "project_id": "royale-ghost",
+    "storage_bucket": "royale-ghost.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:787439703393:android:31a12ab1afdbd431eaa120",
+        "android_client_info": {
+          "package_name": "com.example.project_part_3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDIYw5Zh9wC8JB0UzninTcICMa81y0uz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
