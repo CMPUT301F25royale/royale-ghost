@@ -2,6 +2,9 @@ package com.example.project_part_3.Database_functions;
 
 import android.widget.Toast;
 
+import com.example.project_part_3.Users.Admin;
+import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 
 import java.util.ArrayList;
@@ -32,7 +35,7 @@ public class UserDatabase {
         if (userExists(email)){ // return false if user already their else adds them to the database
             return false;
         }
-        User user = new User(name, password, email, phone, usertype);
+        User user = new Entrant(name, password, email, phone);
         database.add(user);
         return true;
     }
