@@ -35,9 +35,22 @@ public class UserDatabase {
         if (userExists(email)){ // return false if user already their else adds them to the database
             return false;
         }
-        User user = new Entrant(name, password, email, phone);
-        database.add(user);
-        return true;
+        switch (usertype) {
+            case "Admin":
+                User admin = new Admin(name, password, email, phone);
+                database.add(admin);
+                return true;
+            case "Organizer":
+                User organizer= new Organizer(name, password, email, phone);
+                database.add(organizer);
+                return true;
+            case "Entrant":
+                User entrant= new Entrant(name, password, email, phone);
+                database.add(entrant);
+                return true;
+            default:
+                return false;
+        }
     }
     // change to accomodate firebase
     public boolean checkUser(String name, String password){

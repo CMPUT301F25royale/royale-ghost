@@ -7,7 +7,7 @@
     android:id="@+id/admin_host"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Users.Admin.Admin_main_fragment"
+    tools:context=".Users.Admin_UI.Admin_main_fragment"
     >
 
     <androidx.fragment.app.FragmentContainerView

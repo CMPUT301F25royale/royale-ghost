@@ -32,4 +32,6 @@ public abstract class User {
         return email;
     }
     public String getPhone() { return phone; }
+
+    public abstract String getObjectName();
 }
