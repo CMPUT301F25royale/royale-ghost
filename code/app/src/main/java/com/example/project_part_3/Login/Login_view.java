@@ -3,6 +3,8 @@ package com.example.project_part_3.Login;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 import com.example.project_part_3.R;
 
 public class Login_view extends Fragment {
+    private String userType;
     private TextView name;
     private TextView password;
     private Button submit;
@@ -54,12 +57,32 @@ public class Login_view extends Fragment {
             login_model = new Login_model(nameText, passwordText);
             if (login_model.getSuccess()){
                 Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                //TODO: Add navigation logic here
+                userType = login_model.getUser(nameText, passwordText).getUsertype();
+                NavController navController = NavHostFragment.findNavController(this);
+                navigationBasedonType(userType, navController);
+
             }else
             {
                 Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
                 return;
             };
             });
+    }
+
+    public void navigationBasedonType(String userType, NavController navController){
+        switch (userType) {
+            case "Admin":
+                navController.navigate(R.id.action_loginFragment_to_admin_main);
+                break;
+            case "Organizer":
+                Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
+                break;
+            case "Entrant":
+                Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 }

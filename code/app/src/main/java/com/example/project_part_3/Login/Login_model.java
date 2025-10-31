@@ -1,5 +1,6 @@
 package com.example.project_part_3.Login;
 import com.example.project_part_3.Database_functions.UserDatabase;
+import com.example.project_part_3.Users.User;
 
 public class Login_model {
     UserDatabase userDatabase = UserDatabase.getInstance();
@@ -10,5 +11,9 @@ public class Login_model {
     }
     public Boolean getSuccess(){
         return success;
+    }
+
+    public User getUser(String name, String password){
+        return userDatabase.getUser(name, password);
     }
 }

@@ -14,7 +14,7 @@ public class UserDatabase {
 
     private UserDatabase(){
         database = new ArrayList<>();
-        database.add(new User("john_doe", "test", "john@gmail.com", "7", "Entrent")); // test user
+        database.add(new User("john_doe", "test", "john@gmail.com", "7", "Entrant")); // test user
         database.add(new User("jack_doe", "test", "jack@gmail.com", "8", "Organizer")); // Test organizer
         database.add(new User("jane_doe", "test", "jane@gmail.com", "9", "Admin")); // Test admin
     }
@@ -54,4 +54,12 @@ public class UserDatabase {
         }
         return false;
     }
+    public User getUser(String name, String password){
+        for (User user : database) {
+            if (user.getName().equals(name) && user.getPassword().equals(password)) {
+                return user;
+            }
+        }
+        return null;
+    };
 }
