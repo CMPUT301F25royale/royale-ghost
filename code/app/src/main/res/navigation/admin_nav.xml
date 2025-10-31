@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/adminProfilesFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_profile_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile_view"
         android:label="Profiles"
         tools:layout="@layout/admin_profiles" />
 
     <fragment
         android:id="@+id/adminSearchFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_search_event_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_search_event_view"
         android:label="Search"
         tools:layout="@layout/admin_search" />
 
     <fragment
         android:id="@+id/adminNotificationsFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_notification_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_notification_view"
         android:label="Notifications"
         tools:layout="@layout/admin_notifications" />
 </navigation>

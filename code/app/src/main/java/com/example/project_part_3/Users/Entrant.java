@@ -11,4 +11,8 @@ public class Entrant extends User {
     public Entrant(String name, String password, String email) {
         super(name, password, email);
     }
+
+    public String getObjectName(){
+        return "Entrant";
+    }
 }

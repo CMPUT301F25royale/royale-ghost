@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Admin;
+package com.example.project_part_3.Users.Admin_UI;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,12 +9,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.project_part_3.R;
 
-public class Admin_search_event_view extends Fragment {
+public class Admin_profile_view extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.admin_search, container, false);
+        return inflater.inflate(R.layout.admin_profiles, container, false);
     }
 }
-
