@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/organizer_nav.xml"
-    app:startDestination="@id/organizerNotificationsFragment"/>
+    app:startDestination="@id/organizerNotificationsFragment">
+    <fragment
+        android:id="@+id/organizerNotificationsFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_notification_view"
+        android:label="Notifications"
+        tools:layout="@layout/organizer_notifications" />
+</navigation>
