@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.project_part_3" />
+                  <option name="mobileSdkAppId" value="1:787439703393:android:31a12ab1afdbd431eaa120" />
+                  <option name="projectId" value="royale-ghost" />
+                  <option name="projectNumber" value="787439703393" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
