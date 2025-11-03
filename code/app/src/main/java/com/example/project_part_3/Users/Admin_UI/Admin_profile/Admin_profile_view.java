@@ -54,7 +54,7 @@ public class Admin_profile_view extends Fragment {
                 bundle.putString("phone", selectedProfile.getPhone());
 
                 NavController navController = Navigation.findNavController(view);
-                navController.navigate(R.id.action_admin_profile_view_to_adminProfileInfoFragment, bundle);
+                navController.navigate(R.id.action_admin_profile_view_to_admin_profile_info, bundle);
             }
         });
         return view;

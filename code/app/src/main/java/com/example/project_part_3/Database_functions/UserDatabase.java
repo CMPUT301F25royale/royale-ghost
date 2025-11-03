@@ -79,6 +79,15 @@ public class UserDatabase {
         return null;
     };
 
+    public void removeUser(String email, String name){
+        for (User user : database) {
+            if (user.getEmail().equals(email) && user.getName().equals(name)) {
+                database.remove(user);
+            }
+
+        }
+    }
+
     public ArrayList<User> getAllUsers() {
         return new ArrayList<>(database);
     }

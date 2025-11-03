@@ -11,8 +11,33 @@
         android:label="Profiles"
         tools:layout="@layout/admin_profiles" >
         <action
-            android:id="@+id/action_admin_profile_view_to_adminProfileInfoFragment"
+            android:id="@+id/action_admin_profile_view_to_admin_profile_info"
             app:destination="@id/admin_profile_info" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/admin_profile_info"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile.Admin_profile_info"
+        android:label="Profile Info"
+        tools:layout="@layout/admin_profile_info" >
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="email"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="phone"
+            app:argType="string"
+            app:nullable="true" />
+
+        <action
+            android:id="@+id/action_admin_profile_info_to_admin_profile_view"
+            app:destination="@id/adminProfilesFragment"
+            />
+
     </fragment>
 
     <fragment
@@ -26,5 +51,4 @@
         android:name="com.example.project_part_3.Users.Admin_UI.Admin_notification_view"
         android:label="Notifications"
         tools:layout="@layout/admin_notifications" />
-    <fragment android:id="@+id/placeholder" />
 </navigation>
