@@ -7,9 +7,13 @@
 
     <fragment
         android:id="@+id/adminProfilesFragment"
-        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile.Admin_profile_view"
         android:label="Profiles"
-        tools:layout="@layout/admin_profiles" />
+        tools:layout="@layout/admin_profiles" >
+        <action
+            android:id="@+id/action_admin_profile_view_to_adminProfileInfoFragment"
+            app:destination="@id/admin_profile_info" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminSearchFragment"
@@ -22,4 +26,5 @@
         android:name="com.example.project_part_3.Users.Admin_UI.Admin_notification_view"
         android:label="Notifications"
         tools:layout="@layout/admin_notifications" />
+    <fragment android:id="@+id/placeholder" />
 </navigation>

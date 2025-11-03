@@ -78,4 +78,8 @@ public class UserDatabase {
         }
         return null;
     };
+
+    public ArrayList<User> getAllUsers() {
+        return new ArrayList<>(database);
+    }
 }
