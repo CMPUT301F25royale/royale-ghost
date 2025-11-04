@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -60,7 +61,14 @@ public class Admin_profile_info extends Fragment {
             @Override
             public void onClick(View v) {
                 userDb = UserDatabase.getInstance();
-                userDb.removeUser(email, name);
+                boolean output = userDb.removeUser(email, name);
+                if (output == true){
+                    Toast.makeText(getContext(), "User deleted: " + output, Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(getContext(), "User not deleted as is an instance of admin: " + output, Toast.LENGTH_SHORT).show();
+                }
+
                 NavController navController = Navigation.findNavController(view);
                 navController.navigate(R.id.action_admin_profile_info_to_admin_profile_view);
             }

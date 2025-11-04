@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Admin_UI;
+package com.example.project_part_3.Users.Admin_UI.Admin_search;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +15,10 @@ public class Admin_search_event_view extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.admin_search, container, false);
+
+
+
+
     }
 }
 

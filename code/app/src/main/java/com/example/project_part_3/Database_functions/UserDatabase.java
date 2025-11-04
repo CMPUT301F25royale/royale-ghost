@@ -79,13 +79,19 @@ public class UserDatabase {
         return null;
     };
 
-    public void removeUser(String email, String name){
+    public boolean removeUser(String email, String name){
         for (User user : database) {
             if (user.getEmail().equals(email) && user.getName().equals(name)) {
-                database.remove(user);
+                if(user.getObjectName() == "Admin")
+                    return false;
+                else{
+                    database.remove(user);
+                    return true;
+                }
             }
 
         }
+        return false;
     }
 
     public ArrayList<User> getAllUsers() {
