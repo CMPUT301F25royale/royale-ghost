@@ -1,10 +1,13 @@
 package com.example.project_part_3.Events;
 
+import android.graphics.Bitmap;
 import android.media.Image;
 
 import com.example.project_part_3.Users.Organizer;
+import com.example.project_part_3.Users.User;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Event {
@@ -16,10 +19,14 @@ public class Event {
     public Integer price = 0;
     public String location;
     public Integer capacity;
-    public Image poster;
+    public Bitmap poster;
     public Timestamp time;
+    public ArrayList<User> attendant_list;
+    public Integer attendees;
 
-    public Event(String title, String description, Timestamp time , Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Image poster){
+
+
+    public Event(String title, String description, ArrayList<User> attendees, Timestamp time , Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Bitmap poster){
         this.time = time;
         this.price = price;
         this.title = title;
@@ -30,8 +37,10 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
+        this.attendant_list = attendees;
+        this.attendees = attendees.size();
     }
-    public Event(String title, String description, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Image poster){
+    public Event(String title, String description, ArrayList<User> attendees, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Bitmap poster){
         this.time = time;
         this.title = title;
         this.description = description;
@@ -41,6 +50,8 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
+        this.attendant_list = attendees;
+        this.attendees = attendees.size();
     }
 
     public String getTitle(){
@@ -67,12 +78,17 @@ public class Event {
     public Integer getCapacity(){
         return capacity;
     }
-    public Image getPoster(){
+    public Bitmap getPoster(){
         return poster;
     }
     public Timestamp getTime(){
         return time;
     }
+    public ArrayList<User> getAttendant_list(){ return attendant_list;}
+
+    public Integer getAttendees(){return attendees;}
+
+
 
     public void EditTitle(String title){
         this.title = title;
@@ -95,7 +111,7 @@ public class Event {
     public void EditCapacity(Integer capacity){
         this.capacity = capacity;
     }
-    public void EditPoster(Image poster){
+    public void EditPoster(Bitmap poster){
         this.poster = poster;
     }
 

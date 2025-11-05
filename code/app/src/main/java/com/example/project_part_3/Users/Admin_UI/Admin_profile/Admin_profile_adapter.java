@@ -48,6 +48,7 @@ public class Admin_profile_adapter extends ArrayAdapter<User> {
         return view;
 
     }
+    //view Holder patter for optimization
     private static class ViewHolder {
         TextView nameTextView;
         TextView emailTextView;

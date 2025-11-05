@@ -42,7 +42,7 @@
 
     <fragment
         android:id="@+id/adminSearchFragment"
-        android:name="com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_search_event_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_search_view"
         android:label="Search"
         tools:layout="@layout/admin_search" />
 
