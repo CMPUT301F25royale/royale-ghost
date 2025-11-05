@@ -70,7 +70,8 @@ public class UserDatabase {
         }
         return false;
     }
-    public User getUser(String name, String password){ // returns true or false if their is a user with the same email
+    public User getUser(String name, String password){
+        // returns true or false if their is a user with the same email
         for (User user : database) {
             if (user.getName().equals(name) && user.getPassword().equals(password)) {
                 return user;

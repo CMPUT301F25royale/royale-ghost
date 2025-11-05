@@ -12,6 +12,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
+
+/**
+ * we might combine this database with UserDatabase and Image database for a central database
+ * ultimately we need to have the Events as a weak key of the Organizer that way we can then ensure
+ * that deleting a Organizer will delete all of their events. It must also be that
+ */
 public class EventDatabase {
 
     private static EventDatabase instance;

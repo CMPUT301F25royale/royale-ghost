@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project_part_3.Database_functions.EventDatabase;
-import com.example.project_part_3.Database_functions.Image_database;
+import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_holder;
 import com.example.project_part_3.R;
@@ -122,7 +122,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             holder.description.setText(image.getDescription());
 
             holder.deleteButton.setOnClickListener(v -> {
-                if (Image_database.getInstance().removeImage(image)) {
+                if (ImageDatabase.getInstance().removeImage(image)) {
                     remove(image);
                     notifyDataSetChanged();
                     Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();

@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.Database_functions.EventDatabase;
-import com.example.project_part_3.Database_functions.Image_database;
+import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_holder;
 import com.example.project_part_3.R;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 public class Admin_search_view extends Fragment {
 
     private EventDatabase eventDb;
-    private Image_database imagedb;
+    private ImageDatabase imagedb;
     private ArrayList<Object> objectList; 
     private Event_and_image_array_adapter adapter;
 
@@ -38,7 +38,7 @@ public class Admin_search_view extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_search, container, false);
         eventDb = EventDatabase.getInstance();
-        imagedb = Image_database.getInstance();
+        imagedb = ImageDatabase.getInstance();
         listView = view.findViewById(R.id.admin_search_list);
         searchButton = view.findViewById(R.id.search_button);
         TextInputLayout searchInputLayout = view.findViewById(R.id.Search_input_admin);

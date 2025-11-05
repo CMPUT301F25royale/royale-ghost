@@ -4,39 +4,50 @@ import com.example.project_part_3.Image.Image_holder;
 
 import java.util.ArrayList;
 
-public class Image_database {
 
-    private static Image_database instance;
+
+/**
+ * Our Figma wasn't very descriptive but to search images we needed some string tied to Image types
+ * And our CRC cards were flawed because we need to relate the concept that Images can be profile pics
+ * And posters so deleting elements from the database must delete images from both the events and
+ * User profiles. If an Image is of type Profile it must be deleted the moment the User
+ * profile is deleted. If an Image is of type Poster it must be deleted the moment the Event
+ * is deleted. This class might get retconned but we need to implement the functions within to
+ * maintain the UI.
+ */
+public class ImageDatabase {
+
+    private static ImageDatabase instance;
     private ArrayList<Image_holder> database;
 
-    private Image_database(){
+    private ImageDatabase(){
         database = new ArrayList<>();
         database.add(new Image_holder(
                 null,
                 "Profile picture of user John Doe",
                 "profile"
-        ));
+        , null));
         database.add(new Image_holder(
                 null,
                 "Official poster for the Annual Tech Conference 2025",
                 "poster"
-        ));
+        , null));
         database.add(new Image_holder(
                 null,
                 "Avatar for Jane Smith",
                 "profile"
-        ));
+        , null));
         database.add(new Image_holder(
                 null,
                 "Promotional banner for the Summer Music Festival",
                 "poster"
-        ));
+        , null));
 
     }
 
-    public static synchronized Image_database getInstance() {
+    public static synchronized ImageDatabase getInstance() {
         if (instance == null) {
-            instance = new Image_database();
+            instance = new ImageDatabase();
         }
         return instance;
     }
