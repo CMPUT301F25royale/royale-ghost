@@ -94,7 +94,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             String closeDate = dateFormat.format(event.getDate_close());
             holder.eventDate.setText("Closes: " + closeDate);
 
-            holder.eventAttendees.setText("Attendees: " + event.getAttendees());
+            holder.eventAttendees.setText("Attendees: " + event.getAttendees() + "/" + event.getCapacity() + "");
 
             if (event.getPoster() != null) {
                 holder.eventImage.setImageBitmap(event.getPoster());

@@ -37,8 +37,8 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
-        this.attendant_list = attendees;
-        this.attendees = attendees.size();
+        this.attendant_list = attendees; // Attendees should be held within events so that the same user can' be in the same event for hard enforcement
+        this.attendees = attendees.size();// current people signed up for events as in number of people who signed up this gets updatded frequently
     }
     public Event(String title, String description, ArrayList<User> attendees, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Bitmap poster){
         this.time = time;

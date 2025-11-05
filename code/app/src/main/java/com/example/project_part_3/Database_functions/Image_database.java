@@ -11,6 +11,27 @@ public class Image_database {
 
     private Image_database(){
         database = new ArrayList<>();
+        database.add(new Image_holder(
+                null,
+                "Profile picture of user John Doe",
+                "profile"
+        ));
+        database.add(new Image_holder(
+                null,
+                "Official poster for the Annual Tech Conference 2025",
+                "poster"
+        ));
+        database.add(new Image_holder(
+                null,
+                "Avatar for Jane Smith",
+                "profile"
+        ));
+        database.add(new Image_holder(
+                null,
+                "Promotional banner for the Summer Music Festival",
+                "poster"
+        ));
+
     }
 
     public static synchronized Image_database getInstance() {
@@ -20,7 +41,7 @@ public class Image_database {
         return instance;
     }
 
-    public Boolean addImage(Image_holder image){
+    public Boolean addImage(Image_holder image){ //
         database.add(image);
         return true;
     }
