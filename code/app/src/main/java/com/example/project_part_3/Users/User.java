@@ -1,14 +1,21 @@
 package com.example.project_part_3.Users;
 
 import java.io.Serializable;
-
+import android.util.Log;
 public abstract class User implements Serializable {
     public int userID;
 
-    public String name;
-    public String password;
-    public String email;
-    public String phone; // optional
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public abstract class User {
+    private String name;
+    private String password;
+    private String email;
+    private String phone; // optional
 
     public User(String name, String password, String email, String phone) {
         this.name = name;
@@ -27,13 +34,32 @@ public abstract class User implements Serializable {
     public String getName() {
         return name;
     }
+
     public String getPassword() {
         return password;
     }
+
     public String getEmail() {
         return email;
     }
-    public String getPhone() { return phone; }
 
-    public abstract String getObjectName();
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }
