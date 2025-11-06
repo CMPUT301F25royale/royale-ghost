@@ -83,6 +83,11 @@ public class Database {
         });
     }
 
+    /**
+     * Gets all users from the database
+     *
+     * @return A Task that completes with a List of Users. The Task will fail if a database error occurs.
+     */
     public Task<List<User>> getAllUsers() {
         Task<QuerySnapshot> queryTask = db.collection("users").get();
 
