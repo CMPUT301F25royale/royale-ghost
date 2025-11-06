@@ -7,19 +7,48 @@
 
     <fragment
         android:id="@+id/adminProfilesFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_profile_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile.Admin_profile_view"
         android:label="Profiles"
-        tools:layout="@layout/admin_profiles" />
+        tools:layout="@layout/admin_profiles" >
+        <action
+            android:id="@+id/action_admin_profile_view_to_admin_profile_info"
+            app:destination="@id/admin_profile_info" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/admin_profile_info"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_profile.Admin_profile_info"
+        android:label="Profile Info"
+        tools:layout="@layout/admin_profile_info" >
+        <argument
+            android:name="name"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="email"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="phone"
+            app:argType="string"
+            app:nullable="true" />
+
+        <action
+            android:id="@+id/action_admin_profile_info_to_admin_profile_view"
+            app:destination="@id/adminProfilesFragment"
+            />
+
+    </fragment>
 
     <fragment
         android:id="@+id/adminSearchFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_search_event_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_search_view"
         android:label="Search"
         tools:layout="@layout/admin_search" />
 
     <fragment
         android:id="@+id/adminNotificationsFragment"
-        android:name="com.example.project_part_3.Users.Admin.Admin_notification_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.admin_notifications.Admin_notification_view"
         android:label="Notifications"
         tools:layout="@layout/admin_notifications" />
 </navigation>
