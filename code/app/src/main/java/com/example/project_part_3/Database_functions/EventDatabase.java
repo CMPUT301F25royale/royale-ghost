@@ -81,6 +81,17 @@ public class EventDatabase {
         }
         return null;
     }
+    public Event getEvent(String title, String organizerName) {
+        for (Event event : database) {
+            if (event.getTitle().equalsIgnoreCase(title)
+                    && event.getOrganizer() != null
+                    && organizerName.equals(event.getOrganizer().getName())) {
+                return event;
+            }
+        }
+        return null;
+    }
+
     public boolean removeEvent(String title, String organizerName) {
         return database.removeIf(event -> event.getTitle().equalsIgnoreCase(title) && event.getOrganizer().getName().equals(organizerName));
     }
