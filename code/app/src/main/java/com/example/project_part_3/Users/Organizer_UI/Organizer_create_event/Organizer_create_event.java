@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Organizer_UI;
+package com.example.project_part_3.Users.Organizer_UI.Organizer_create_event;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
