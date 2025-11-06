@@ -5,12 +5,14 @@ import android.media.Image;
 
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
+import com.google.firebase.firestore.Exclude;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Event {
+    private String id; // required for firebase, created when added to database
     private String title;
     private String description;
     private Date date_open;
@@ -24,13 +26,20 @@ public class Event {
     private ArrayList<User> attendant_list;
     private Integer attendees;
 
-    public void addAttendee(User user){
+    public void addAttendant(User user){
         attendant_list.add(user);
         attendees++;
     }
-    public void removeAttendee(User user){
+
+    public void removeAttendant(User user){
         attendant_list.remove(user);
         attendees--;
+    }
+
+    public Event(){
+        // required for firebase
+        this.attendant_list = new ArrayList<User>();
+        this.attendees = 0;
     }
 
     public Event(String title, String description, ArrayList<User> attendees, Timestamp time , Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Bitmap poster){
@@ -77,6 +86,14 @@ public class Event {
         this.attendees = 0;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getTitle(){
         return title;
     }
@@ -101,7 +118,9 @@ public class Event {
     public Integer getCapacity(){
         return capacity;
     }
+    @Exclude
     public Bitmap getPoster(){
+        // too large to be stored in Firebase object, we will store it in firebase storage instead
         return poster;
     }
     public Timestamp getTime(){

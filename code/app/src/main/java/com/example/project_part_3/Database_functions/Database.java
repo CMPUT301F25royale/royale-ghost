@@ -3,6 +3,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -25,16 +26,11 @@ public class Database {
      *
      * @param user The user you would like to add.
      * @return A Task that completes with a Boolean: `true` if the user was successfully added,
-     * `false` if the user already existed. The Task will fail if a database error occurs.
+     * `false` if the user already existed.
      */
     public Task<Boolean> addUser(@NonNull User user) {
-        // 1. First, check if the user exists.
+        // first, check if the user exists.
         return doesUserExist(user).continueWithTask(task -> {
-
-            if (!task.isSuccessful()) {
-                throw task.getException();
-            }
-
             boolean exists = task.getResult();
 
             if (exists) {
@@ -51,17 +47,33 @@ public class Database {
                         return true; // The user was added
                     } else {
                         Log.e("addUser", "User failed to be written to database", setTask.getException());
-                        // Propagate the failure
-                        throw setTask.getException();
+                        return false;
                     }
                 });
             }
         });
     }
 
+    public Task<Boolean> addEvent(@NonNull Event event) {
+        DocumentReference docRef = db.collection("events").document();
+        event.setId(docRef.getId()); // gives the event a unique ID
+
+        return docRef.set(event).continueWith(setTask -> {
+            if (setTask.isSuccessful()) {
+                Log.d("addEvent", "Event successfully written to database");
+                return true;
+            } else {
+                Log.e("addEvent", "Event failed to be written to database", setTask.getException());
+                return false;
+            }
+        });
+    }
 
     /**
-     * Fetches the user based on their email
+     * Fetches the user based on their email.
+     *
+     * @param email The email of the user you want to fetch.
+     * @return A Task that completes with the User object. Returns null if the user does not exist or an error occurs.
      */
     public Task<User> fetchUser(String email) {
         DocumentReference docRef = db.collection("users").document(email);
@@ -74,11 +86,12 @@ public class Database {
                 if (doc != null && doc.exists()) {
                     return doc.toObject(User.class);
                 } else {
+                    Log.d("fetchUser", "User does not exist");
                     return null;
                 }
             } else {
                 Log.d("fetchUser", "Could not find document", task.getException());
-                throw task.getException();
+                return null;
             }
         });
     }
@@ -106,20 +119,22 @@ public class Database {
                 }
                 return users;
             } else {
-                throw task.getException();
+                return null;
             }
         });
     }
 
-    public void deleteUser(String email) {
+    public Task<Boolean> deleteUser(String email) {
         DocumentReference docRef = db.collection("users").document(email);
-        docRef.delete()
-                .addOnSuccessListener(l -> {
-                    Log.d("deleteUser", "User deleted successfully");
-                })
-                .addOnFailureListener(e -> {
-                    Log.w("deleteUser", "Error deleting user", e);
-                });
+        return docRef.delete().continueWith(task -> {
+            if (task.isSuccessful()) {
+                Log.d("deleteUser", "User successfully deleted");
+                return true;
+            } else {
+                Log.e("deleteUser", "User failed to be deleted", task.getException());
+                return false;
+            }
+        });
     }
 
     public Task<Boolean> doesUserExist(User user) {
