@@ -48,7 +48,7 @@
 
     <fragment
         android:id="@+id/adminNotificationsFragment"
-        android:name="com.example.project_part_3.Users.Admin_UI.admin_notifications.Admin_notification_view"
+        android:name="com.example.project_part_3.Users.Admin_UI.Admin_notifications.Admin_notification_view"
         android:label="Notifications"
         tools:layout="@layout/admin_notifications" />
 </navigation>

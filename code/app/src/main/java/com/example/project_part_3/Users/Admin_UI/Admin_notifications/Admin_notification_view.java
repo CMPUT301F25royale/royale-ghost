@@ -1,11 +1,10 @@
-package com.example.project_part_3.Users.Admin_UI.admin_notifications;
+package com.example.project_part_3.Users.Admin_UI.Admin_notifications;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
