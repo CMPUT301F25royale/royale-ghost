@@ -9,6 +9,7 @@ public class Login_model {
     public Login_model(String name, String password) {
         this.success = userDatabase.checkUser(name, password);
     }
+
     public Boolean getSuccess(){
         return success;
     }

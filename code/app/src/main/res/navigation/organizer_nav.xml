@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/organizer_nav"
+    app:startDestination="@id/organizerNotificationsFragment">
+
+    <fragment
+        android:id="@+id/organizerNotificationsFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_notifications.Organizer_notification_view"
+        android:label="fragment_organizer_notifications"
+        tools:layout="@layout/organizer_notifications" />
+
+    <fragment
+        android:id="@+id/organizerSearchFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_search.Organizer_search_event_view"
+        android:label="fragment_organizer_search"
+        tools:layout="@layout/organizer_search" />
+
+    <fragment
+        android:id="@+id/organizerProfilesFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view"
+        android:label="fragment_organizer_profiles"
+        tools:layout="@layout/organizer_profiles" />
+
+    <fragment
+        android:id="@+id/organizerCreateEventFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_create_event.Organizer_create_event"
+        android:label="fragment_organizer_create_event"
+        tools:layout="@layout/organizer_create_event" />
+
+
+</navigation>
