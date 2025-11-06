@@ -28,32 +28,35 @@ public abstract class User {
         this.phone = null;
     }
 
-    public void addToDatabase(FirebaseFirestore db) {
-        Map<Object, String> data = new HashMap<>();
-        data.put("name", name);
-        data.put("password", password);
-        data.put("email", email);
-        data.put("phone", phone); // may be null
-
-        db.collection("users")
-                .document(email)
-                .set(data)
-                .addOnSuccessListener(s -> {
-                    Log.d("Success", "User was successfully added to the database");
-                })
-                .addOnFailureListener(f -> {
-                    Log.d("Fail", "Could not add user to the database");
-                });
-    }
-
     public String getName() {
         return name;
     }
+
     public String getPassword() {
         return password;
     }
+
     public String getEmail() {
         return email;
     }
-    public String getPhone() { return phone; }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }

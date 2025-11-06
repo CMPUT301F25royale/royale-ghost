@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,14 +79,17 @@ public class Sign_up_view extends Fragment {
                 return;
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
-            if (sign_up_model.getSuccess()){
-                Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                clearForm();
-                //TODO: Add navigation logic here
-            }
-            else{
-                Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
-            };
+            sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+                if (wasAdded) {
+                    Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                    clearForm();
+                    //TODO: Add navigation logic here
+                } else {
+                    Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Log.d("Sign_up", "Failed to sign up");
+            });
         });
     }
 
@@ -97,7 +101,7 @@ public class Sign_up_view extends Fragment {
             selectedOption = "Organizer";
             Organizer_button_sign_up.setBackgroundColor(Color.BLACK);
         } else if (selectedButton.getId() == R.id.Entrent_button_sign_up) {
-            selectedOption = "Entrent";
+            selectedOption = "Entrant";
             Entrent_button_sign_up.setBackgroundColor(Color.BLACK);
         }
     }
