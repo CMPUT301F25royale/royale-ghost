@@ -17,9 +17,9 @@ public class UserDatabase {
 
     private UserDatabase(){
         database = new ArrayList<>();
-        database.add(new Entrant("john_doe", "test", "john@gmail.com", "7"));
-        database.add(new Organizer("jack_doe", "test", "jack@gmail.com", "8"));
-        database.add(new Admin("jane_doe", "test", "jane@gmail.com", "9"));
+        database.add(new Entrant("john_doe", "test", "john@gmail.com", "7")); // test user
+        database.add(new Organizer("jack_doe", "test", "jack@gmail.com", "8")); // Test organizer
+        database.add(new Admin("jane_doe", "test", "jane@gmail.com", "9")); // Test admin
     }
 
     public static synchronized UserDatabase getInstance() {
@@ -71,6 +71,7 @@ public class UserDatabase {
         return false;
     }
     public User getUser(String name, String password){
+        // returns true or false if their is a user with the same email
         for (User user : database) {
             if (user.getName().equals(name) && user.getPassword().equals(password)) {
                 return user;
@@ -78,4 +79,23 @@ public class UserDatabase {
         }
         return null;
     };
+
+    public boolean removeUser(String email, String name){
+        for (User user : database) {
+            if (user.getEmail().equals(email) && user.getName().equals(name)) {
+                if(user.getObjectName() == "Admin")
+                    return false;
+                else{
+                    database.remove(user);
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
+    public ArrayList<User> getAllUsers() {
+        return new ArrayList<>(database);
+    }
 }
