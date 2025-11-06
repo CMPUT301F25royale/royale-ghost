@@ -81,6 +81,7 @@ public class Sign_up_view extends Fragment {
                 if (wasAdded) {
                     Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
                     clearForm();
+                    MainActivity mainActivity = (MainActivity) getActivity();
                     assert mainActivity != null;
                     mainActivity.NavigationForUserType(selectedOption);
                 } else {

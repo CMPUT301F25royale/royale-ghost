@@ -1,17 +1,14 @@
 package com.example.project_part_3.Users;
 
 import java.io.Serializable;
-import android.util.Log;
-public abstract class User implements Serializable {
-    public int userID;
-
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import android.util.Log;
 
-public abstract class User {
+
+public abstract class User implements Serializable{
     private String name;
     private String password;
     private String email;
