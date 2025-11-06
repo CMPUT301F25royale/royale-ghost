@@ -1,6 +1,8 @@
 package com.example.project_part_3.Users;
 
-public abstract class User {
+import java.io.Serializable;
+
+public abstract class User implements Serializable {
     public int userID;
 
     public String name;
