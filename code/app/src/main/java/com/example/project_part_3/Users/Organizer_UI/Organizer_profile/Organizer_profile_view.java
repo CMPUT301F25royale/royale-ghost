@@ -95,9 +95,12 @@ public class Organizer_profile_view extends Fragment {
                     String name = user.getName();
                     String password = user.getPassword();
                     String number = user.getPhone();
-                    db.deleteUser(username).addOnSuccessListener(success -> {});
+                    db.deleteUser(username);
                     Organizer new_user = new Organizer(name,password,_new,number);
                     db.addUser(new_user);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("username", _new);
+                    editor.apply();
                 });
             });
         });
