@@ -12,9 +12,34 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.w3c.dom.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Database class provides methods for interacting with the Firebase Firestore database. Most
+ * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
+ * Example usage:
+ * <pre>
+ *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
+ *     Database db = new Database(ff);
+ *
+ *     String email = "ballsdeep69@gmail.com"
+ *     db.fetchUser(email).addOnSuccessListener(user -> {
+ *          user.setName("Dion"); // changes user name
+ *     }
+ *     db.fetchUser(email).addOnFailureListener(e -> {
+ *          // e is the exception that was thrown
+ *          Log.e("fetchUser", "Failed to fetch user", e);
+ *     }
+ *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
+ *          // success = true if user was added
+ *          // success = false if user exists already
+ *     }
+ * </pre>
+ *
+ */
 public class Database {
     FirebaseFirestore db;
     public Database(FirebaseFirestore db) {
@@ -70,6 +95,29 @@ public class Database {
     }
 
     /**
+     * Fetches an event based on its ID.
+     *
+     * @param eventId
+     * @return
+     */
+    public Task<Event> fetchEvent(String eventId) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+
+        return docRef.get().continueWith(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot doc = task.getResult();
+                if (doc != null && doc.exists()) {
+                    return doc.toObject(Event.class);
+                } else {
+                    throw new Exception("Event does not exist");
+                }
+            }
+            // else propagate exception
+            throw task.getException();
+        });
+    }
+
+    /**
      * Fetches the user based on their email.
      *
      * @param email The email of the user you want to fetch.
@@ -87,13 +135,23 @@ public class Database {
                     return doc.toObject(User.class);
                 } else {
                     Log.d("fetchUser", "User does not exist");
-                    return null;
+                    throw new Exception("User does not exist");
                 }
             } else {
                 Log.d("fetchUser", "Could not find document", task.getException());
-                return null;
+                throw task.getException();
             }
         });
+    }
+
+    /**
+     * Sets (replaces) a user in the database.
+     *
+     * @param user The user you would like to set.
+     */
+    public void setUser(User user) {
+        DocumentReference docRef = db.collection("users").document(user.getEmail());
+        docRef.set(user);
     }
 
     /**
@@ -119,7 +177,46 @@ public class Database {
                 }
                 return users;
             } else {
-                return null;
+                Log.d("getAllUsers", "Could not get documents", task.getException());
+                throw task.getException();
+            }
+        });
+    }
+
+    public Task<List<Event>> getAllEvents() {
+        Task<QuerySnapshot> queryTask = db.collection("events").get();
+        return queryTask.continueWith(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot query = task.getResult();
+                List<Event> events = new ArrayList<>();
+                if (query != null) {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        events.add(doc.toObject(Event.class));
+                    }
+                }
+                return events;
+            } else {
+                Log.d("getAllEvents", "Could not get documents", task.getException());
+                throw task.getException();
+            }
+        });
+    }
+
+    public Task<List<Event>> getEventsByUser(String email) {
+        Task<QuerySnapshot> queryTask = db.collection("events").whereEqualTo("organizer", email).get();
+        return queryTask.continueWith(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot query = task.getResult();
+                List<Event> events = new ArrayList<>();
+                if (query != null) {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        events.add(doc.toObject(Event.class));
+                    }
+                }
+                return events;
+            } else {
+                Log.d("getEventsByUser", "Could not get documents", task.getException());
+                throw task.getException();
             }
         });
     }
@@ -137,6 +234,19 @@ public class Database {
         });
     }
 
+    public Task<Boolean> deleteEvent(String eventId) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+        return docRef.delete().continueWith(task -> {
+            if (task.isSuccessful()) {
+                Log.d("deleteEvent", "Event successfully deleted");
+                return true;
+            } else {
+                Log.e("deleteEvent", "Event failed to be deleted", task.getException());
+                return false;
+            }
+        });
+    }
+
     /**
      * Verifies if email and password is correct, and returns the user for which it is correct.
      *
@@ -149,7 +259,7 @@ public class Database {
 
         return docRef.get().continueWithTask(task -> {
             if (!task.isSuccessful()) {
-                // Propagate the original failure (e.g., network error, permission denied)
+                // propagate the original failure
                 throw task.getException();
             }
             DocumentSnapshot document = task.getResult();
@@ -157,18 +267,16 @@ public class Database {
                 return Tasks.forException(new Exception("User not found"));
             }
             String storedPassword = document.getString("password");
-            // Use TextUtils for safety against nulls
             if (android.text.TextUtils.equals(storedPassword, password)) {
-                // SUCCESS: Password matches, return a successful task with the User object
+                // password matches, return a successful task with the User object
                 User user = document.toObject(User.class);
                 return Tasks.forResult(user);
             } else {
-                // Password mismatch, return a specific failed task
+                // password mismatch, return a specific failed task
                 return Tasks.forException(new Exception("Incorrect password"));
             }
         });
     }
-
 
     public Task<Boolean> doesUserExist(User user) {
         return fetchUser(user.getEmail()).continueWith(task -> {

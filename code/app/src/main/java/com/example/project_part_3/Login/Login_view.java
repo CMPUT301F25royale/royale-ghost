@@ -24,8 +24,9 @@ public class Login_view extends Fragment {
     private TextView password;
     private Button submit;
     private Login_model login_model;
-    public Login_view() {
-    }
+
+    public Login_view() {}
+
     public static Login_view newInstance(String param1, String param2) {
         Login_view fragment = new Login_view();
         Bundle args = new Bundle();
@@ -51,6 +52,7 @@ public class Login_view extends Fragment {
         password = view.findViewById(R.id.password_login_edit_text);
         submit = view.findViewById(R.id.Login_submit);
         Database db = new Database(FirebaseFirestore.getInstance());
+
         submit.setOnClickListener(v -> {
             String nameText = name.getText().toString();
             String passwordText = password.getText().toString();
