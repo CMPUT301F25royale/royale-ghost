@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Users.Admin_UI.Admin_search.Admin_event_detail_activity"
+            android:parentActivityName=".Users.Admin_UI.Admin_search.Admin_search_view" />
+
     </application>
 
 </manifest>

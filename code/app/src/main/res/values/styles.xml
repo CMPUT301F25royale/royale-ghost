@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Rounded 28dp corners used by the TextInputLayout -->
-    <style name="ShapeAppearanceOverlay.App.Rounded28">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">28dp</item>
+    <style name="InfoStat">
+        <item name="android:orientation">vertical</item>
     </style>
 
-
-    <style name="CircleImage">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item> <!-- perfect circle -->
+    <style name="InfoLabel">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
+    <style name="InfoValue">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">2dp</item>
+    </style>
 
+    <style name="InfoCaption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
 </resources>
+

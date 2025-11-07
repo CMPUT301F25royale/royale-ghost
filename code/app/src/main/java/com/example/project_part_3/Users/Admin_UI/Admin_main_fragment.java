@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Admin; // Assuming this is the correct package
+package com.example.project_part_3.Users.Admin_UI; // Assuming this is the correct package
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

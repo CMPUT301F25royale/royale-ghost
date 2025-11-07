@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.project_part_3.Login.Login_model;
 import com.example.project_part_3.R;
 
 public class Login_view extends Fragment {
@@ -57,7 +58,7 @@ public class Login_view extends Fragment {
             login_model = new Login_model(nameText, passwordText);
             if (login_model.getSuccess()){
                 Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                userType = login_model.getUser(nameText, passwordText).getUsertype();
+                userType = login_model.getUser(nameText, passwordText).getObjectName();
                 NavController navController = NavHostFragment.findNavController(this);
                 navigationBasedonType(userType, navController);
 
@@ -75,7 +76,8 @@ public class Login_view extends Fragment {
                 navController.navigate(R.id.action_loginFragment_to_admin_main);
                 break;
             case "Organizer":
-                Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_organizer_main);
                 break;
             case "Entrant":
                 Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();
