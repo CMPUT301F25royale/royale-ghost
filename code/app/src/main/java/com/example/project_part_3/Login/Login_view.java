@@ -1,5 +1,7 @@
 package com.example.project_part_3.Login;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -56,6 +58,13 @@ public class Login_view extends Fragment {
         submit.setOnClickListener(v -> {
             String nameText = name.getText().toString();
             String passwordText = password.getText().toString();
+
+            SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("username", nameText);
+            editor.putString("password", passwordText);
+            editor.apply();
+
             if (nameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
