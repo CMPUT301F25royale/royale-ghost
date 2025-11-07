@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.Database_functions.EventDatabase;
+import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.R;
 
@@ -21,7 +22,7 @@ public class Organizer_event_view extends Fragment{
     ListView eventList;
     EventDatabase eventDb;
     Organizer_event_adapter adapter;
-    ArrayList<Event_Organizer> events;
+    ArrayList<Event> events;
 
     public Organizer_event_view() {
 

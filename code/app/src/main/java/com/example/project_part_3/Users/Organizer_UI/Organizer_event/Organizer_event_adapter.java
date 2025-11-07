@@ -7,19 +7,20 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
-public class Organizer_event_adapter extends ArrayAdapter<Event_Organizer> {
+public class Organizer_event_adapter extends ArrayAdapter<Event> {
     private final int resourceLayout;
-    private final ArrayList<Event_Organizer> organizers;
+    private final ArrayList<Event> events;
 
-    public Organizer_event_adapter(Context context, int resource, ArrayList<Event_Organizer> organizers) {
-        super(context, 0, organizers);
+    public Organizer_event_adapter(Context context, int resource, ArrayList<Event> events) {
+        super(context, resource, events);
         this.resourceLayout = resource;
-        this.organizers = organizers;
+        this.events = events;
     }
 
 
@@ -42,14 +43,14 @@ public class Organizer_event_adapter extends ArrayAdapter<Event_Organizer> {
             holder = (Organizer_event_adapter.ViewHolder) view.getTag();
         }
 
-        Event_Organizer event = getItem(position);
+        Event event = getItem(position);
 
         if (event != null) {
-            holder.eventName.setText(event.getName());
+            holder.eventName.setText(event.getTitle());
             holder.eventLocation.setText(event.getLocation());
-            holder.eventDate.setText(event.getDate().toString());
-            holder.eventRegistrationStatus.setText(event.getRegStatus());
-            holder.eventCapacity.setText(event.getCapacity());
+            holder.eventDate.setText(event.getDate_open().toString());//TODO: include close date
+            holder.eventRegistrationStatus.setText(event.registrationStatus());
+            holder.eventCapacity.setText(String.valueOf(event.getCapacity()));
             return view;
         }
         return view;
