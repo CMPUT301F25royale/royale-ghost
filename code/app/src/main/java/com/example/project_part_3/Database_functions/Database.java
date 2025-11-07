@@ -171,6 +171,44 @@ public class Database {
         });
     }
 
+    public Task<List<Event>> getAllEvents() {
+        Task<QuerySnapshot> queryTask = db.collection("events").get();
+        return queryTask.continueWith(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot query = task.getResult();
+                List<Event> events = new ArrayList<>();
+                if (query != null) {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        events.add(doc.toObject(Event.class));
+                    }
+                }
+                return events;
+            } else {
+                Log.d("getAllEvents", "Could not get documents", task.getException());
+                throw task.getException();
+            }
+        });
+    }
+
+    public Task<List<Event>> getEventsByUser(String email) {
+        Task<QuerySnapshot> queryTask = db.collection("events").whereEqualTo("organizer", email).get();
+        return queryTask.continueWith(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot query = task.getResult();
+                List<Event> events = new ArrayList<>();
+                if (query != null) {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        events.add(doc.toObject(Event.class));
+                    }
+                }
+                return events;
+            } else {
+                Log.d("getEventsByUser", "Could not get documents", task.getException());
+                throw task.getException();
+            }
+        });
+    }
+
     public Task<Boolean> deleteUser(String email) {
         DocumentReference docRef = db.collection("users").document(email);
         return docRef.delete().continueWith(task -> {

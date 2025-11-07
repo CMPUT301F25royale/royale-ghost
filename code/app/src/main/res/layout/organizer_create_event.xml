@@ -78,6 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:hint="Enter capacity"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/create_event_capacity_text"
         app:layout_constraintTop_toBottomOf="@+id/create_event_description_input" />
@@ -99,6 +100,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:hint="Opens"
+        android:inputType="date"
         app:layout_constraintStart_toEndOf="@id/create_event_registration_text"
         app:layout_constraintTop_toBottomOf="@id/create_event_capacity_input" />
 
@@ -108,6 +110,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:hint="Closes"
+        android:inputType="date"
         app:layout_constraintStart_toEndOf="@id/create_event_registration_open_input"
         app:layout_constraintTop_toBottomOf="@id/create_event_capacity_input" />
 
@@ -145,6 +148,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/cretae_event_price_input"
         android:hint="Add Amount ($)"
+        android:inputType="numberDecimal"
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toEndOf="@id/create_event_price_text"
         app:layout_constraintTop_toBottomOf="@id/create_event_location_input"/>

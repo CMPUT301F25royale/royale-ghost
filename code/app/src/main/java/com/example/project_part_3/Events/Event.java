@@ -1,7 +1,6 @@
 package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
-import android.media.Image;
 
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
@@ -18,7 +17,7 @@ public class Event {
     private Date date_open;
     private Date date_close;
     private Organizer organizer;
-    private Integer price = 0;
+    private Float price;
     private String location;
     private Integer capacity;
     private Bitmap poster;
@@ -42,7 +41,7 @@ public class Event {
         this.attendees = 0;
     }
 
-    public Event(String title, String description, ArrayList<User> attendees, Timestamp time , Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Bitmap poster){
+    public Event(String title, String description, ArrayList<User> attendees, Timestamp time , Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster){
         this.time = time;
         this.price = price;
         this.title = title;
@@ -71,7 +70,7 @@ public class Event {
         this.attendees = attendees.size();
     }
 
-    public Event(String title, String description, Timestamp time, Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Bitmap poster){
+    public Event(String title, String description, Timestamp time, Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster){
         this.time = time;
         this.price = price;
         this.title = title;
@@ -109,7 +108,7 @@ public class Event {
     public Organizer getOrganizer(){
         return organizer;
     }
-    public Integer getPrice(){
+    public Float getPrice(){
         return price;
     }
     public String getLocation(){
@@ -142,7 +141,7 @@ public class Event {
     public void EditDate_close(Date date_close){
         this.date_close = date_close;
     }
-    public void EditPrice(Integer price){
+    public void EditPrice(Float price){
         this.price = price;
     }
     public void EditLocation(String location){
