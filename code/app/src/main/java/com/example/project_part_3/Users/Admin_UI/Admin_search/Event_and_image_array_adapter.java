@@ -1,6 +1,4 @@
-package com.example.project_part_3.Users.Admin_UI.Admin_search;
-
-import android.content.Context;
+package com.example.project_part_3.Users.Admin_UI.Admin_search;import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.project_part_3.Database_functions.EventDatabase;
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_holder;
 import com.example.project_part_3.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,12 +22,14 @@ import java.util.Locale;
 
 public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
     private Context context;
+    private Database db;
     private static final int TYPE_EVENT = 0;
     private static final int TYPE_IMAGE = 1;
 
     public Event_and_image_array_adapter(Context context, ArrayList<Object> items) {
-        super(context, 0, items); // Use 0 for resource since we inflate manually
+        super(context, 0, items);
         this.context = context;
+        this.db = new Database(FirebaseFirestore.getInstance());
     }
 
     @Override
@@ -75,50 +76,57 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
         if (viewType == TYPE_EVENT) {
             EventViewHolder holder = (EventViewHolder) convertView.getTag();
-            Event event = (Event) item;
-            bindEventView(holder, event);
+            bindEventView(holder, (Event) item);
         } else {
             ImageViewHolder holder = (ImageViewHolder) convertView.getTag();
-            Image_holder image = (Image_holder) item;
-            bindImageView(holder, image);
+            bindImageView(holder, (Image_holder) item);
         }
 
         return convertView;
     }
 
     private void bindEventView(EventViewHolder holder, Event event) {
-        if (event != null) {
-            holder.eventTitle.setText(event.getTitle());
-            holder.eventLocation.setText(event.getLocation());
+        if (event == null) return;
+        holder.eventTitle.setText(event.getTitle());
+        holder.eventLocation.setText(event.getLocation());
 
+        if (event.getDate_close() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             String closeDate = dateFormat.format(event.getDate_close());
             holder.eventDate.setText("Closes: " + closeDate);
+        }
 
-            holder.eventAttendees.setText("Attendees: " + event.getAttendees() + "/" + event.getCapacity() + "");
+        holder.eventAttendees.setText("Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity());
 
-            if (event.getPoster() != null) {
-                holder.eventImage.setImageBitmap(event.getPoster());
-            } else {
-                holder.eventImage.setImageResource(android.R.drawable.ic_menu_myplaces);
+        if (event.getPoster() != null) {
+            holder.eventImage.setImageBitmap(event.getPoster());
+        } else {
+            holder.eventImage.setImageResource(android.R.drawable.ic_menu_myplaces);
+        }
+
+        holder.eventDetail.setOnClickListener(v -> {
+            Intent i = new Intent(context, com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_event_detail_activity.class);
+            i.putExtra("eventId", event.getId());
+            context.startActivity(i);
+        });
+
+        holder.eventDelete.setOnClickListener(v -> {
+            if (event.getId() == null || event.getId().isEmpty()) {
+                Toast.makeText(context, "Cannot delete event without an ID", Toast.LENGTH_SHORT).show();
+                return;
             }
-
-            holder.eventDetail.setOnClickListener(v -> {
-                Intent i = new Intent(context, com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_event_detail_activity.class);
-                i.putExtra("title", event.getTitle());
-                i.putExtra("organizerName", event.getOrganizer() != null ? event.getOrganizer().getName() : "");
-                context.startActivity(i);
-            });
-            holder.eventDelete.setOnClickListener(v -> {
-                if (EventDatabase.getInstance().removeEvent(event.getTitle(), event.getOrganizer().getName())) {
+            db.deleteEvent(event.getId()).addOnSuccessListener(success -> {
+                if (success) {
                     remove(event);
                     notifyDataSetChanged();
                     Toast.makeText(context, event.getTitle() + " deleted", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(context, "Failed to delete event", Toast.LENGTH_SHORT).show();
                 }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
-        }
+        });
     }
 
     private void bindImageView(ImageViewHolder holder, Image_holder image) {
@@ -140,12 +148,8 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     private static class EventViewHolder {
         ImageView eventImage;
-        TextView eventTitle;
-        TextView eventLocation;
-        TextView eventDate;
-        TextView eventAttendees;
-        Button eventDetail;
-        Button eventDelete;
+        TextView eventTitle, eventLocation, eventDate, eventAttendees;
+        Button eventDetail, eventDelete;
     }
     private static class ImageViewHolder {
         ImageView imageView;
@@ -153,3 +157,4 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         Button deleteButton;
     }
 }
+
