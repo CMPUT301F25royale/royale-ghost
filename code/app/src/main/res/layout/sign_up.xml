@@ -10,6 +10,7 @@
         android:layout_width="347dp"
         android:layout_height="wrap_content"
         android:text="@string/name_sign_up"
+        android:textSize="24sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,7 +21,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="347dp"
         android:layout_height="wrap_content"
-        android:hint="Enter your name"
+        android:hint="@string/enter_your_name"
         app:layout_constraintTop_toBottomOf="@+id/name_sign_up"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,6 +37,8 @@
         android:layout_width="347dp"
         android:layout_height="wrap_content"
         android:text="@string/password_sign_up"
+        android:textSize="24sp"
+
         app:layout_constraintTop_toBottomOf="@+id/name_sign_up_input"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +49,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="347dp"
         android:layout_height="wrap_content"
-        android:hint="Enter your password"
+        android:hint="@string/enter_your_password"
         app:layout_constraintTop_toBottomOf="@+id/password_sign_up"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,6 +66,7 @@
         android:layout_width="347dp"
         android:layout_height="wrap_content"
         android:text="@string/email_sign_up"
+        android:textSize="24sp"
         app:layout_constraintTop_toBottomOf="@+id/password_sign_up_input"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -90,6 +94,8 @@
         android:layout_width="347dp"
         android:layout_height="wrap_content"
         android:text="@string/phone_num_sign_up"
+        android:textSize="24sp"
+
         app:layout_constraintTop_toBottomOf="@+id/email_sign_up_input"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,9 +120,10 @@
     </com.google.android.material.textfield.TextInputLayout>
     <LinearLayout
         android:id="@+id/role_selection_container"
-        android:layout_width="347dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginHorizontal="24sp"
         app:layout_constraintBottom_toTopOf="@+id/submit_sign_up"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -127,28 +134,29 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="@color/gray"
             android:layout_weight="1"
             android:text="@string/sign_up_organizer" />
 
         <Button
             android:id="@+id/Entrant_button_sign_up"
             android:layout_width="0dp"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="@color/gray"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/sign_up_entrant" />
     </LinearLayout>
+
     <Button
         android:id="@+id/submit_sign_up"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="24sp"
         android:backgroundTint="@color/black"
         android:text="@string/submit_sign_up"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/role_selection_container" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
