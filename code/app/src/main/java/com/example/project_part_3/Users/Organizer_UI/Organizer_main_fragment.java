@@ -1,13 +1,17 @@
+// In: com/example/project_part_3/Users/Organizer_UI/Organizer_main_fragment.java
+
 package com.example.project_part_3.Users.Organizer_UI;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider; // Import ViewModelProvider
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
@@ -16,6 +20,18 @@ import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class Organizer_main_fragment extends Fragment {
+    private OrganizerSharedViewModel sharedViewModel;
+
+    public Organizer_main_fragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
+    }
+
 
     @Nullable
     @Override
@@ -23,10 +39,10 @@ public class Organizer_main_fragment extends Fragment {
         return inflater.inflate(R.layout.organizer_host, container, false);
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         BottomNavigationView bottomNav = view.findViewById(R.id.organizer_bottom_nav);
         NavHostFragment navHostFragment = (NavHostFragment) getChildFragmentManager()
                 .findFragmentById(R.id.organizer_nav_host_fragment);
@@ -37,3 +53,6 @@ public class Organizer_main_fragment extends Fragment {
         }
     }
 }
+
+
+

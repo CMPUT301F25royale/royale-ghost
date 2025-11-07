@@ -41,6 +41,9 @@
         android:label="sign_up"
         tools:layout="@layout/sign_up" />
     <include app:graph="@navigation/admin_main" />
-    <include app:graph="@navigation/organizer_main"/>
-
+    <include app:graph="@navigation/organizer_main">
+        <argument
+            android:name="userEmail"
+            app:argType="string" />
+    </include>
 </navigation>
