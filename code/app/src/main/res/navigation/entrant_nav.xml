@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/entrant_nav"
+    app:startDestination="@id/entrant_profile_view">
+
+    <fragment
+        android:id="@+id/entrant_profile_view"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_profile.Entrant_profile_view"
+        android:label="Entrant_profile_view"
+        tools:layout="@layout/entrant_profile"/>
+    <fragment
+        android:id="@+id/entrant_main_view"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_event.Entrant_event_view"
+        android:label="fragment_blank"
+        tools:layout="@layout/entrant_main" />
+    <fragment
+        android:id="@+id/entrant_search"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_search.Entrant_search_view"
+        android:label="fragment_blank"
+        tools:layout="@layout/entrant_search" />
+    <fragment
+        android:id="@+id/entrant_qr"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_qrscan.Entrant_qrscan_view"
+        android:label="fragment_blank"
+        tools:layout="@layout/entrant_scan" />
+</navigation>

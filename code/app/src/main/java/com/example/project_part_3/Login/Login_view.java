@@ -92,13 +92,16 @@ public class Login_view extends Fragment {
                 break;
             case "Organizer":
                 //Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
-                Bundle bundle = new Bundle();
-                bundle.putString("userEmail", userEmail);
+                Bundle bundleO = new Bundle();
+                bundleO.putString("userEmail", userEmail);
                 Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_organizer_main, bundle);
+                navController.navigate(R.id.action_loginFragment_to_organizer_main, bundleO);
                 break;
             case "Entrant":
-                Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();
+                Bundle bundleE = new Bundle();
+                bundleE.putString("userEmail", userEmail);
+                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_entrant_main, bundleE);
                 break;
             default:
                 Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();
