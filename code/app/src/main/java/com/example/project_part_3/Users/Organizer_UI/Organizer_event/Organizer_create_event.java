@@ -1,6 +1,4 @@
-// In: .../Organizer_UI/Organizer_create_event/Organizer_create_event.java
-
-package com.example.project_part_3.Users.Organizer_UI.Organizer_create_event;
+package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
