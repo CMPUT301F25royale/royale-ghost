@@ -1,6 +1,7 @@
 package com.example.project_part_3.Users.Admin_UI.Admin_search;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,8 +103,12 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
                 holder.eventImage.setImageResource(android.R.drawable.ic_menu_myplaces);
             }
 
-            holder.eventDetail.setOnClickListener(v -> Toast.makeText(context, "Details for " + event.getTitle(), Toast.LENGTH_SHORT).show());
-
+            holder.eventDetail.setOnClickListener(v -> {
+                Intent i = new Intent(context, com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_event_detail_activity.class);
+                i.putExtra("title", event.getTitle());
+                i.putExtra("organizerName", event.getOrganizer() != null ? event.getOrganizer().getName() : "");
+                context.startActivity(i);
+            });
             holder.eventDelete.setOnClickListener(v -> {
                 if (EventDatabase.getInstance().removeEvent(event.getTitle(), event.getOrganizer().getName())) {
                     remove(event);
