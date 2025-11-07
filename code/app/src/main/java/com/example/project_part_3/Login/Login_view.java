@@ -73,8 +73,9 @@ public class Login_view extends Fragment {
                     if (user != null) {
                         Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
                         userType = user.getUserType();
+                        String userEmail = user.getEmail();
                         NavController navController = NavHostFragment.findNavController(this);
-                        navigationBasedonType(userType, navController);
+                        navigationBasedonType(userType, userEmail, navController);
                     } else {
                         Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
                     }
@@ -84,14 +85,17 @@ public class Login_view extends Fragment {
         });
     }
 
-    public void navigationBasedonType(String userType, NavController navController){
+    public void navigationBasedonType(String userType, String userEmail, NavController navController){
         switch (userType) {
             case "Admin":
                 navController.navigate(R.id.action_loginFragment_to_admin_main);
                 break;
             case "Organizer":
                 //Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_organizer_main);
+                Bundle bundle = new Bundle();
+                bundle.putString("userEmail", userEmail);
+                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_organizer_main, bundle);
                 break;
             case "Entrant":
                 Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();

@@ -44,6 +44,13 @@ public class Organizer_create_event extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Button back = view.findViewById(R.id.back);
+        back.setOnClickListener(v-> {
+            NavController navBack = NavHostFragment.findNavController(this);
+            navBack.navigate(R.id.create_to_event);
+        });
+
         BottomNavigationView bottomNav = view.findViewById(R.id.organizer_bottom_nav);
         NavHostFragment navHostFragment = (NavHostFragment) getChildFragmentManager()
                 .findFragmentById(R.id.organizer_nav_host_fragment);
@@ -107,18 +114,64 @@ public class Organizer_create_event extends Fragment {
         Database db = new Database(ff);
         Button publishButton = view.findViewById(R.id.create_event_publish_button);
         publishButton.setOnClickListener(v -> {
-            String title = titleEditText.getText().toString();
-            String description = descriptionEditText.getText().toString();
-            Integer capacity = Integer.parseInt(capacityEditText.getText().toString());
-            String location = locationEditText.getText().toString();
-            Float price = Float.parseFloat(priceEditText.getText().toString());
+            String title = titleEditText.getText().toString().trim();
+            String description = descriptionEditText.getText().toString().trim();
+            String capacityStr = capacityEditText.getText().toString().trim();
+            String location = locationEditText.getText().toString().trim();
+            String priceStr = priceEditText.getText().toString().trim();
+            if (title.isEmpty() || description.isEmpty() || capacityStr.isEmpty() || location.isEmpty() || priceStr.isEmpty()) {
+                Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             if (registrationOpenDate == null || registrationCloseDate == null) {
                 Toast.makeText(getContext(), "Please select both registration dates", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            //TODO: Actually publish the event!
+            if (registrationOpenDate.after(registrationCloseDate)) {
+                Toast.makeText(getContext(), "Registration open date must be before the close date", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Integer capacity;
+            Float price;
+            try {
+                capacity = Integer.parseInt(capacityStr);
+                price = Float.parseFloat(priceStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid number for capacity or price", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            //change to your own email
+            String organizerId = "organizer_email@example.com";
+            Event newEvent = new Event(
+                    null,
+                    organizerId,
+                    title,
+                    description,
+                    location,
+                    location,
+                    null,
+                    registrationOpenDate.getTime(),
+                    registrationCloseDate.getTime(),
+                    registrationCloseDate.getTime(),
+                    null,
+                    capacity,
+                    price
+            );
+
+            db.addEvent(newEvent).addOnSuccessListener(success -> {
+                if (success) {
+                    Toast.makeText(getContext(), "Event published successfully!", Toast.LENGTH_SHORT).show();
+                    NavController navController = NavHostFragment.findNavController(this);
+                    navController.navigate(R.id.create_to_event);
+                } else {
+                    Toast.makeText(getContext(), "Failed to publish event.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
         });
     }
 }
