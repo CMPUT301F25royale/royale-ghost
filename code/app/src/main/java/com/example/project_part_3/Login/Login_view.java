@@ -1,5 +1,7 @@
 package com.example.project_part_3.Login;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -56,6 +58,13 @@ public class Login_view extends Fragment {
         submit.setOnClickListener(v -> {
             String nameText = name.getText().toString();
             String passwordText = password.getText().toString();
+
+            SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("username", nameText);
+            editor.putString("password", passwordText);
+            editor.apply();
+
             if (nameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
@@ -64,8 +73,9 @@ public class Login_view extends Fragment {
                     if (user != null) {
                         Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
                         userType = user.getUserType();
+                        String userEmail = user.getEmail();
                         NavController navController = NavHostFragment.findNavController(this);
-                        navigationBasedonType(userType, navController);
+                        navigationBasedonType(userType, userEmail, navController);
                     } else {
                         Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
                     }
@@ -75,17 +85,23 @@ public class Login_view extends Fragment {
         });
     }
 
-    public void navigationBasedonType(String userType, NavController navController){
+    public void navigationBasedonType(String userType, String userEmail, NavController navController){
         switch (userType) {
             case "Admin":
                 navController.navigate(R.id.action_loginFragment_to_admin_main);
                 break;
             case "Organizer":
                 //Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_organizer_main);
+                Bundle bundleO = new Bundle();
+                bundleO.putString("userEmail", userEmail);
+                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_organizer_main, bundleO);
                 break;
             case "Entrant":
-                Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();
+                Bundle bundleE = new Bundle();
+                bundleE.putString("userEmail", userEmail);
+                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_entrant_main, bundleE);
                 break;
             default:
                 Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();

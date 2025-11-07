@@ -9,25 +9,60 @@
         android:id="@+id/organizerNotificationsFragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_notifications.Organizer_notification_view"
         android:label="fragment_organizer_notifications"
-        tools:layout="@layout/organizer_notifications" />
+        tools:layout="@layout/organizer_notifications">
+        <argument
+            android:name="userEmail"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/organizerSearchFragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_search.Organizer_search_event_view"
         android:label="fragment_organizer_search"
-        tools:layout="@layout/organizer_search" />
+        tools:layout="@layout/organizer_search" >
+        <argument
+            android:name="userEmail"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/organizerProfilesFragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view"
         android:label="fragment_organizer_profiles"
-        tools:layout="@layout/organizer_profiles" />
+        tools:layout="@layout/organizer_profile">
+        <argument
+            android:name="userEmail"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/organizerCreateEventFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_create_event">
+        <action
+            android:id="@+id/create_to_event"
+            app:destination="@id/organizerEventsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/organizerEventsFragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_event_view"
         android:label="fragment_organizer_create_event"
-        tools:layout="@layout/organizer_events" />
+        tools:layout="@layout/organizer_create_event" >
+        <argument
+            android:name="userEmail"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_organizerEventsFragment_to_organizerCreateEventFragment"
+            app:destination="@id/organizerCreateEventFragment" />
+    </fragment>
+
+
 
 
 </navigation>

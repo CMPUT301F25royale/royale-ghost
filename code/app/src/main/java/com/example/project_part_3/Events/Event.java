@@ -2,8 +2,9 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Users.Organizer;
-import com.example.project_part_3.Users.User;
+import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
+import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -12,56 +13,52 @@ import java.util.List;
 import java.util.Objects;
 
 public class Event {
+
+    private String id;
     private String title;
     private String description;
+    private String organizerId;
+    private String location;
+    private String locationName;
+    private String posterImageUrl;
     private Date date_open;
     private Date date_close;
-    private Organizer organizer;
-    private Float price = 0F;
-    private String location;
-    private Integer capacity;
-    private Bitmap poster;
-    private Date time;
-    private ArrayList<User> attendant_list;
-    private Integer attendees;
-
-    // I (Liam) added these from my event class
-    private String id;// required for firebase, created when added to database
-    private String organizerId;
-
-    private String locationName;     // building or venue name
-    private String posterImageUrl;   //  Firebase Storage URL
     private Date eventStartAt;
     private Date eventEndAt;
-    private List<String> waitlistUserIds; // Clicked enter into lottery
-    private List<String> selectedUserIds; // Offered to register (won lottery)
-    private List<String> confirmedUserIds; // Accepted
-    private List<String> declinedUserIds; // Declined
-    private List<String> alternatesUserIds; // Alternates
 
-    private Long seed; // Kinda optional, just for reproducibility
-    private Long lastLotteryTs; // millis since epoch of last draw
+    private Float price = 0F;
+    private Integer capacity;
+    private Long seed;
+    private Long lastLotteryTs;
 
-    public void addAttendant(User user){
-        attendant_list.add(user);
-        attendees++;
-    }
+    private List<String> waitlistUserIds;
+    private List<String> selectedUserIds;
+    private List<String> confirmedUserIds;
+    private List<String> declinedUserIds;
+    private List<String> alternatesUserIds;
 
-    public void removeAttendant(User user){
-        attendant_list.remove(user);
-        attendees--;
-    }
-
+    @Exclude
+    private Organizer organizer;
+    @Exclude
+    private Bitmap poster;
+    @Exclude
+    private Date time;
+    private ArrayList<String> attendant_list;
+    @Exclude
+    private Integer attendees;
     public Event(){
-        // required for firebase
-        this.attendant_list = new ArrayList<User>();
+        this.waitlistUserIds = new ArrayList<>();
+        this.selectedUserIds = new ArrayList<>();
+        this.confirmedUserIds = new ArrayList<>();
+        this.declinedUserIds = new ArrayList<>();
+        this.alternatesUserIds = new ArrayList<>();
+        this.attendant_list = new ArrayList<>();
         this.attendees = 0;
     }
 
-
     public Event(String title,
                  String description,
-                 ArrayList<User> attendees,
+                 ArrayList<String> attendees,
                  Timestamp time,
                  Date date_open,
                  Date date_close,
@@ -70,7 +67,7 @@ public class Event {
                  String location,
                  Integer capacity,
                  Bitmap poster) {
-        baseInit();
+        this(); // Calls the default constructor to init lists
         this.time = time;
         this.price = price;
         this.title = title;
@@ -78,18 +75,18 @@ public class Event {
         this.date_open = date_open;
         this.date_close = date_close;
         this.organizer = organizer;
+        if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
-        this.price = price;
     }
 
     public Event(String title,
                  String description,
-                 ArrayList<User> attendees,
+                 ArrayList<String> attendees,
                  Timestamp time,
                  Date date_open,
                  Date date_close,
@@ -97,13 +94,14 @@ public class Event {
                  String location,
                  Integer capacity,
                  Bitmap poster) {
-        baseInit();
+        this();
         this.time = time;
         this.title = title;
         this.description = description;
         this.date_open = date_open;
         this.date_close = date_close;
         this.organizer = organizer;
+        if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
@@ -125,12 +123,13 @@ public class Event {
                  Long eventEndAtMs,
                  int capacity,
                  float price) {
-        baseInit();
-        this.id = id;
+        this();
+        this.id = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
         this.locationName = locationName;
+        this.location = locationAddress;
         this.posterImageUrl = posterImageUrl;
         this.date_open = new Date(registrationOpensAtMs);
         this.date_close = new Date(registrationClosesAtMs);
@@ -140,28 +139,29 @@ public class Event {
         this.price = price;
     }
 
-    private void baseInit() {
-        this.waitlistUserIds = new ArrayList<>();
-        this.selectedUserIds = new ArrayList<>();
-        this.confirmedUserIds = new ArrayList<>();
-        this.declinedUserIds = new ArrayList<>();
-        this.alternatesUserIds = new ArrayList<>();
-    }
+
 
     public String getTitle(){ return title; }
-    public String getDescription(){ return description; }
-    public Date getDate_open(){ return date_open; }
-    public Date getDate_close(){ return date_close; }
-    public Organizer getOrganizer(){ return organizer; }
-    public Float getPrice(){ return price; }
-    public String getLocation(){ return location; }
-    public Integer getCapacity(){ return capacity; }
-    public Bitmap getPoster(){ return poster; }
-    public Date getTime(){ return time; }
-    public ArrayList<User> getAttendant_list(){ return attendant_list; }
-    public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
+    public void setTitle(String title) { this.title = title; }
 
-    // ===== New getters/setters (from Model.Event) =====
+    public String getDescription(){ return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Date getDate_open(){ return date_open; }
+    public void setDate_open(Date date_open) { this.date_open = date_open; }
+
+    public Date getDate_close(){ return date_close; }
+    public void setDate_close(Date date_close) { this.date_close = date_close; }
+
+    public Float getPrice(){ return price; }
+    public void setPrice(Float price) { this.price = price; }
+
+    public String getLocation(){ return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public Integer getCapacity(){ return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
     public String getId() { return id; }
     public void setId(String eventId) { this.id = eventId; }
 
@@ -174,106 +174,81 @@ public class Event {
     public String getPosterImageUrl() { return posterImageUrl; }
     public void setPosterImageUrl(String posterImageUrl) { this.posterImageUrl = posterImageUrl; }
 
-    public long getRegistrationOpensAt() { return (date_open != null) ? date_open.getTime() : 0L; }
-    public void setRegistrationOpensAt(long ms) { this.date_open = new Date(ms); }
-
-    public long getRegistrationClosesAt() { return (date_close != null) ? date_close.getTime() : 0L; }
-    public void setRegistrationClosesAt(long ms) { this.date_close = new Date(ms); }
-
     public Date getEventStartAt() { return (eventStartAt != null) ? eventStartAt : time; }
-    public void setEventStartAt(Timestamp ts) { this.eventStartAt = ts; this.time = ts; }
+    public void setEventStartAt(Date ts) { this.eventStartAt = ts; }
 
     public Date getEventEndAt() { return eventEndAt; }
-    public void setEventEndAt(Timestamp ts) { this.eventEndAt = ts; }
+    public void setEventEndAt(Date ts) { this.eventEndAt = ts; }
 
     public List<String> getWaitlistUserIds() { return waitlistUserIds; }
     public void setWaitlistUserIds(List<String> list) { this.waitlistUserIds = (list != null) ? list : new ArrayList<>(); }
 
-    public List<String> getSelectedUserIds() { return selectedUserIds; }
-    public void setSelectedUserIds(List<String> list) { this.selectedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Organizer getOrganizer(){ return organizer; }
+    @Exclude
+    public void setOrganizer(Organizer organizer) { this.organizer = organizer; }
 
-    public List<String> getConfirmedUserIds() { return confirmedUserIds; }
-    public void setConfirmedUserIds(List<String> list) { this.confirmedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Bitmap getPoster(){ return poster; }
+    @Exclude
+    public void setPoster(Bitmap poster) { this.poster = poster; }
 
-    public List<String> getDeclinedUserIds() { return declinedUserIds; }
-    public void setDeclinedUserIds(List<String> list) { this.declinedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Date getTime(){ return time; }
+    @Exclude
+    public void setTime(Date time) { this.time = time; }
 
-    public List<String> getAlternatesUserIds() { return alternatesUserIds; }
-    public void setAlternatesUserIds(List<String> list) { this.alternatesUserIds = (list != null) ? list : new ArrayList<>(); }
+    public ArrayList<String> getAttendant_list(){ return attendant_list; }
+    public void setAttendant_list(ArrayList<String> list) { this.attendant_list = list; }
 
-    public Long getLastLotterySeed() { return seed; }
-    public void setLastLotterySeed(Long lastLotterySeed) { this.seed = lastLotterySeed; }
+    public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
+    public void setAttendees(Integer attendees) { this.attendees = attendees; }
 
-    public Long getLastLotteryRunAt() { return lastLotteryTs; }
-    public void setLastLotteryRunAt(Long lastLotteryRunAt) { this.lastLotteryTs = lastLotteryRunAt; }
 
-    public void EditTitle(String title){ this.title = title; }
-    public void EditDescription(String description){ this.description = description; }
-    public void EditDate_open(Date date_open){ this.date_open = date_open; }
-    public void EditDate_close(Date date_close){ this.date_close = date_close; }
-    public void EditPrice(Float price){ this.price = price; }
-    public void EditLocation(String location){ this.location = location; }
-    public void EditCapacity(Integer capacity){ this.capacity = capacity; }
-    public void EditPoster(Bitmap poster){ this.poster = poster; }
+    @Exclude
+    public void addAttendant(String email){
+        if (attendant_list == null) attendant_list = new ArrayList<>();
+        attendant_list.add(email);
+        attendees = attendant_list.size();
+    }
 
-    // Added some helpers
+    @Exclude
+    public void removeAttendant(String email){
+        if (attendant_list != null) {
+            attendant_list.remove(email);
+            attendees = attendant_list.size();
+        }
+    }
 
+    @Exclude
     public int getConfirmedCount() {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
 
+    @Exclude
     public int getRemainingCapacity() {
         int cap = (capacity != null) ? capacity : 0;
         int remaining = cap - getConfirmedCount();
         return Math.max(remaining, 0);
     }
-
-    public boolean isRegistrationOpen(long nowMs) {
-        long open = (date_open != null) ? date_open.getTime() : Long.MIN_VALUE;
-        long close = (date_close != null) ? date_close.getTime() : Long.MAX_VALUE;
-        return nowMs >= open && nowMs <= close;
-    }
-    public boolean addConfirmedUser(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (getRemainingCapacity() <= 0) return false;
-        if (!confirmedUserIds.contains(userId)) {
-            confirmedUserIds.add(userId);
-            return true;
-        }
-        return false;
-    }
-
-    public void addToWaitlist(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (!waitlistUserIds.contains(userId)) waitlistUserIds.add(userId);
-    }
-
-    public boolean declineUser(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (!declinedUserIds.contains(userId)) {
-            declinedUserIds.add(userId);
-            // ensure they aren't in confirmed or selected anymore
-            selectedUserIds.remove(userId);
-            confirmedUserIds.remove(userId);
-            return true;
-        }
-        return false;
-    }
-
+    @Exclude
     public boolean registrationOpen(){
         Date currentDate = new Date();
+        if (date_open == null || date_close == null) return false;
         boolean afterOpen = currentDate.after(date_open);
         boolean beforeClose = currentDate.before(date_close);
 
         return afterOpen && beforeClose;
     }
 
+    @Exclude
     public long daysUntilClose(){
         Date currentDate = new Date();
+        if (date_close == null) return 0;
         return date_close.getTime() - currentDate.getTime();
-
     }
 
+    @Exclude
     public String registrationStatus(){
         if (registrationOpen()){
             return "Open ("+daysUntilClose()+")";
@@ -281,3 +256,4 @@ public class Event {
         return "Closed";
     }
 }
+

@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Project_Part_3">
         <activity
+            android:name=".Menu_Nav_Org"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -23,7 +26,6 @@
         <activity
             android:name=".Users.Admin_UI.Admin_search.Admin_event_detail_activity"
             android:parentActivityName=".Users.Admin_UI.Admin_search.Admin_search_view" />
-
     </application>
 
 </manifest>
