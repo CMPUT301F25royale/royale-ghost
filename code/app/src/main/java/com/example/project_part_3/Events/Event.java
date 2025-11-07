@@ -1,10 +1,8 @@
 package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
-import android.os.Bundle;
-
-import com.example.project_part_3.Users.Organizer;
-import com.example.project_part_3.Users.User;
+import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
+import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -13,36 +11,49 @@ import java.util.List;
 import java.util.Objects;
 
 public class Event {
-    public String title;
-    public String description;
-    public Date date_open;
-    public Date date_close;
-    public Organizer organizer;
-    public Integer price = 0;
-    public String location;
-    public Integer capacity;
-    public Bitmap poster;
-    public Timestamp time;
-    public ArrayList<User> attendant_list;
-    public Integer attendees;
 
-    // I (Liam) added these from my event class
-    private String eventId;
+    private String id;
+    private String title;
+    private String description;
     private String organizerId;
+    private String location;
+    private String locationName;
+    private String posterImageUrl;
+    private Date date_open;
+    private Date date_close;
+    private Date eventStartAt;
+    private Date eventEndAt;
 
-    private String locationName;     // building or venue name
-    private String posterImageUrl;   //  Firebase Storage URL
-    private Timestamp eventStartAt;
-    private Timestamp eventEndAt;
-    private Integer priceCents = 0;  // price in cents, 0 default
-    private List<String> waitlistUserIds; // Clicked enter into lottery
-    private List<String> selectedUserIds; // Offered to register (won lottery)
-    private List<String> confirmedUserIds; // Accepted
-    private List<String> declinedUserIds; // Declined
-    private List<String> alternatesUserIds; // Alternates
+    private Float price = 0F;
+    private Integer capacity;
+    private Long seed;
+    private Long lastLotteryTs;
 
-    private Long seed; // Kinda optional, just for reproducibility
-    private Long lastLotteryTs; // millis since epoch of last draw
+    private List<String> waitlistUserIds;
+    private List<String> selectedUserIds;
+    private List<String> confirmedUserIds;
+    private List<String> declinedUserIds;
+    private List<String> alternatesUserIds;
+
+    @Exclude
+    private Organizer organizer;
+    @Exclude
+    private Bitmap poster;
+    @Exclude
+    private Date time;
+    @Exclude
+    private ArrayList<User> attendant_list;
+    @Exclude
+    private Integer attendees;
+    public Event(){
+        this.waitlistUserIds = new ArrayList<>();
+        this.selectedUserIds = new ArrayList<>();
+        this.confirmedUserIds = new ArrayList<>();
+        this.declinedUserIds = new ArrayList<>();
+        this.alternatesUserIds = new ArrayList<>();
+        this.attendant_list = new ArrayList<>();
+        this.attendees = 0;
+    }
 
     public Event(String title,
                  String description,
@@ -51,11 +62,11 @@ public class Event {
                  Date date_open,
                  Date date_close,
                  Organizer organizer,
-                 Integer price,
+                 Float price,
                  String location,
                  Integer capacity,
                  Bitmap poster) {
-        baseInit();
+        this(); // Calls the default constructor to init lists
         this.time = time;
         this.price = price;
         this.title = title;
@@ -63,13 +74,13 @@ public class Event {
         this.date_open = date_open;
         this.date_close = date_close;
         this.organizer = organizer;
+        if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
-        this.priceCents = (price != null) ? price * 100 : 0;
     }
 
     public Event(String title,
@@ -82,20 +93,20 @@ public class Event {
                  String location,
                  Integer capacity,
                  Bitmap poster) {
-        baseInit();
+        this();
         this.time = time;
         this.title = title;
         this.description = description;
         this.date_open = date_open;
         this.date_close = date_close;
         this.organizer = organizer;
+        if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
         this.poster = poster;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
-        this.priceCents = (this.price != null) ? this.price * 100 : 0;
     }
 
     public Event(String eventId,
@@ -110,47 +121,48 @@ public class Event {
                  long eventStartAtMs,
                  Long eventEndAtMs,
                  int capacity,
-                 int priceCents) {
-        baseInit();
-        this.eventId = eventId;
+                 float price) {
+        this();
+        this.id = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
         this.locationName = locationName;
+        this.location = locationAddress;
         this.posterImageUrl = posterImageUrl;
         this.date_open = new Date(registrationOpensAtMs);
         this.date_close = new Date(registrationClosesAtMs);
         this.eventStartAt = new Timestamp(eventStartAtMs);
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
-        this.priceCents = priceCents;
-        this.price = priceCents / 100; // keep legacy field in sync approximately
+        this.price = price;
     }
 
-    private void baseInit() {
-        this.waitlistUserIds = new ArrayList<>();
-        this.selectedUserIds = new ArrayList<>();
-        this.confirmedUserIds = new ArrayList<>();
-        this.declinedUserIds = new ArrayList<>();
-        this.alternatesUserIds = new ArrayList<>();
-    }
+
 
     public String getTitle(){ return title; }
-    public String getDescription(){ return description; }
-    public Date getDate_open(){ return date_open; }
-    public Date getDate_close(){ return date_close; }
-    public Organizer getOrganizer(){ return organizer; }
-    public Integer getPrice(){ return price; }
-    public String getLocation(){ return location; }
-    public Integer getCapacity(){ return capacity; }
-    public Bitmap getPoster(){ return poster; }
-    public Timestamp getTime(){ return time; }
-    public ArrayList<User> getAttendant_list(){ return attendant_list; }
-    public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
+    public void setTitle(String title) { this.title = title; }
 
-    // ===== New getters/setters (from Model.Event) =====
-    public String getEventId() { return eventId; }
-    public void setEventId(String eventId) { this.eventId = eventId; }
+    public String getDescription(){ return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Date getDate_open(){ return date_open; }
+    public void setDate_open(Date date_open) { this.date_open = date_open; }
+
+    public Date getDate_close(){ return date_close; }
+    public void setDate_close(Date date_close) { this.date_close = date_close; }
+
+    public Float getPrice(){ return price; }
+    public void setPrice(Float price) { this.price = price; }
+
+    public String getLocation(){ return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public Integer getCapacity(){ return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public String getId() { return id; }
+    public void setId(String eventId) { this.id = eventId; }
 
     public String getOrganizerId() { return organizerId; }
     public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
@@ -161,134 +173,90 @@ public class Event {
     public String getPosterImageUrl() { return posterImageUrl; }
     public void setPosterImageUrl(String posterImageUrl) { this.posterImageUrl = posterImageUrl; }
 
-    public long getRegistrationOpensAt() { return (date_open != null) ? date_open.getTime() : 0L; }
-    public void setRegistrationOpensAt(long ms) { this.date_open = new Date(ms); }
+    public Date getEventStartAt() { return (eventStartAt != null) ? eventStartAt : time; }
+    public void setEventStartAt(Date ts) { this.eventStartAt = ts; }
 
-    public long getRegistrationClosesAt() { return (date_close != null) ? date_close.getTime() : 0L; }
-    public void setRegistrationClosesAt(long ms) { this.date_close = new Date(ms); }
-
-    public Timestamp getEventStartAt() { return (eventStartAt != null) ? eventStartAt : time; }
-    public void setEventStartAt(Timestamp ts) { this.eventStartAt = ts; this.time = ts; }
-
-    public Timestamp getEventEndAt() { return eventEndAt; }
-    public void setEventEndAt(Timestamp ts) { this.eventEndAt = ts; }
-
-    public int getPriceCents() { return (priceCents != null) ? priceCents : (price != null ? price * 100 : 0); }
-    public void setPriceCents(int priceCents) { this.priceCents = priceCents; this.price = priceCents / 100; }
+    public Date getEventEndAt() { return eventEndAt; }
+    public void setEventEndAt(Date ts) { this.eventEndAt = ts; }
 
     public List<String> getWaitlistUserIds() { return waitlistUserIds; }
     public void setWaitlistUserIds(List<String> list) { this.waitlistUserIds = (list != null) ? list : new ArrayList<>(); }
 
-    public List<String> getSelectedUserIds() { return selectedUserIds; }
-    public void setSelectedUserIds(List<String> list) { this.selectedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Organizer getOrganizer(){ return organizer; }
+    @Exclude
+    public void setOrganizer(Organizer organizer) { this.organizer = organizer; }
 
-    public List<String> getConfirmedUserIds() { return confirmedUserIds; }
-    public void setConfirmedUserIds(List<String> list) { this.confirmedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Bitmap getPoster(){ return poster; }
+    @Exclude
+    public void setPoster(Bitmap poster) { this.poster = poster; }
 
-    public List<String> getDeclinedUserIds() { return declinedUserIds; }
-    public void setDeclinedUserIds(List<String> list) { this.declinedUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public Date getTime(){ return time; }
+    @Exclude
+    public void setTime(Date time) { this.time = time; }
 
-    public List<String> getAlternatesUserIds() { return alternatesUserIds; }
-    public void setAlternatesUserIds(List<String> list) { this.alternatesUserIds = (list != null) ? list : new ArrayList<>(); }
+    @Exclude
+    public ArrayList<User> getAttendant_list(){ return attendant_list; }
+    @Exclude
+    public void setAttendant_list(ArrayList<User> list) { this.attendant_list = list; }
 
-    public Long getLastLotterySeed() { return seed; }
-    public void setLastLotterySeed(Long lastLotterySeed) { this.seed = lastLotterySeed; }
+    @Exclude
+    public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
+    @Exclude
+    public void setAttendees(Integer attendees) { this.attendees = attendees; }
 
-    public Long getLastLotteryRunAt() { return lastLotteryTs; }
-    public void setLastLotteryRunAt(Long lastLotteryRunAt) { this.lastLotteryTs = lastLotteryRunAt; }
 
-    public void EditTitle(String title){ this.title = title; }
-    public void EditDescription(String description){ this.description = description; }
-    public void EditDate_open(Date date_open){ this.date_open = date_open; }
-    public void EditDate_close(Date date_close){ this.date_close = date_close; }
-    public void EditPrice(Integer price){ this.price = price; this.priceCents = (price != null) ? price * 100 : 0; }
-    public void EditLocation(String location){ this.location = location; }
-    public void EditCapacity(Integer capacity){ this.capacity = capacity; }
-    public void EditPoster(Bitmap poster){ this.poster = poster; }
+    @Exclude
+    public void addAttendant(User user){
+        if (attendant_list == null) attendant_list = new ArrayList<>();
+        attendant_list.add(user);
+        attendees = attendant_list.size();
+    }
 
-    // Added some helpers
+    @Exclude
+    public void removeAttendant(User user){
+        if (attendant_list != null) {
+            attendant_list.remove(user);
+            attendees = attendant_list.size();
+        }
+    }
 
+    @Exclude
     public int getConfirmedCount() {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
 
+    @Exclude
     public int getRemainingCapacity() {
         int cap = (capacity != null) ? capacity : 0;
         int remaining = cap - getConfirmedCount();
         return Math.max(remaining, 0);
     }
+    @Exclude
+    public boolean registrationOpen(){
+        Date currentDate = new Date();
+        if (date_open == null || date_close == null) return false;
+        boolean afterOpen = currentDate.after(date_open);
+        boolean beforeClose = currentDate.before(date_close);
 
-    public boolean isRegistrationOpen(long nowMs) {
-        long open = (date_open != null) ? date_open.getTime() : Long.MIN_VALUE;
-        long close = (date_close != null) ? date_close.getTime() : Long.MAX_VALUE;
-        return nowMs >= open && nowMs <= close;
+        return afterOpen && beforeClose;
     }
-    public boolean addConfirmedUser(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (getRemainingCapacity() <= 0) return false;
-        if (!confirmedUserIds.contains(userId)) {
-            confirmedUserIds.add(userId);
-            return true;
+
+    @Exclude
+    public long daysUntilClose(){
+        Date currentDate = new Date();
+        if (date_close == null) return 0;
+        return date_close.getTime() - currentDate.getTime();
+    }
+
+    @Exclude
+    public String registrationStatus(){
+        if (registrationOpen()){
+            return "Open ("+daysUntilClose()+")";
         }
-        return false;
-    }
-
-    public void addToWaitlist(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (!waitlistUserIds.contains(userId)) waitlistUserIds.add(userId);
-    }
-
-    public boolean declineUser(String userId) {
-        Objects.requireNonNull(userId, "userId");
-        if (!declinedUserIds.contains(userId)) {
-            declinedUserIds.add(userId);
-            // ensure they aren't in confirmed or selected anymore
-            selectedUserIds.remove(userId);
-            confirmedUserIds.remove(userId);
-            return true;
-        }
-        return false;
-    }
-
-    public static List<Event> sample() {
-        List<Event> events = new ArrayList<>();
-        Organizer dummyOrg = new Organizer("Demo Organizer", "pass123", "demo@org.com");
-
-
-        events.add(new Event(
-                "Beginner Swim Lessons",
-                "A 6-week course for new swimmers.",
-                new ArrayList<>(),
-                new Timestamp(System.currentTimeMillis() + 86400000L),
-                new Date(System.currentTimeMillis() - 86400000L),
-                new Date(System.currentTimeMillis() + 86400000L * 7),
-                dummyOrg,
-                10,
-                "Local Rec Centre",
-                60,
-                null
-        ));
-
-        events.add(new Event(
-                "Tennis Lessons",
-                "Learn tennis basics with certified coaches.",
-                new ArrayList<>(),
-                new Timestamp(System.currentTimeMillis() + 172800000L),
-                new Date(System.currentTimeMillis() - 86400000L * 2),
-                new Date(System.currentTimeMillis() + 86400000L * 14),
-                dummyOrg,
-                20,
-                "Community Sports Complex",
-                40,
-                null
-        ));
-
-        return events;
-    }
-
-    public static Bundle bundle(String eventId) {
-        Bundle b = new Bundle();
-        b.putString("eventId", eventId);
-        return b;
+        return "Closed";
     }
 }
+

@@ -8,7 +8,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,16 +79,24 @@ public class Sign_up_view extends Fragment {
                 return;
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
-            if (sign_up_model.getSuccess()){
-                Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                clearForm();
-                MainActivity mainActivity = (MainActivity) getActivity();
-                assert mainActivity != null;
-                mainActivity.NavigationForUserType(selectedOption);
-            }
-            else{
-                Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
-            };
+            sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+                if (wasAdded) {
+                    Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                    clearForm();
+                    Bundle args = new Bundle();
+                    args.putString("userEmail", email);
+                    NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
+                    if ("Organizer".equals(selectedOption)) {
+                        navController.navigate(R.id.action_sign_up_fragment_to_organizer_main_fragment, args);
+                    } else if ("Entrant".equals(selectedOption)) {
+                        // navController.navigate(R.id.action_sign_up_to_entrant_fragment, args);
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Log.d("Sign_up", "Failed to sign up");
+            });
         });
     }
 

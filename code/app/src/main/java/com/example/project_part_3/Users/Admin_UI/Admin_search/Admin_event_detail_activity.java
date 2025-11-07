@@ -3,19 +3,22 @@ package com.example.project_part_3.Users.Admin_UI.Admin_search;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.project_part_3.Database_functions.EventDatabase;
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class Admin_event_detail_activity extends AppCompatActivity {
 
+    private Database db;
     private ImageView poster;
     private TextView title;
     private TextView organizer;
@@ -38,6 +41,27 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_event_detail);
 
+        db = new Database(FirebaseFirestore.getInstance());
+        setupViews();
+        findViewById(R.id.btn_close).setOnClickListener(v -> finish());
+
+        String eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null || eventId.isEmpty()) {
+            Toast.makeText(this, "Event ID not found.", Toast.LENGTH_LONG).show();
+            title.setText("Event not found");
+            finish();
+            return;
+        }
+
+        db.fetchEvent(eventId)
+                .addOnSuccessListener(this::populateUI)
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load event details: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    title.setText("Error loading event");
+                });
+    }
+
+    private void setupViews() {
         poster = findViewById(R.id.detail_poster);
         title = findViewById(R.id.detail_title);
         organizer = findViewById(R.id.detail_organizer);
@@ -46,76 +70,55 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         regWindow = findViewById(R.id.detail_reg_window);
         startEnd = findViewById(R.id.detail_start_end);
         price = findViewById(R.id.detail_price);
-        TextView capacity  = findViewById(R.id.value_capacity);
-        TextView confirmed = findViewById(R.id.value_confirmed);
-        TextView remaining = findViewById(R.id.value_remaining);
-        TextView waitlist  = findViewById(R.id.value_waitlist);
-        TextView selected  = findViewById(R.id.value_selected);
-        TextView declined  = findViewById(R.id.value_declined);
-        TextView alternates= findViewById(R.id.value_alternates);
-
+        capacity  = findViewById(R.id.value_capacity);
+        confirmed = findViewById(R.id.value_confirmed);
+        remaining = findViewById(R.id.value_remaining);
+        waitlist  = findViewById(R.id.value_waitlist);
+        selected  = findViewById(R.id.value_selected);
+        declined  = findViewById(R.id.value_declined);
+        alternates= findViewById(R.id.value_alternates);
         description = findViewById(R.id.detail_description);
-        findViewById(R.id.btn_close).setOnClickListener(v -> finish());
+    }
 
-        String t = getIntent().getStringExtra("title");
-        String organizerName = getIntent().getStringExtra("organizerName");
-
-        Event event = EventDatabase.getInstance().getEvent(t, organizerName);
+    private void populateUI(Event event) {
         if (event == null) {
-            title.setText("Event not found");
+            title.setText("Event data is null");
             return;
         }
 
-        // Title & organizer
         title.setText(event.getTitle());
-        organizer.setText(organizerName != null ? organizerName : "-"); // - if not set
+        organizer.setText(nonEmpty(event.getOrganizerId(), "—"));
 
-        // Poster
         if (event.getPoster() != null) {
             poster.setImageBitmap(event.getPoster());
         } else {
-            // In case we opt for the URL approach (which we probably wont) with default icon
             poster.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
-        // Location
-        String locName = event.getLocationName();
-        String locAddr = event.getLocation();
-        locationName.setText(nonEmpty(locName, event.getLocation())); // Fallback to address if no name
-        locationAddressOrLegacy.setText(nonEmpty(locAddr, "-"));
+        locationName.setText(nonEmpty(event.getLocationName(), event.getLocation()));
+        locationAddressOrLegacy.setText(nonEmpty(event.getLocation(), "—"));
 
-        // Registration window
         String reg = "Register from " + fmtDate(event.getDate_open()) + " to " + fmtDate(event.getDate_close());
         regWindow.setText(reg);
 
-        // If start is not set, just display the current time.
-        Timestamp start = event.getEventStartAt() != null ? event.getEventStartAt() : event.getTime();
-        Timestamp end = event.getEventEndAt();
-        startEnd.setText(
-                (start != null ? fmtDateTime(start) : "—")
-                        + (end != null ? " to " + fmtDateTime(end) : "")
-        );
+        Date start = event.getEventStartAt();
+        Date end = event.getEventEndAt();
+        startEnd.setText((start != null ? fmtDateTime(start) : "—") + (end != null ? " to " + fmtDateTime(end) : ""));
 
-        // Price
-        int cents = event.getPriceCents();
-        if (cents <= 0 && event.getPrice() != null) {
-            cents = event.getPrice() * 100; // we have these two methods, should consolodate to one but a later concern.
-        }
-        price.setText(cents > 0 ? centsToCurrency(cents) : "Free");
+        Float p = event.getPrice();
+        price.setText(p != null && p > 0 ? String.format("%.2f", p) : "Free");
 
-        // Capacity & counts
         int cap = event.getCapacity() != null ? event.getCapacity() : 0;
         capacity.setText(String.valueOf(cap));
         confirmed.setText(String.valueOf(event.getConfirmedCount()));
         remaining.setText(String.valueOf(event.getRemainingCapacity()));
 
-        // Lottery lists (may be null if not used)
         waitlist.setText(String.valueOf(sizeSafe(event.getWaitlistUserIds())));
-        selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
-        declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
-        alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
+        // These fields are not in your Event class, but this shows how to handle them if added
+        // selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
+        // declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
+        // alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
 
-        // Description
         description.setText(nonEmpty(event.getDescription(), "—"));
     }
 
@@ -125,21 +128,15 @@ public class Admin_event_detail_activity extends AppCompatActivity {
 
     private String fmtDate(Date d) {
         if (d == null) return "—";
-        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        return df.format(d);
+        return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d);
     }
 
-    private String fmtDateTime(Timestamp ts) {
-        if (ts == null) return "—";
-        DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-        return df.format(ts);
+    private String fmtDateTime(Date d) {
+        if (d == null) return "—";
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(d);
     }
 
-    private int sizeSafe(java.util.List<?> list) {
+    private int sizeSafe(List<?> list) {
         return list == null ? 0 : list.size();
-    }
-
-    private String centsToCurrency(int cents) {
-        return String.format("$%.2f", cents / 100.0);
     }
 }

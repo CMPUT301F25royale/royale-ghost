@@ -7,32 +7,35 @@
     android:layout_height="match_parent">
 
     <!-- Search bar -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/searchCard"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
-        app:cardUseCompatPadding="true"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="28dp"
+
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeWidthFocused="2dp"
+        app:boxStrokeColor="#D9D9D9"
+        app:endIconMode="clear_text"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSearch"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
             android:hint="Search for events..."
             android:imeOptions="actionSearch"
-            android:singleLine="true"
-            android:background="@android:color/transparent"/>
-    </com.google.android.material.card.MaterialCardView>
+            android:singleLine="true"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
 
     <!-- Filter row -->
     <LinearLayout
@@ -43,8 +46,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="12dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -66,23 +68,15 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipInterests"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="interests"
-                app:chipIconVisible="false"
-                app:chipStrokeWidth="1dp"
-                app:chipStrokeColor="#D9D9D9"
-                app:chipBackgroundColor="@android:color/transparent"/>
+                app:chipIconVisible="false"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAvailability"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:text="availability"
-                app:chipIconVisible="false"
-                app:chipStrokeWidth="1dp"
-                app:chipStrokeColor="#D9D9D9"
-                app:chipBackgroundColor="@android:color/transparent"/>
+                app:chipIconVisible="false"/>
         </com.google.android.material.chip.ChipGroup>
     </LinearLayout>
 
@@ -119,7 +113,7 @@
         android:background="?android:attr/windowBackground"
         app:itemIconTint="@color/black"
         app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/bottom_nav_menu"
+        app:menu="@menu/bottom_nav_menu_org"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

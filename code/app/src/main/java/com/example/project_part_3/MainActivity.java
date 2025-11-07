@@ -22,13 +22,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     public void NavigationForUserType(String userType){
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(
-                R.id.nav_host_fragment);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
         NavController navController = navHostFragment.getNavController();
 
         int graphId;
         switch(userType){
-            case "Organizer":
+                case "Organizer":
                 graphId = R.navigation.organizer_main;
                 break;
                 case "Entrant":

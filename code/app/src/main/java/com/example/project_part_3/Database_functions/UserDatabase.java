@@ -78,15 +78,15 @@ public class UserDatabase {
             }
         }
         return null;
-    };
+    }
 
     public boolean removeUser(String email, String name){
         for (User user : database) {
             if (user.getEmail().equals(email) && user.getName().equals(name)) {
-                if(user.getObjectName() == "Admin")
+                if(user.getClass().toString().equals("Admin")) {
                     return false;
-                else{
-                    database.remove(user);
+                }else{
+                        database.remove(user);
                     return true;
                 }
             }

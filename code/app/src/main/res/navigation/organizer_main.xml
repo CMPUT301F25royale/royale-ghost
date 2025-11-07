@@ -7,7 +7,10 @@
     <fragment
         android:id="@+id/organizer_main_fragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_main_fragment"
-        android:label="fragment_admin_main"
-        tools:layout="@layout/organizer_host" />
-
+        android:label="fragment_organizer_main"
+        tools:layout="@layout/organizer_host">
+        <argument
+            android:name="userEmail"
+            app:argType="string" />
+    </fragment>
 </navigation>

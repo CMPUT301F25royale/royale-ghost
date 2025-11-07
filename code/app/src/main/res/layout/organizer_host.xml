@@ -12,8 +12,8 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/organizer_nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:defaultNavHost="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/organizer_bottom_nav"
@@ -31,6 +31,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:menu="@menu/organizer_menu" />
+        app:menu="@menu/bottom_nav_menu_org" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

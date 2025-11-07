@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/entrant_main"
-    app:startDestination="@id/entrant_main_fragment">
+    android:id="@+id/entrant_nav">
 
-    <fragment
-        android:id="@+id/entrant_main_fragment"
-        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_main"
-        android:label="fragment_entrant_main"
-        tools:layout="@layout/entrant_main"/>
 </navigation>
