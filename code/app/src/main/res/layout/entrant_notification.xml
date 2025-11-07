@@ -40,8 +40,9 @@
             app:chipBackgroundColor="@android:color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:textColor="@android:color/white" />
+            app:layout_constraintTop_toTopOf="parent"/>
+<!--        app:textColor="@android:color/white"-->
+
 
         <TextView
             android:id="@+id/tvSwitchLabel"
