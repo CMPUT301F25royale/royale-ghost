@@ -72,7 +72,7 @@ public class Admin_profile_view extends Fragment {
             bundle.putString("name", selectedProfile.getName());
             bundle.putString("email", selectedProfile.getEmail());
             bundle.putString("phone", selectedProfile.getPhone());
-
+            bundle.putString("userType", selectedProfile.getUserType());
             NavController navController = Navigation.findNavController(itemView);
             navController.navigate(R.id.action_admin_profile_view_to_admin_profile_info, bundle);
         });
