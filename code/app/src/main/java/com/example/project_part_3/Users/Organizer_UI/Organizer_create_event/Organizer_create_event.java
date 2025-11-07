@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast; // Import this
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,7 +18,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.project_part_3.Database_functions.Database;
-import com.example.project_part_3.DialogFragments.DatePickerDialogFragment;
+// import com.example.project_part_3.DialogFragments.DatePickerDialogFragment; // 1. No longer needed
+import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,8 +28,12 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Organizer_create_event extends Fragment implements DatePickerDialog.OnDateSetListener {
-    Date selectedDate;
+// 2. Remove "implements DatePickerDialog.OnDateSetListener"
+public class Organizer_create_event extends Fragment {
+
+    // 3. Keep two separate Date objects
+    private Date registrationOpenDate;
+    private Date registrationCloseDate;
 
     @Nullable
     @Override
@@ -57,8 +63,43 @@ public class Organizer_create_event extends Fragment implements DatePickerDialog
         Button registrationCloseButton = view.findViewById(R.id.create_event_registration_close_button);
 
         registrationOpenButton.setOnClickListener(v -> {
-            DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
-            datePickerDialogFragment.show(getParentFragmentManager(), "datePicker");
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog.OnDateSetListener openDateSetListener = (view1, year1, month1, dayOfMonth) -> {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year1, month1, dayOfMonth);
+
+                registrationOpenDate = calendar.getTime();
+
+                String dateString = DateFormat.getDateInstance().format(registrationOpenDate);
+                registrationOpenButton.setText(dateString);
+            };
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), openDateSetListener, year, month, day);
+            datePickerDialog.show();
+        });
+
+        registrationCloseButton.setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog.OnDateSetListener closeDateSetListener = (view2, year2, month2, dayOfMonth) -> {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year2, month2, dayOfMonth);
+
+                registrationCloseDate = calendar.getTime();
+
+                String dateString = DateFormat.getDateInstance().format(registrationCloseDate);
+                registrationCloseButton.setText(dateString);
+            };
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), closeDateSetListener, year, month, day);
+            datePickerDialog.show();
         });
 
 
@@ -70,20 +111,14 @@ public class Organizer_create_event extends Fragment implements DatePickerDialog
             String description = descriptionEditText.getText().toString();
             Integer capacity = Integer.parseInt(capacityEditText.getText().toString());
             String location = locationEditText.getText().toString();
-            //TODO: add date picker
             Float price = Float.parseFloat(priceEditText.getText().toString());
 
+            if (registrationOpenDate == null || registrationCloseDate == null) {
+                Toast.makeText(getContext(), "Please select both registration dates", Toast.LENGTH_SHORT).show();
+            }
+
+            //TODO: Actually publish the event!
 
         });
-    }
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-        Calendar mCalendar = Calendar.getInstance();
-        mCalendar.set(Calendar.YEAR, year);
-        mCalendar.set(Calendar.MONTH, month);
-        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        selectedDate = new Date(mCalendar.getTimeInMillis());
-        DateFormat dateFormat = DateFormat.getDateInstance();
-        String dateString = dateFormat.format(selectedDate);
     }
 }
