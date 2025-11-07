@@ -50,6 +50,7 @@ public class Login_view extends Fragment {
         name = view.findViewById(R.id.name_login_edit_text);
         password = view.findViewById(R.id.password_login_edit_text);
         submit = view.findViewById(R.id.Login_submit);
+        Database db = new Database(FirebaseFirestore.getInstance());
         submit.setOnClickListener(v -> {
             String nameText = name.getText().toString();
             String passwordText = password.getText().toString();
@@ -57,17 +58,17 @@ public class Login_view extends Fragment {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Database db = new Database(FirebaseFirestore.getInstance());
             db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
                     if (user != null) {
                         Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                        userType = user.getObjectName();
+                        userType = user.getUserType();
                         NavController navController = NavHostFragment.findNavController(this);
                         navigationBasedonType(userType, navController);
-                        Toast.makeText(getActivity(), userType,Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
                     }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getActivity(), "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
         });
     }

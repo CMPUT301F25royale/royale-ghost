@@ -144,22 +144,31 @@ public class Database {
      * @param password
      * @return Task that completes with the User object. Returns null if the user does not exist or an error occurs.
      */
-    public Task<User> checkUser(String email, String password) {
+     public Task<User> checkUser(String email, String password) {
         DocumentReference docRef = db.collection("users").document(email);
-        Task<DocumentSnapshot> getTask = docRef.get();
 
-        return getTask.continueWith(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot doc = task.getResult();
-                if (doc != null && doc.exists()) {
-                    if (doc.getString("password").equals(password)) {
-                        return doc.toObject(User.class);
-                        }
-                }
+        return docRef.get().continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                // Propagate the original failure (e.g., network error, permission denied)
+                throw task.getException();
             }
-            return null;
+            DocumentSnapshot document = task.getResult();
+            if (document == null || !document.exists()) {
+                return Tasks.forException(new Exception("User not found"));
+            }
+            String storedPassword = document.getString("password");
+            // Use TextUtils for safety against nulls
+            if (android.text.TextUtils.equals(storedPassword, password)) {
+                // SUCCESS: Password matches, return a successful task with the User object
+                User user = document.toObject(User.class);
+                return Tasks.forResult(user);
+            } else {
+                // Password mismatch, return a specific failed task
+                return Tasks.forException(new Exception("Incorrect password"));
+            }
         });
     }
+
 
     public Task<Boolean> doesUserExist(User user) {
         return fetchUser(user.getEmail()).continueWith(task -> {
