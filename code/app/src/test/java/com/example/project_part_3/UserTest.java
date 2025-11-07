@@ -12,8 +12,7 @@ import com.example.project_part_3.Users.User;
  * Unit tests for {@link User}.
  *
  * Notes:
- * - Pure JVM tests (no Android deps).
- * - Uses JUnit4 (matches your Gradle setup).
+ * - Pure JVM tests
  */
 public class UserTest {
 
@@ -29,17 +28,17 @@ public class UserTest {
 
     @Test
     public void constructorWithPhone_setsAllFieldsExceptUserType() {
-        User u = new User("Alice", "pass123", "alice@example.com", "555-1111");
-        assertEquals("Alice", u.getName());
-        assertEquals("pass123", u.getPassword());
-        assertEquals("alice@example.com", u.getEmail());
-        assertEquals("555-1111", u.getPhone());
+        User u = new User("Liam", "password123", "liam@example.com", "555-1234");
+        assertEquals("Liam", u.getName());
+        assertEquals("password123", u.getPassword());
+        assertEquals("liam@example.com", u.getEmail());
+        assertEquals("555-1234", u.getPhone());
         assertNull(u.getUserType());
     }
 
     @Test
     public void constructorWithoutPhone_setsPhoneNull() {
-        User u = new User("Bob", "secret", "bob@example.com");
+        User u = new User("Liam", "secret", "bob@example.com");
         assertEquals("Bob", u.getName());
         assertEquals("secret", u.getPassword());
         assertEquals("bob@example.com", u.getEmail());
@@ -50,8 +49,8 @@ public class UserTest {
     @Test
     public void altConstructor_setsUserType() {
         // Signature: (String name, String email, String phone, String password, String userType, Object o)
-        User u = new User("Jane Smith", "jane@example.com", "555-2222", "password456", "organizer", null);
-        assertEquals("Jane Smith", u.getName());
+        User u = new User("Jane Doe", "jane@example.com", "555-2222", "password456", "organizer", null);
+        assertEquals("Jane Doe", u.getName());
         assertEquals("password456", u.getPassword());
         assertEquals("jane@example.com", u.getEmail());
         assertEquals("555-2222", u.getPhone());
@@ -61,22 +60,22 @@ public class UserTest {
     @Test
     public void setters_updateValues() {
         User u = new User();
-        u.setName("Charlie");
+        u.setName("Hugus");
         u.setPassword("p@ss");
-        u.setEmail("charlie@example.com");
+        u.setEmail("hugus@example.com");
         u.setPhone("555-3333");
         u.setUserType("entrant");
 
-        assertEquals("Charlie", u.getName());
+        assertEquals("Hugus", u.getName());
         assertEquals("p@ss", u.getPassword());
-        assertEquals("charlie@example.com", u.getEmail());
+        assertEquals("hugus@example.com", u.getEmail());
         assertEquals("555-3333", u.getPhone());
         assertEquals("entrant", u.getUserType());
     }
 
     @Test
     public void setters_acceptNulls() {
-        User u = new User("Nina", "pw", "nina@example.com", "555-4444");
+        User u = new User("el chapo", "pw", "chapo@example.com", "555-4444");
         u.setName(null);
         u.setPassword(null);
         u.setEmail(null);
