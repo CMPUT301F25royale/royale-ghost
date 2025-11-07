@@ -30,6 +30,14 @@ public class Organizer_main_fragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
+
+        if (getArguments() != null) {
+            String email = getArguments().getString("userEmail");
+            if (email != null && !email.isEmpty()) {
+                sharedViewModel.setUserEmail(email);
+                Toast.makeText(getContext(), "Email Received: " + email, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
 

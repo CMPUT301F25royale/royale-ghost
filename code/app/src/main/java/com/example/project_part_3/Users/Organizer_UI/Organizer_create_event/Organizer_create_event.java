@@ -46,6 +46,7 @@ public class Organizer_create_event extends Fragment {
         String currentEmail = sharedViewModel.getUserEmail().getValue();
         sharedViewModel.getUserEmail().observe(getViewLifecycleOwner(), email -> {
             if (email != null && !email.isEmpty()) {
+                Toast.makeText(getContext(), "Current Email: " + email, Toast.LENGTH_SHORT).show();
                 }
         });
     }
