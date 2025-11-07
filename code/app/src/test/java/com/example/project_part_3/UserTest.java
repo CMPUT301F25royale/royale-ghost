@@ -39,7 +39,7 @@ public class UserTest {
     @Test
     public void constructorWithoutPhone_setsPhoneNull() {
         User u = new User("Liam", "secret", "bob@example.com");
-        assertEquals("Bob", u.getName());
+        assertEquals("Liam", u.getName());
         assertEquals("secret", u.getPassword());
         assertEquals("bob@example.com", u.getEmail());
         assertNull(u.getPhone());
