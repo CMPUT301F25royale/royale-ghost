@@ -16,7 +16,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
-The
+ * The Database class provides methods for interacting with the Firebase Firestore database. Most
+ * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
+ * Example usage:
+ * <pre>
+ *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
+ *     Database db = new Database(ff)
+ *
+ *     String email = "ballsdeep69@gmail.com"
+ *     db.fetchUser(email).addOnSuccessListener(user -> {
+ *          user.setName("Dion"); // changes user name
+ *     }
+ *     db.fetchUser(email).addOnFailureListener(e -> {
+ *          // e is the exception that was thrown
+ *          Log.e("fetchUser", "Failed to fetch user", e);
+ *     }
+ *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
+ *          // success = true if user was added
+ *          // success = false if user exists already
+ *     }
+ * </pre>
+ *
  */
 public class Database {
     FirebaseFirestore db;
@@ -113,11 +133,11 @@ public class Database {
                     return doc.toObject(User.class);
                 } else {
                     Log.d("fetchUser", "User does not exist");
-                    return null;
+                    throw new Exception("User does not exist");
                 }
             } else {
                 Log.d("fetchUser", "Could not find document", task.getException());
-                return null;
+                throw task.getException();
             }
         });
     }
@@ -146,7 +166,7 @@ public class Database {
                 return users;
             } else {
                 Log.d("getAllUsers", "Could not get documents", task.getException());
-                return null;
+                throw task.getException();
             }
         });
     }
