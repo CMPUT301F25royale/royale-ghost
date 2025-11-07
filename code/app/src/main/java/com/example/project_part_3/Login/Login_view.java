@@ -13,8 +13,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Login.Login_model;
 import com.example.project_part_3.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Login_view extends Fragment {
     private String userType;
@@ -22,8 +24,9 @@ public class Login_view extends Fragment {
     private TextView password;
     private Button submit;
     private Login_model login_model;
-    public Login_view() {
-    }
+
+    public Login_view() {}
+
     public static Login_view newInstance(String param1, String param2) {
         Login_view fragment = new Login_view();
         Bundle args = new Bundle();
@@ -48,6 +51,8 @@ public class Login_view extends Fragment {
         name = view.findViewById(R.id.name_login_edit_text);
         password = view.findViewById(R.id.password_login_edit_text);
         submit = view.findViewById(R.id.Login_submit);
+        Database db = new Database(FirebaseFirestore.getInstance());
+
         submit.setOnClickListener(v -> {
             String nameText = name.getText().toString();
             String passwordText = password.getText().toString();
@@ -55,19 +60,19 @@ public class Login_view extends Fragment {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
-            login_model = new Login_model(nameText, passwordText);
-            if (login_model.getSuccess()){
-                Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                userType = login_model.getUser(nameText, passwordText).getClass().toString();
-                NavController navController = NavHostFragment.findNavController(this);
-                navigationBasedonType(userType, navController);
-
-            }else
-            {
-                Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
-                return;
-            };
+            db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
+                    if (user != null) {
+                        Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
+                        userType = user.getUserType();
+                        NavController navController = NavHostFragment.findNavController(this);
+                        navigationBasedonType(userType, navController);
+                    } else {
+                        Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+                    }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getActivity(), "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+        });
     }
 
     public void navigationBasedonType(String userType, NavController navController){
