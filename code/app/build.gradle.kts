@@ -9,7 +9,7 @@ android {
     namespace = "com.example.project_part_3"
 
     // Use a stable compile/target SDK (36 is fine if you installed the preview SDK)
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.project_part_3"
@@ -60,17 +60,14 @@ dependencies {
     // Firebase BoM + Firestore
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.android.material:material:1.12.0")
 
     // ===== CameraX =====
-    // Keep all CameraX artifacts in the SAME MODULE that owns the XML using PreviewView
-    implementation(platform("androidx.camera:camera-bom:1.4.0"))
-    implementation("androidx.camera:camera-core")
-    implementation("androidx.camera:camera-camera2")
-    implementation("androidx.camera:camera-lifecycle")
-    implementation("androidx.camera:camera-view")
-    implementation("com.google.android.material:material:1.12.0")
-// <-- PreviewView lives here
-    // Optional extras:
-    // implementation("androidx.camera:camera-video")
-    // implementation("androidx.camera:camera-extensions")
+//    implementation(platform("androidx.camera:camera-bom:1.3.4"))
+//    implementation("androidx.camera:camera-core")
+//    implementation("androidx.camera:camera-camera2")
+//    implementation("androidx.camera:camera-lifecycle")
+//    implementation("androidx.camera:camera-view")
+//    implementation("com.google.android.material:material:1.12.0")
+
 }

@@ -80,7 +80,7 @@ public class Login_view extends Fragment {
                 navController.navigate(R.id.action_loginFragment_to_organizer_main);
                 break;
             case "Entrant":
-                Toast.makeText(getContext(), "Entrant navigation not implemented.", Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_loginFragment_to_entrant_main);
                 break;
             default:
                 Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();

@@ -31,12 +31,12 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- CameraX preview surface -->
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:keepScreenOn="true"
-            tools:background="#111" />
+<!--        <androidx.camera.view.PreviewView-->
+<!--            android:id="@+id/previewView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:keepScreenOn="true"-->
+<!--            tools:background="#111" />-->
 
         <!-- Optional dim scrim -->
         <View

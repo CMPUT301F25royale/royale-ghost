@@ -1,6 +1,7 @@
 package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
+import android.os.Bundle;
 
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
@@ -247,5 +248,47 @@ public class Event {
             return true;
         }
         return false;
+    }
+
+    public static List<Event> sample() {
+        List<Event> events = new ArrayList<>();
+        Organizer dummyOrg = new Organizer("Demo Organizer", "pass123", "demo@org.com");
+
+
+        events.add(new Event(
+                "Beginner Swim Lessons",
+                "A 6-week course for new swimmers.",
+                new ArrayList<>(),
+                new Timestamp(System.currentTimeMillis() + 86400000L),
+                new Date(System.currentTimeMillis() - 86400000L),
+                new Date(System.currentTimeMillis() + 86400000L * 7),
+                dummyOrg,
+                10,
+                "Local Rec Centre",
+                60,
+                null
+        ));
+
+        events.add(new Event(
+                "Tennis Lessons",
+                "Learn tennis basics with certified coaches.",
+                new ArrayList<>(),
+                new Timestamp(System.currentTimeMillis() + 172800000L),
+                new Date(System.currentTimeMillis() - 86400000L * 2),
+                new Date(System.currentTimeMillis() + 86400000L * 14),
+                dummyOrg,
+                20,
+                "Community Sports Complex",
+                40,
+                null
+        ));
+
+        return events;
+    }
+
+    public static Bundle bundle(String eventId) {
+        Bundle b = new Bundle();
+        b.putString("eventId", eventId);
+        return b;
     }
 }
