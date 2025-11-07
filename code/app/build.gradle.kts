@@ -52,11 +52,10 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-    }
+
 
     // ===== CameraX =====
     // Keep all CameraX artifacts in the SAME MODULE that owns the XML using PreviewView
-    implementation(platform("androidx.camera:camera-bom:1.4.0"))
     implementation("androidx.camera:camera-core")
     implementation("androidx.camera:camera-camera2")
     implementation("androidx.camera:camera-lifecycle")
