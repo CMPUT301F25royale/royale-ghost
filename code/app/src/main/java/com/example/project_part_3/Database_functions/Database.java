@@ -12,6 +12,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.w3c.dom.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,7 @@ import java.util.List;
  * Example usage:
  * <pre>
  *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
- *     Database db = new Database(ff)
+ *     Database db = new Database(ff);
  *
  *     String email = "ballsdeep69@gmail.com"
  *     db.fetchUser(email).addOnSuccessListener(user -> {
@@ -140,6 +142,16 @@ public class Database {
                 throw task.getException();
             }
         });
+    }
+
+    /**
+     * Sets (replaces) a user in the database.
+     *
+     * @param user The user you would like to set.
+     */
+    public void setUser(User user) {
+        DocumentReference docRef = db.collection("users").document(user.getEmail());
+        docRef.set(user);
     }
 
     /**
