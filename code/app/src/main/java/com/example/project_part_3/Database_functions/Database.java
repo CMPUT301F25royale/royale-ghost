@@ -4,6 +4,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -203,6 +204,32 @@ public class Database {
                 throw task.getException();
             }
         });
+    }
+
+    /**
+     * Gets all events for a given organizer, given their email.
+     *
+     * @param email
+     * @return A task that when completed, returns a List of events that the organizer has created.
+     */
+    public Task<List<Event>> getEventsByOrganizer(@NonNull String email) {
+            Task<QuerySnapshot> query = db.collection("events")
+                    .whereEqualTo("organizerId", email)
+                    .get();
+            return query.continueWith(task -> {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                if (task.getResult() == null) {
+                    return new ArrayList<>(); // if there are no events, return an empty list
+                }
+                List<Event> events = new ArrayList<>();
+                for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                    events.add(doc.toObject(Event.class));
+                }
+                return events;
+            });
+
     }
 
     public Task<List<Event>> getEventsByUser(String email) {
