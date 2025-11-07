@@ -55,6 +55,7 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         TextView alternates= findViewById(R.id.value_alternates);
 
         description = findViewById(R.id.detail_description);
+        findViewById(R.id.btn_close).setOnClickListener(v -> finish());
 
         String t = getIntent().getStringExtra("title");
         String organizerName = getIntent().getStringExtra("organizerName");
