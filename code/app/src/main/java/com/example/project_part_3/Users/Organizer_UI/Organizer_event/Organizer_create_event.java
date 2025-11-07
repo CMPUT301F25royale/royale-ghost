@@ -6,9 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast; // Import this
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +18,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.project_part_3.Database_functions.Database;
-// import com.example.project_part_3.DialogFragments.DatePickerDialogFragment; // 1. No longer needed
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
@@ -30,10 +28,8 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-// 2. Remove "implements DatePickerDialog.OnDateSetListener"
 public class Organizer_create_event extends Fragment {
 
-    // 3. Keep two separate Date objects
     private Date registrationOpenDate;
     private Date registrationCloseDate;
     private OrganizerSharedViewModel model;

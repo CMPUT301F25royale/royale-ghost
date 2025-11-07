@@ -4,6 +4,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
@@ -11,6 +12,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -232,23 +234,29 @@ public class Database {
 
     }
 
-    public Task<List<Event>> getEventsByUser(String email) {
-        Task<QuerySnapshot> queryTask = db.collection("events").whereEqualTo("organizer", email).get();
-        return queryTask.continueWith(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot query = task.getResult();
-                List<Event> events = new ArrayList<>();
-                if (query != null) {
-                    for (DocumentSnapshot doc : query.getDocuments()) {
-                        events.add(doc.toObject(Event.class));
-                    }
-                }
-                return events;
-            } else {
-                Log.d("getEventsByUser", "Could not get documents", task.getException());
+    public Task<ArrayList<String>> getEventEntrants(String eventId) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+        return docRef.get().continueWith(task -> {
+            if (!task.isSuccessful()) {
                 throw task.getException();
             }
+            DocumentSnapshot document = task.getResult();
+            if (document == null || !document.exists()) {
+                throw new Exception("Event not found");
+            }
+            return document.toObject(Event.class).getAttendant_list();
         });
+    }
+
+    /**
+     * Adds an entrant to an event.
+     * @param eventId
+     * @param email
+     */
+    public void addEntrant(String eventId, String email) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+        // add email to the list of entrants
+        docRef.update("attendant_list", FieldValue.arrayUnion(email));
     }
 
     public Task<Boolean> deleteUser(String email) {
