@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@id/organizerEventsFragment"
+        android:title="Events" />
+    <item
+        android:id="@+id/organizerSearchFragment"
+        android:title="Search" />
+    <item
+        android:id="@+id/organizerNotificationsFragment"
+        android:title="Notifications" />
+    <item
+        android:id="@+id/organizerProfilesFragment"
+        android:title="My Profile" />
+</menu>
