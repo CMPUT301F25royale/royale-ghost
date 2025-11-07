@@ -24,10 +24,20 @@
         tools:layout="@layout/organizer_profiles" />
 
     <fragment
+        android:id="@+id/organizerCreateEventFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_create_event"/>
+
+    <fragment
         android:id="@+id/organizerEventsFragment"
         android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_event_view"
         android:label="fragment_organizer_create_event"
-        tools:layout="@layout/organizer_events" />
+        tools:layout="@layout/organizer_events" >
+        <action
+            android:id="@+id/action_organizerEventsFragment_to_organizerCreateEventFragment"
+            app:destination="@id/organizerCreateEventFragment" />
+    </fragment>
+
+
 
 
 </navigation>
