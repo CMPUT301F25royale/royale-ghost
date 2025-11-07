@@ -8,11 +8,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.util.Log;
 
 
-public abstract class User implements Serializable{
+public class User implements Serializable {
     private String name;
     private String password;
     private String email;
     private String phone; // optional
+    private String userType;
+
+    public User() {
+        // required for firebase
+    }
 
     public User(String name, String password, String email, String phone) {
         this.name = name;
@@ -58,5 +63,13 @@ public abstract class User implements Serializable{
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }
