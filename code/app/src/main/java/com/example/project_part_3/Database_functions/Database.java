@@ -137,6 +137,30 @@ public class Database {
         });
     }
 
+    /**
+     * Verifies if email and password is correct, and returns the user for which it is correct.
+     *
+     * @param email
+     * @param password
+     * @return Task that completes with the User object. Returns null if the user does not exist or an error occurs.
+     */
+    public Task<User> checkUser(String email, String password) {
+        DocumentReference docRef = db.collection("users").document(email);
+        Task<DocumentSnapshot> getTask = docRef.get();
+
+        return getTask.continueWith(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot doc = task.getResult();
+                if (doc != null && doc.exists()) {
+                    if (doc.getString("password").equals(password)) {
+                        return doc.toObject(User.class);
+                        }
+                }
+            }
+            return null;
+        });
+    }
+
     public Task<Boolean> doesUserExist(User user) {
         return fetchUser(user.getEmail()).continueWith(task -> {
             if (!task.isSuccessful()) {

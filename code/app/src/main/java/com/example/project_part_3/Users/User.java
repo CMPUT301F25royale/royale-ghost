@@ -44,6 +44,8 @@ public abstract class User implements Serializable{
         return phone;
     }
 
+    public abstract String getObjectName();
+
     public void setName(String name) {
         this.name = name;
     }
@@ -59,4 +61,5 @@ public abstract class User implements Serializable{
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
 }
