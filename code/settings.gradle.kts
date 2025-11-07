@@ -16,9 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Add this line to include the repository for CameraX and other libraries
+        maven { url = uri("https://maven.google.com") }
     }
 }
 
 rootProject.name = "code"
 include(":app")
- 

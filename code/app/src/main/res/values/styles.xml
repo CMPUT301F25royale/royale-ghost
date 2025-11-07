@@ -21,5 +21,25 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">?android:textColorSecondary</item>
     </style>
+
+    <style name="ShapeAppearanceOverlay.App.Rounded28">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.App">
+        <!-- Rounded corners for all components that apply this overlay -->
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="ShapeAppearanceOverlay">
+        <!-- Rounded corners for all components that apply this overlay -->
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="CircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item> <!-- perfect circle -->
+    </style>
 </resources>
 
