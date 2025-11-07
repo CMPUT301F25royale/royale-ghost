@@ -1,6 +1,8 @@
 package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
+
+import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
@@ -41,8 +43,7 @@ public class Event {
     private Bitmap poster;
     @Exclude
     private Date time;
-    @Exclude
-    private ArrayList<User> attendant_list;
+    private ArrayList<String> attendant_list;
     @Exclude
     private Integer attendees;
     public Event(){
@@ -57,7 +58,7 @@ public class Event {
 
     public Event(String title,
                  String description,
-                 ArrayList<User> attendees,
+                 ArrayList<String> attendees,
                  Timestamp time,
                  Date date_open,
                  Date date_close,
@@ -85,7 +86,7 @@ public class Event {
 
     public Event(String title,
                  String description,
-                 ArrayList<User> attendees,
+                 ArrayList<String> attendees,
                  Timestamp time,
                  Date date_open,
                  Date date_close,
@@ -197,28 +198,24 @@ public class Event {
     @Exclude
     public void setTime(Date time) { this.time = time; }
 
-    @Exclude
-    public ArrayList<User> getAttendant_list(){ return attendant_list; }
-    @Exclude
-    public void setAttendant_list(ArrayList<User> list) { this.attendant_list = list; }
+    public ArrayList<String> getAttendant_list(){ return attendant_list; }
+    public void setAttendant_list(ArrayList<String> list) { this.attendant_list = list; }
 
-    @Exclude
     public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
-    @Exclude
     public void setAttendees(Integer attendees) { this.attendees = attendees; }
 
 
     @Exclude
-    public void addAttendant(User user){
+    public void addAttendant(String email){
         if (attendant_list == null) attendant_list = new ArrayList<>();
-        attendant_list.add(user);
+        attendant_list.add(email);
         attendees = attendant_list.size();
     }
 
     @Exclude
-    public void removeAttendant(User user){
+    public void removeAttendant(String email){
         if (attendant_list != null) {
-            attendant_list.remove(user);
+            attendant_list.remove(email);
             attendees = attendant_list.size();
         }
     }

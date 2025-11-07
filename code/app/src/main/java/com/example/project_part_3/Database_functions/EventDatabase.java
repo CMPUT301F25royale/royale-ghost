@@ -5,6 +5,7 @@ import android.media.Image;
 
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Events.Event_Organizer;
+import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 
@@ -47,7 +48,7 @@ public class EventDatabase {
         return instance;
     }
 
-    public Boolean addEvent(String title, String description, ArrayList<User> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Bitmap poster) {
+    public Boolean addEvent(String title, String description, ArrayList<String> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Bitmap poster) {
         Event newEvent = new Event(title, description, attendant,  time, date_open, date_close, organizer, location, capacity, poster);
         if (eventExists(newEvent.getTitle(), newEvent.getOrganizer())) {
             return false;
@@ -56,7 +57,7 @@ public class EventDatabase {
         return true;
     }
 
-    public Boolean addEvent(String title, String description, ArrayList<User> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster) {
+    public Boolean addEvent(String title, String description, ArrayList<String> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster) {
         Event newEvent = new Event(title, description, attendant, time, date_open, date_close, organizer, price, location, capacity, poster);
         if (eventExists(newEvent.getTitle(), newEvent.getOrganizer())) {
             return false;
