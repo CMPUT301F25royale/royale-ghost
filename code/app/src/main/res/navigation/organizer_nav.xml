@@ -25,7 +25,11 @@
 
     <fragment
         android:id="@+id/organizerCreateEventFragment"
-        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_create_event"/>
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_create_event">
+        <action
+            android:id="@+id/create_to_event"
+            app:destination="@id/organizerEventsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/organizerEventsFragment"
