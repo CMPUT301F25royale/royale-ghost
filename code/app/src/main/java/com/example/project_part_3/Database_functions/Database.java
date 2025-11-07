@@ -15,6 +15,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+The
+ */
 public class Database {
     FirebaseFirestore db;
     public Database(FirebaseFirestore db) {
@@ -70,6 +73,29 @@ public class Database {
     }
 
     /**
+     * Fetches an event based on its ID.
+     *
+     * @param eventId
+     * @return
+     */
+    public Task<Event> fetchEvent(String eventId) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+
+        return docRef.get().continueWith(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot doc = task.getResult();
+                if (doc != null && doc.exists()) {
+                    return doc.toObject(Event.class);
+                } else {
+                    throw new Exception("Event does not exist");
+                }
+            }
+            // else propagate exception
+            throw task.getException();
+        });
+    }
+
+    /**
      * Fetches the user based on their email.
      *
      * @param email The email of the user you want to fetch.
@@ -119,6 +145,7 @@ public class Database {
                 }
                 return users;
             } else {
+                Log.d("getAllUsers", "Could not get documents", task.getException());
                 return null;
             }
         });
@@ -168,7 +195,6 @@ public class Database {
             }
         });
     }
-
 
     public Task<Boolean> doesUserExist(User user) {
         return fetchUser(user.getEmail()).continueWith(task -> {
