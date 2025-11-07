@@ -61,15 +61,6 @@ public class Admin_search_view extends Fragment {
 
         searchButton.setOnClickListener(v -> performSearch());
 
-        listView.setOnItemClickListener((parent, view1, position, id) -> {
-            Object selectedItem = adapter.getItem(position);
-            if (selectedItem instanceof Event) {
-                Toast.makeText(getContext(), "Clicked on event: " + ((Event) selectedItem).getTitle(), Toast.LENGTH_SHORT).show();
-            } else if (selectedItem instanceof Image_holder) {
-                Toast.makeText(getContext(), "Clicked on an image.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         return view;
     }
 
