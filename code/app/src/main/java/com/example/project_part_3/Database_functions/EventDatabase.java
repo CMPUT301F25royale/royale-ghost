@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.media.Image;
 
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 
@@ -33,10 +34,10 @@ public class EventDatabase {
         Timestamp eventTime1 = new Timestamp(futureDate.getTime());
         Timestamp eventTime2 = new Timestamp(futureDate.getTime() + 1000 * 60 * 60 * 24);
         addEvent("Spring Fling Festival", "Annual campus spring festival with music, food, and games.", new ArrayList<>(), eventTime1, dateOpen, dateClose, sampleOrganizer, "Main Quad", 500, null);
-        addEvent("Tech Career Fair", "Meet with top tech companies looking to hire interns and graduates.", new ArrayList<>(), eventTime2, dateOpen, dateClose, sampleOrganizer, 0, "Engineering Hall", 300, null);
+        addEvent("Tech Career Fair", "Meet with top tech companies looking to hire interns and graduates.", new ArrayList<>(), eventTime2, dateOpen, dateClose, sampleOrganizer, 0F, "Engineering Hall", 300, null);
         addEvent("Art Exhibit Opening", "Showcasing student artwork from the past semester.", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 20), dateOpen, dateClose, sampleOrganizer, "Fine Arts Gallery", 150, null);
         addEvent("Outdoor Movie Night: The Avengers", "Free outdoor screening of the classic Marvel movie. Bring a blanket!", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 5), dateOpen, new Date(now + 1000 * 60 * 60 * 24 * 4), sampleOrganizer, "Lawn by the Lake", 1000, null);
-        addEvent("Charity 5K Run", "A fun run to raise money for local charities. All fitness levels welcome.", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 30), dateOpen, dateClose, sampleOrganizer, 25, "Campus Recreation Center", 400, null);
+        addEvent("Charity 5K Run", "A fun run to raise money for local charities. All fitness levels welcome.", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 30), dateOpen, dateClose, sampleOrganizer, 25F, "Campus Recreation Center", 400, null);
     }
 
     public static synchronized EventDatabase getInstance() {
@@ -55,7 +56,7 @@ public class EventDatabase {
         return true;
     }
 
-    public Boolean addEvent(String title, String description, ArrayList<User> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, Integer price, String location, Integer capacity, Bitmap poster) {
+    public Boolean addEvent(String title, String description, ArrayList<User> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster) {
         Event newEvent = new Event(title, description, attendant, time, date_open, date_close, organizer, price, location, capacity, poster);
         if (eventExists(newEvent.getTitle(), newEvent.getOrganizer())) {
             return false;

@@ -12,11 +12,11 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
-public class Admin_notifications_adapter extends ArrayAdapter<Notification_Organizer> {
+public class Admin_notification_adapter extends ArrayAdapter<Notification_Organizer> {
     private final int resourceLayout;
     private final ArrayList<Notification_Organizer> organizers;
 
-    public Admin_notifications_adapter(Context context, int resource, ArrayList<Notification_Organizer> organizers) {
+    public Admin_notification_adapter(Context context, int resource, ArrayList<Notification_Organizer> organizers) {
         super(context, 0, organizers);
         this.resourceLayout = resource;
         this.organizers = organizers;

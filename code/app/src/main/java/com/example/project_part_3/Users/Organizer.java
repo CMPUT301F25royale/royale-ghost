@@ -10,7 +10,7 @@ public class Organizer extends User {
         super(name, password, email);
     }
 
-    public String getObjectName(){
+    public String getUserType(){
         return "Organizer";
     }
 }

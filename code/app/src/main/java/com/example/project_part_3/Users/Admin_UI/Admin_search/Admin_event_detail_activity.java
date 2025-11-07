@@ -10,7 +10,6 @@ import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -89,19 +88,16 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         regWindow.setText(reg);
 
         // If start is not set, just display the current time.
-        Timestamp start = event.getEventStartAt() != null ? event.getEventStartAt() : event.getTime();
-        Timestamp end = event.getEventEndAt();
+        Date start = event.getEventStartAt() != null ? event.getEventStartAt() : event.getTime();
+        Date end = event.getEventEndAt();
         startEnd.setText(
                 (start != null ? fmtDateTime(start) : "—")
                         + (end != null ? " to " + fmtDateTime(end) : "")
         );
 
         // Price
-        int cents = event.getPriceCents();
-        if (cents <= 0 && event.getPrice() != null) {
-            cents = event.getPrice() * 100; // we have these two methods, should consolodate to one but a later concern.
-        }
-        price.setText(cents > 0 ? centsToCurrency(cents) : "Free");
+        float p = event.getPrice();
+        price.setText(p > 0 ? Float.toString(p) : "Free");
 
         // Capacity & counts
         int cap = event.getCapacity() != null ? event.getCapacity() : 0;
@@ -129,17 +125,14 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         return df.format(d);
     }
 
-    private String fmtDateTime(Timestamp ts) {
-        if (ts == null) return "—";
+    private String fmtDateTime(Date d) {
+        if (d == null) return "—";
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-        return df.format(ts);
+        return df.format(d);
     }
 
     private int sizeSafe(java.util.List<?> list) {
         return list == null ? 0 : list.size();
     }
 
-    private String centsToCurrency(int cents) {
-        return String.format("$%.2f", cents / 100.0);
-    }
 }
