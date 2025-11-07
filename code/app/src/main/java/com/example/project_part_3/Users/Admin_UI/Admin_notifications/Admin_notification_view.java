@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class Admin_notification_view extends Fragment {
     ListView notificationList;
     NotificationDatabase notificationDb;
-    Admin_notifications_adapter adapter;
+    Admin_notification_adapter adapter;
     ArrayList<Notification_Organizer> notifications;
 
     public Admin_notification_view() {
@@ -35,7 +35,7 @@ public class Admin_notification_view extends Fragment {
         notificationDb = NotificationDatabase.getInstance();
 
         notifications = new ArrayList<>(notificationDb.getAllNotifications());
-        adapter = new Admin_notifications_adapter(getContext(), R.layout.admin_notifications_element, notifications);
+        adapter = new Admin_notification_adapter(getContext(), R.layout.admin_notifications_element, notifications);
 
 
         notificationList = view.findViewById(R.id.admin_notifications_list);
