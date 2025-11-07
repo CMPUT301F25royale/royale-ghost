@@ -184,6 +184,19 @@ public class Database {
         });
     }
 
+    public Task<Boolean> deleteEvent(String eventId) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+        return docRef.delete().continueWith(task -> {
+            if (task.isSuccessful()) {
+                Log.d("deleteEvent", "Event successfully deleted");
+                return true;
+            } else {
+                Log.e("deleteEvent", "Event failed to be deleted", task.getException());
+                return false;
+            }
+        });
+    }
+
     /**
      * Verifies if email and password is correct, and returns the user for which it is correct.
      *
@@ -196,7 +209,7 @@ public class Database {
 
         return docRef.get().continueWithTask(task -> {
             if (!task.isSuccessful()) {
-                // Propagate the original failure (e.g., network error, permission denied)
+                // propagate the original failure
                 throw task.getException();
             }
             DocumentSnapshot document = task.getResult();
@@ -204,13 +217,12 @@ public class Database {
                 return Tasks.forException(new Exception("User not found"));
             }
             String storedPassword = document.getString("password");
-            // Use TextUtils for safety against nulls
             if (android.text.TextUtils.equals(storedPassword, password)) {
-                // SUCCESS: Password matches, return a successful task with the User object
+                // password matches, return a successful task with the User object
                 User user = document.toObject(User.class);
                 return Tasks.forResult(user);
             } else {
-                // Password mismatch, return a specific failed task
+                // password mismatch, return a specific failed task
                 return Tasks.forException(new Exception("Incorrect password"));
             }
         });
