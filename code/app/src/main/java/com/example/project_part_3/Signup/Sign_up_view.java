@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,16 +77,19 @@ public class Sign_up_view extends Fragment {
                 return;
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
-            if (sign_up_model.getSuccess()){
-                Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                clearForm();
-                MainActivity mainActivity = (MainActivity) getActivity();
-                assert mainActivity != null;
-                mainActivity.NavigationForUserType(selectedOption);
-            }
-            else{
-                Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
-            };
+            sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+                if (wasAdded) {
+                    Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                    clearForm();
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    assert mainActivity != null;
+                    mainActivity.NavigationForUserType(selectedOption);
+                } else {
+                    Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Log.d("Sign_up", "Failed to sign up");
+            });
         });
     }
 

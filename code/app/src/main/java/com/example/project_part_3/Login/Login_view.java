@@ -58,7 +58,7 @@ public class Login_view extends Fragment {
             login_model = new Login_model(nameText, passwordText);
             if (login_model.getSuccess()){
                 Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                userType = login_model.getUser(nameText, passwordText).getObjectName();
+                userType = login_model.getUser(nameText, passwordText).getClass().toString();
                 NavController navController = NavHostFragment.findNavController(this);
                 navigationBasedonType(userType, navController);
 

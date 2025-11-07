@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Admin_UI.admin_notifications;
+package com.example.project_part_3.Users.Organizer_UI.Organizer_notifications;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,11 +12,11 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
-public class Admin_notifications_adapter extends ArrayAdapter<Notification_Organizer> {
+public class Organizer_notifications_adapter extends ArrayAdapter<Notification_Organizer> {
     private final int resourceLayout;
     private final ArrayList<Notification_Organizer> organizers;
 
-    public Admin_notifications_adapter(Context context, int resource, ArrayList<Notification_Organizer> organizers) {
+    public Organizer_notifications_adapter(Context context, int resource, ArrayList<Notification_Organizer> organizers) {
         super(context, 0, organizers);
         this.resourceLayout = resource;
         this.organizers = organizers;
@@ -25,18 +25,18 @@ public class Admin_notifications_adapter extends ArrayAdapter<Notification_Organ
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
-        ViewHolder holder;
+        Organizer_notifications_adapter.ViewHolder holder;
 
         if (view == null) {
             view = LayoutInflater.from(getContext()).inflate(resourceLayout, parent, false);
-            holder = new ViewHolder();
-            holder.organizerName = view.findViewById(R.id.admin_notifications_organizer_name);
-            holder.dateSent = view.findViewById(R.id.admin_notifications_date_sent);
-            holder.eventTitle = view.findViewById(R.id.admin_notification_event_title);
-            holder.eventMessage = view.findViewById(R.id.admin_notifications_event_message);
+            holder = new Organizer_notifications_adapter.ViewHolder();
+            holder.organizerName = view.findViewById(R.id.organizer_notifications_organizer_name);
+            holder.dateSent = view.findViewById(R.id.organizer_notifications_date_sent);
+            holder.eventTitle = view.findViewById(R.id.organizer_notification_event_title);
+            holder.eventMessage = view.findViewById(R.id.organizer_notifications_event_message);
             view.setTag(holder);
         } else {
-            holder = (ViewHolder) view.getTag();
+            holder = (Organizer_notifications_adapter.ViewHolder) view.getTag();
         }
 
         Notification_Organizer notification = getItem(position);
