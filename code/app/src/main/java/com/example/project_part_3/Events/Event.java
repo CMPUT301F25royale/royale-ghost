@@ -39,7 +39,6 @@ public class Event {
     private List<String> confirmedUserIds; // Accepted
     private List<String> declinedUserIds; // Declined
     private List<String> alternatesUserIds; // Alternates
-
     private Long seed; // Kinda optional, just for reproducibility
     private Long lastLotteryTs; // millis since epoch of last draw
 
@@ -123,7 +122,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.priceCents = priceCents;
-        this.price = priceCents / 100; // keep legacy field in sync approximately
+        this.price = priceCents / 100;
     }
 
     private void baseInit() {
