@@ -58,7 +58,30 @@ public class Event {
         this.attendees = 0;
     }
 
-
+    public Event(String title,
+                 String description,
+                 ArrayList<User> attendees,
+                 Timestamp time,
+                 Date date_open,
+                 Date date_close,
+                 Organizer organizer,
+                 Float price,
+                 String location,
+                 Integer capacity) {
+        baseInit();
+        this.time = time;
+        this.price = price;
+        this.title = title;
+        this.description = description;
+        this.date_open = date_open;
+        this.date_close = date_close;
+        this.organizer = organizer;
+        this.location = location;
+        this.capacity = capacity;
+        this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
+        this.attendees = this.attendant_list.size();
+        this.eventStartAt = time;
+    }
     public Event(String title,
                  String description,
                  ArrayList<User> attendees,
