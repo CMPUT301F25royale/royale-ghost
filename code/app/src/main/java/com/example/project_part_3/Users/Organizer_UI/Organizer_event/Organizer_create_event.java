@@ -44,6 +44,13 @@ public class Organizer_create_event extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Button back = view.findViewById(R.id.back);
+        back.setOnClickListener(v-> {
+            NavController navBack = NavHostFragment.findNavController(this);
+            navBack.navigate(R.id.create_to_event);
+        });
+
         BottomNavigationView bottomNav = view.findViewById(R.id.organizer_bottom_nav);
         NavHostFragment navHostFragment = (NavHostFragment) getChildFragmentManager()
                 .findFragmentById(R.id.organizer_nav_host_fragment);
