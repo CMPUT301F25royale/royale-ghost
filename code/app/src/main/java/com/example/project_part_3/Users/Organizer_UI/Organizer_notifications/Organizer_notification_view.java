@@ -21,7 +21,7 @@ public class Organizer_notification_view extends Fragment{
 
     ListView notificationList;
     NotificationDatabase notificationDb;
-    Organizer_notifications_adapter adapter;
+    Organizer_notification_adapter adapter;
     ArrayList<Notification_Organizer> notifications;
 
     public Organizer_notification_view() {
@@ -36,7 +36,7 @@ public class Organizer_notification_view extends Fragment{
         notificationDb = NotificationDatabase.getInstance();
 
         notifications = new ArrayList<>(notificationDb.getAllNotifications());
-        adapter = new Organizer_notifications_adapter(getContext(), R.layout.organizer_notifications_element, notifications);
+        adapter = new Organizer_notification_adapter(getContext(), R.layout.organizer_notifications_element, notifications);
 
 
         notificationList = view.findViewById(R.id.organizer_notifications_list);

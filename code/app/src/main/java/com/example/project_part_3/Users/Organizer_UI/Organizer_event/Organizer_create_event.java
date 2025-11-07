@@ -1,4 +1,4 @@
-package com.example.project_part_3.Users.Organizer_UI.Organizer_create_event;
+package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;

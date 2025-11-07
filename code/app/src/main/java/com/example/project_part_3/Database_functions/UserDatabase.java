@@ -78,7 +78,7 @@ public class UserDatabase {
             }
         }
         return null;
-    };
+    }
 
     public boolean removeUser(String email, String name){
         for (User user : database) {
