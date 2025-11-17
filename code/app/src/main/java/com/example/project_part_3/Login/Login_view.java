@@ -101,7 +101,7 @@ public class Login_view extends Fragment {
                 Bundle bundleE = new Bundle();
                 bundleE.putString("userEmail", userEmail);
                 Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_entrant_main, bundleE);
+                navController.navigate(R.id.entrant_main_view, bundleE);
                 break;
             default:
                 Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();
