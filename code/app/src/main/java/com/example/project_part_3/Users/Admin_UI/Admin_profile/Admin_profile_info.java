@@ -24,6 +24,8 @@ public class Admin_profile_info extends Fragment {
     private String name;
     private String email;
     private String phone;
+    private String userType;
+
 
     public Admin_profile_info() {
         // Required empty public constructor
@@ -52,6 +54,8 @@ public class Admin_profile_info extends Fragment {
             name = getArguments().getString("name");
             email = getArguments().getString("email");
             phone = getArguments().getString("phone");
+            userType = getArguments().getString("userType");
+
 
             nameTextView.setText("Name: " + name);
             emailTextView.setText("Email: " + email);
@@ -68,6 +72,11 @@ public class Admin_profile_info extends Fragment {
         deleteButton.setOnClickListener(v -> {
             if (email == null || email.isEmpty()) {
                 Toast.makeText(getContext(), "Cannot delete user: email is missing.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(userType.equals("Admin")) {
+                Toast.makeText(getContext(), "Cannot delete admin user.", Toast.LENGTH_SHORT).show();
                 return;
             }
 

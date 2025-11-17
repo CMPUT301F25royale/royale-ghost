@@ -6,21 +6,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast; // Import this
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.project_part_3.Database_functions.Database;
-// import com.example.project_part_3.DialogFragments.DatePickerDialogFragment; // 1. No longer needed
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
+import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,17 +28,26 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-// 2. Remove "implements DatePickerDialog.OnDateSetListener"
 public class Organizer_create_event extends Fragment {
 
-    // 3. Keep two separate Date objects
     private Date registrationOpenDate;
     private Date registrationCloseDate;
+    private OrganizerSharedViewModel model;
+    private String organizerEmail;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        model = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        model.getUserEmail().observe(getViewLifecycleOwner(), email -> {
+            organizerEmail = email;
+        });
         return inflater.inflate(R.layout.organizer_create_event, container, false);
+
     }
 
     @Override
@@ -113,6 +122,8 @@ public class Organizer_create_event extends Fragment {
         FirebaseFirestore ff = FirebaseFirestore.getInstance();
         Database db = new Database(ff);
         Button publishButton = view.findViewById(R.id.create_event_publish_button);
+
+
         publishButton.setOnClickListener(v -> {
             String title = titleEditText.getText().toString().trim();
             String description = descriptionEditText.getText().toString().trim();
@@ -143,8 +154,7 @@ public class Organizer_create_event extends Fragment {
                 return;
             }
 
-            //change to your own email
-            String organizerId = "organizer_email@example.com";
+            String organizerId = organizerEmail;
             Event newEvent = new Event(
                     null,
                     organizerId,

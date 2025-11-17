@@ -101,8 +101,8 @@ public class Sign_up_view extends Fragment {
     }
 
     private void selectOption(Button selectedButton) {
-        Organizer_button_sign_up.setBackgroundColor(Color.DKGRAY);
-        Entrant_button_sign_up.setBackgroundColor(Color.DKGRAY);
+        Organizer_button_sign_up.setBackgroundColor(Color.GRAY);
+        Entrant_button_sign_up.setBackgroundColor(Color.GRAY);
 
         if (selectedButton.getId() == R.id.Organizer_button_sign_up) {
             selectedOption = "Organizer";
