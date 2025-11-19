@@ -39,7 +39,7 @@ public class Admin_event_detail_activity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_event_detail);
+        setContentView(R.layout.admin_event_detail);
 
         db = new Database(FirebaseFirestore.getInstance());
         setupViews();

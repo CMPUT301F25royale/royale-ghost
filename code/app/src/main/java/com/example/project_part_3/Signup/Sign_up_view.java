@@ -89,7 +89,7 @@ public class Sign_up_view extends Fragment {
                     if ("Organizer".equals(selectedOption)) {
                         navController.navigate(R.id.action_sign_up_fragment_to_organizer_main_fragment, args);
                     } else if ("Entrant".equals(selectedOption)) {
-                        navController.navigate(R.id.entrant_main_view, args);
+                        navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
                     }
                 } else {
                     Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();

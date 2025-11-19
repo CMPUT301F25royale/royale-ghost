@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
@@ -70,18 +71,37 @@ public class Login_view extends Fragment {
                 return;
             }
             db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
-                    if (user != null) {
-                        Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
-                        userType = user.getUserType();
-                        String userEmail = user.getEmail();
-                        NavController navController = NavHostFragment.findNavController(this);
-                        navigationBasedonType(userType, userEmail, navController);
-                    } else {
-                        Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+                if (user != null) {
+                    Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
+
+                    String userType = user.getUserType();
+                    String userEmail = user.getEmail();
+
+                    Bundle args = new Bundle();
+                    args.putString("userEmail", userEmail);
+
+                    NavController nav = Navigation.findNavController(requireView());
+
+                    switch (userType) {
+                        case "Admin":
+                            nav.navigate(R.id.action_loginFragment_to_admin_main, args);
+                            break;
+                        case "Organizer":
+                            nav.navigate(R.id.action_loginFragment_to_organizer_main, args);
+                            break;
+                        case "Entrant":
+                            nav.navigate(R.id.action_global_entrant_main, args); // global works from anywhere
+                            break;
+                        default:
+                            Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+                }
             }).addOnFailureListener(e -> {
                 Toast.makeText(getActivity(), "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+
         });
     }
 
@@ -101,7 +121,7 @@ public class Login_view extends Fragment {
                 Bundle bundleE = new Bundle();
                 bundleE.putString("userEmail", userEmail);
                 Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.entrant_main_view, bundleE);
+                navController.navigate(R.id.action_loginFragment_to_entrant_main, bundleE);
                 break;
             default:
                 Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();

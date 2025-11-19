@@ -19,7 +19,6 @@
         app:boxStrokeWidth="1dp"
         app:boxStrokeWidthFocused="2dp"
         app:boxStrokeColor="#D9D9D9"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Rounded28"
         app:endIconMode="clear_text"
 
         app:layout_constraintTop_toTopOf="parent"
@@ -114,7 +113,7 @@
         android:background="?android:attr/windowBackground"
         app:itemIconTint="@color/black"
         app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/bottom_nav_menu"
+        app:menu="@menu/bottom_nav_menu_org"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
