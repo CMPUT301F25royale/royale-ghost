@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,18 +87,43 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         // Cancel button visibility depends on mode
         if (mode == Mode.MY_EVENTS) {
             h.btnSecondary.setVisibility(View.VISIBLE);
+            h.btnSecondary.setEnabled(true);
             h.btnSecondary.setText("Cancel");
+
             h.btnSecondary.setOnClickListener(v -> {
-                // TODO: call DB to remove this user from the event if they cancel
+                if (e.getId() == null || e.getId().isEmpty() || currentUserEmail == null || currentUserEmail.isEmpty()) {
+                    Toast.makeText(ctx, "Missing event/user info", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 h.btnSecondary.setEnabled(false);
-                h.btnSecondary.setText("Canceled");
+                h.btnSecondary.setText("Removing...");
+
+                Database db = new Database(FirebaseFirestore.getInstance());
+                db.removeUserFromWaitlist(e.getId(), currentUserEmail)
+                        .addOnSuccessListener(ignored -> {
+                            Toast.makeText(ctx, "Removed from waitlist", Toast.LENGTH_SHORT).show();
+
+                            // Remove this item from the list immediately
+                            int idx = h.getBindingAdapterPosition();
+                            if (idx != RecyclerView.NO_POSITION) {
+                                items.remove(idx);
+                                notifyItemRemoved(idx);
+                            }
+                        })
+                        .addOnFailureListener(err -> {
+                            h.btnSecondary.setEnabled(true);
+                            h.btnSecondary.setText("Cancel");
+                            Toast.makeText(ctx, "Failed to remove: " +
+                                    (err != null ? err.getMessage() : "unknown error"), Toast.LENGTH_LONG).show();
+                        });
             });
+
         } else {
-            // SEARCH mode: hide the cancel button since it wouldnt make sense to have it here
             h.btnSecondary.setVisibility(View.GONE);
-            h.btnSecondary.setOnClickListener(null);
         }
     }
+
 
     public void submitList(List<Event> newItems) {
         items.clear();
