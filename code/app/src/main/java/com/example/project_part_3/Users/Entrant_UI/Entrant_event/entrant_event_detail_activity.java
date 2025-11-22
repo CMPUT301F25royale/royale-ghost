@@ -1,6 +1,7 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_event;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -8,30 +9,36 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.project_part_3.Database_functions.EventDatabase;
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.List;
 
 public class entrant_event_detail_activity extends AppCompatActivity {
 
     private ImageView poster;
     private TextView title, organizer, locationName, locationAddress, regWindow, startEnd, price, description;
     private TextView vCapacity, vConfirmed, vRemaining, vWaitlist, vSelected, vDeclined, vAlternates;
-    private MaterialButton joinBtn;
+    private MaterialButton joinBtn, closeBtn;
+
+    private final NumberFormat currencyFmt = NumberFormat.getCurrencyInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.entrant_event_detail);
+
         MaterialToolbar tb = findViewById(R.id.toolbar);
         tb.setNavigationOnClickListener(v -> finish());
+
         poster = findViewById(R.id.detail_poster);
         title = findViewById(R.id.detail_title);
         organizer = findViewById(R.id.detail_organizer);
@@ -49,68 +56,135 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         vDeclined = findViewById(R.id.value_declined);
         vAlternates = findViewById(R.id.value_alternates);
         joinBtn = findViewById(R.id.btn_join_lottery);
+        closeBtn = findViewById(R.id.btn_close);
 
-        // Intent has these args from the bundle sent from the adapter
-        String eventTitle = getIntent().getStringExtra("title");
-        String organizerName = getIntent().getStringExtra("organizerName");
-        String viewerUserEmail = getIntent().getStringExtra("viewerUserEmail"); // I need this to identify user type
+        if (closeBtn != null) {
+            closeBtn.setOnClickListener(v -> finish());
+        }
 
-        // Lookup event
-        Event event = EventDatabase.getInstance().getEvent(eventTitle,
-                new com.example.project_part_3.Users.Organizer(organizerName, "", "", "Organizer"));
-        if (event == null) {
-            Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
+        Database db = new Database(FirebaseFirestore.getInstance());
+
+        String eventId = getIntent().getStringExtra("eventId");
+        String viewerUserEmail = getIntent().getStringExtra("viewerUserEmail");
+        if (eventId == null || eventId.isEmpty()) {
+            Toast.makeText(this, "Missing event id", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        title.setText(event.getTitle());
-        organizer.setText(organizerName != null ? organizerName : "—");
+        // Load the event
+        db.fetchEvent(eventId)
+                .addOnSuccessListener(event -> {
+                    if (event == null) {
+                        Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+                    // Bind to UI
+                    bindEventToUI(event);
+                    setupJoinButton(db, event, viewerUserEmail);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load event: " + (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                    finish();
+                });
+    }
 
-        if (event.getPoster() != null) poster.setImageBitmap(event.getPoster());
-        else poster.setImageResource(android.R.drawable.ic_menu_report_image);
 
-        // Fallback to address with no specific locaiton name
-        String locName = null;
-        locationName.setText(nonEmpty(locName, event.getLocation()));
+    private void bindEventToUI(Event event) {
+        title.setText(nonEmpty(event.getTitle(), "—"));
+        organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));
+
+        // Poster
+        if (event.getPoster() != null) {
+            poster.setImageBitmap(event.getPoster());
+        } else {
+            poster.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
+
+        // Location fields
+        String locName = event.getLocationName();
+        locationName.setText(nonEmpty(locName, nonEmpty(event.getLocation(), "—")));
         locationAddress.setText(nonEmpty(event.getLocation(), "—"));
 
+        // Registration window
         regWindow.setText("Register from " + fmtDate(event.getDate_open()) + " to " + fmtDate(event.getDate_close()));
 
+        // Start/End
         Date start = event.getTime();
-        startEnd.setText(start != null ? fmtDate(start) : "—");
+        Timestamp endTs = null;
+        startEnd.setText(
+                (start != null ? fmtDate(start) : "—") +
+                        (endTs != null ? (" to " + fmtDateTime(endTs)) : "")
+        );
 
-        float eventPrice = 0;
-        NumberFormat nf = NumberFormat.getCurrencyInstance();
-        if (event.getPrice() != null && event.getPrice() > 0) eventPrice = event.getPrice();
+        // Price
+        float eventPrice = (event.getPrice() != null && event.getPrice() > 0) ? event.getPrice() : 0f;
+        price.setText(currencyFmt.format(eventPrice));
 
-        price.setText(nf.format(eventPrice));
-
+        // Capacity & counts
         int cap = event.getCapacity() != null ? event.getCapacity() : 0;
-        vCapacity.setText(String.valueOf(cap));
-        vConfirmed.setText(String.valueOf(event.getAttendees() != null ? event.getAttendees() : 0));
-        vRemaining.setText(String.valueOf(Math.max(cap - (event.getAttendees() != null ? event.getAttendees() : 0), 0)));
-        vWaitlist.setText("0");
-        vSelected.setText("0");
-        vDeclined.setText("0");
-        vAlternates.setText("0");
+        int confirmed = event.getConfirmedUserIds() != null ? event.getConfirmedUserIds().size() : 0;
+        int remaining = Math.max(cap - confirmed, 0);
+        int waitlisted = event.getWaitlistUserIds() != null ? event.getWaitlistUserIds().size() : 0;
+        int selected = event.getSelectedUserIds() != null ? event.getSelectedUserIds().size() : 0;
+        int declined = event.getDeclinedUserIds() != null ? event.getDeclinedUserIds().size() : 0;
+        int alternates = event.getAlternatesUserIds() != null ? event.getAlternatesUserIds().size() : 0;
 
-        // Show Enter lottery button if registration is open
+        vCapacity.setText(String.valueOf(cap));
+        vConfirmed.setText(String.valueOf(confirmed));
+        vRemaining.setText(String.valueOf(remaining));
+        vWaitlist.setText(String.valueOf(waitlisted));
+        vSelected.setText(String.valueOf(selected));
+        vDeclined.setText(String.valueOf(declined));
+        vAlternates.setText(String.valueOf(alternates));
+
+        description.setText(nonEmpty(event.getDescription(), "—"));
+    }
+
+    private void setupJoinButton(Database db, Event event, String viewerUserEmail) {
         boolean openNow = isRegistrationOpen(event, System.currentTimeMillis());
-        if (openNow && viewerUserEmail != null && !viewerUserEmail.isEmpty()) {
-            joinBtn.setVisibility(android.view.View.VISIBLE);
-            joinBtn.setEnabled(true);
-            joinBtn.setText("Enter lottery");
-            joinBtn.setOnClickListener(v -> {
-                // TODO: plug into your waitlist from the event methid
-                joinBtn.setEnabled(false); // Dont be able to click it again
-                joinBtn.setText("Entered");
-                Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
-                // TODO: Add to firestore... im not sure how we do this.
-            });
-        } else {
+        if (!openNow || viewerUserEmail == null || viewerUserEmail.isEmpty()) {
             joinBtn.setVisibility(android.view.View.GONE);
+            return;
         }
+
+        joinBtn.setVisibility(android.view.View.VISIBLE);
+        joinBtn.setEnabled(false);
+        joinBtn.setText("Checking…");
+
+        db.isUserOnWaitlistById(event.getId(), viewerUserEmail)
+                .addOnSuccessListener(isOnWaitlist -> {
+                    if (isOnWaitlist) {
+                        joinBtn.setText("Entered");
+                        joinBtn.setEnabled(false);
+                    } else {
+                        joinBtn.setText("Enter lottery");
+                        joinBtn.setEnabled(true);
+                        joinBtn.setOnClickListener(v -> {
+                            joinBtn.setEnabled(false);
+                            joinBtn.setText("Entering…");
+                            db.addUserToWaitlistById(event.getId(), viewerUserEmail)
+                                    .addOnSuccessListener(ignored -> {
+                                        joinBtn.setText("Entered");
+                                        Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
+                                        // Bump the waitlist count on screen... will add checks and such later.
+                                        List<String> list = event.getWaitlistUserIds();
+                                        int newCount = (list == null ? 0 : list.size()) + 1;
+                                        vWaitlist.setText(String.valueOf(newCount));
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        joinBtn.setText("Enter lottery");
+                                        joinBtn.setEnabled(true);
+                                        Toast.makeText(this, "Failed to join: " +
+                                                (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                                    });
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    joinBtn.setVisibility(android.view.View.GONE);
+                });
     }
 
     private boolean isRegistrationOpen(Event e, long nowMs) {
