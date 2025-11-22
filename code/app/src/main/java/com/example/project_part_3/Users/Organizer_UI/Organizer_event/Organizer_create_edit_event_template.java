@@ -233,23 +233,40 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         }
 
         // if selectedEvent is null, it's a new event (pass null ID), else use existing ID
-        String eventId = (selectedEvent != null) ? selectedEvent.getId() : db.db.collection("events").document().getId();
-
-        Event newEvent = new Event(
-                eventId,
-                organizerEmail,
-                title,
-                description,
-                location,
-                location,
-                null,
-                registrationOpenDate.getTime(),
-                registrationCloseDate.getTime(),
-                registrationCloseDate.getTime(), // TODO: change to start time
-                registrationCloseDate.getTime(), // TODO: change to end time
-                capacity, // optional, may be null
-                price // optional, may be null
-        );
+        Event newEvent;
+        if (selectedEvent != null) {
+            newEvent = new Event(
+                    selectedEvent.getId(), // use the ID of the selected event
+                    organizerEmail,
+                    title,
+                    description,
+                    location,
+                    location,
+                    null,
+                    registrationOpenDate.getTime(),
+                    registrationCloseDate.getTime(),
+                    registrationCloseDate.getTime(), // TODO: change to start time
+                    registrationCloseDate.getTime(), // TODO: change to end time
+                    capacity, // optional, may be null
+                    price // optional, may be null
+            );
+        } else {
+            // else, create a new ID
+            newEvent = new Event(
+                    organizerEmail,
+                    title,
+                    description,
+                    location,
+                    location,
+                    null,
+                    registrationOpenDate.getTime(),
+                    registrationCloseDate.getTime(),
+                    registrationCloseDate.getTime(), // TODO: change to start time
+                    registrationCloseDate.getTime(), // TODO: change to end time
+                    capacity, // optional, may be null
+                    price // optional, may be null
+            );
+        }
 
         pushEventToDatabase(db, newEvent);
     }

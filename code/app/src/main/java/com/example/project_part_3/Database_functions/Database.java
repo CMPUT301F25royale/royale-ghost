@@ -209,6 +209,12 @@ public class Database {
 
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document(event.getId());
-        return docRef.delete().continueWith(task -> task.isSuccessful());
+        return docRef.delete().continueWith(Task::isSuccessful);
+    }
+
+    public Task<Boolean> updateEvent(Event event) {
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId());
+        docRef = docRef.collection(EVENTS_SUBCOLLECTION).document(event.getId());
+        return docRef.set(event).continueWith(Task::isSuccessful);
     }
 }

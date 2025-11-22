@@ -2,6 +2,7 @@ package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,7 +21,10 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
     @Override
     protected void populateFields(Event event) {
         // if views weren't found, don't try to set them
-        if (titleEditText == null || event == null) return;
+        if (titleEditText == null || event == null || getView() == null) return;
+
+        TextView pageName = getView().findViewById(R.id.create_event_title);
+        pageName.setText(String.format("Edit Event: %s", event.getTitle()));
 
         titleEditText.setText(event.getTitle());
         descriptionEditText.setText(event.getDescription());

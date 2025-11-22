@@ -145,6 +145,36 @@ public class Event {
         this.price = price;
     }
 
+    public Event(
+            String eventId,
+            String organizerId,
+            String title,
+            String description,
+            String locationName,
+            String locationAddress,
+            String posterImageUrl,
+            Long registrationOpensAtMs,
+            Long registrationClosesAtMs,
+            Long eventStartAtMs,
+            Long eventEndAtMs,
+            Integer capacity,
+            Float price) {
+        this();
+        this.id = eventId;
+        this.organizerId = organizerId;
+        this.title = title;
+        this.description = description;
+        this.locationName = locationName;
+        this.location = locationAddress;
+        this.posterImageUrl = posterImageUrl;
+        this.date_open = new Date(registrationOpensAtMs);
+        this.date_close = new Date(registrationClosesAtMs);
+        this.eventStartAt = new Timestamp(eventStartAtMs);
+        this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
+        this.capacity = capacity;
+        this.price = price;
+    }
+
     /**
      * generate random eventId that is unique
      * @param organizerId
