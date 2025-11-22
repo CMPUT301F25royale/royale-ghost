@@ -16,6 +16,7 @@ camerax = "1.4.1"
 
 firebaseFirestore = "26.0.2"
 cameraView = "1.5.1"
+identityJvm = "202411.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -37,6 +38,7 @@ camerax-core      = { group = "androidx.camera", name = "camera-core",      vers
 camerax-camera2   = { group = "androidx.camera", name = "camera-camera2",   version.ref = "camerax" }
 camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camerax-view      = { group = "androidx.camera", name = "camera-view",      version.ref = "camerax" }
+identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
 # Optional:
 # camerax-video     = { group = "androidx.camera", name = "camera-video",     version.ref = "camerax" }
 # camerax-extensions= { group = "androidx.camera", name = "camera-extensions",version.ref = "camerax" }

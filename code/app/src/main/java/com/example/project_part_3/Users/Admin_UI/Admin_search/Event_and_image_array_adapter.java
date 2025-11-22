@@ -1,5 +1,10 @@
-package com.example.project_part_3.Users.Admin_UI.Admin_search;import android.content.Context;
+// File: com/example/project_part_3/Users/Admin_UI/Admin_search/Event_and_image_array_adapter.java
+
+package com.example.project_part_3.Users.Admin_UI.Admin_search;
+
+import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,28 +13,24 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.project_part_3.Database_functions.Database;
-import com.example.project_part_3.Database_functions.ImageDatabase;
+import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_holder;
 import com.example.project_part_3.R;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
-    private Context context;
-    private Database db;
+    private final Context context;
+    private final Admin_search_model viewModel; // Use ViewModel instead of direct DB
     private static final int TYPE_EVENT = 0;
     private static final int TYPE_IMAGE = 1;
 
-    public Event_and_image_array_adapter(Context context, ArrayList<Object> items) {
+    public Event_and_image_array_adapter(Context context, ArrayList<Object> items, Admin_search_model viewModel) {
         super(context, 0, items);
         this.context = context;
-        this.db = new Database(FirebaseFirestore.getInstance());
+        this.viewModel = viewModel;
     }
 
     @Override
@@ -48,6 +49,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        // ViewHolder logic remains the same...
         int viewType = getItemViewType(position);
         Object item = getItem(position);
 
@@ -64,7 +66,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
                 eventHolder.eventDetail = convertView.findViewById(R.id.admin_search_detail_button);
                 eventHolder.eventDelete = convertView.findViewById(R.id.admin_search_delete_event_button);
                 convertView.setTag(eventHolder);
-            } else {
+            } else { // TYPE_IMAGE
                 convertView = inflater.inflate(R.layout.admin_search_image, parent, false);
                 ImageViewHolder imageHolder = new ImageViewHolder();
                 imageHolder.imageView = convertView.findViewById(R.id.image_general);
@@ -87,15 +89,14 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     private void bindEventView(EventViewHolder holder, Event event) {
         if (event == null) return;
+        // UI binding logic remains the same...
         holder.eventTitle.setText(event.getTitle());
         holder.eventLocation.setText(event.getLocation());
 
         if (event.getDate_close() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            String closeDate = dateFormat.format(event.getDate_close());
-            holder.eventDate.setText("Closes: " + closeDate);
+            holder.eventDate.setText("Closes: " + dateFormat.format(event.getDate_close()));
         }
-
         holder.eventAttendees.setText("Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity());
 
         if (event.getPoster() != null) {
@@ -105,45 +106,38 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         }
 
         holder.eventDetail.setOnClickListener(v -> {
-            Intent i = new Intent(context, com.example.project_part_3.Users.Admin_UI.Admin_search.Admin_event_detail_activity.class);
+            Intent i = new Intent(context, Admin_event_detail_activity.class);
             i.putExtra("eventId", event.getId());
             context.startActivity(i);
         });
 
+        // Use the ViewModel for the delete operation
         holder.eventDelete.setOnClickListener(v -> {
-            if (event.getId() == null || event.getId().isEmpty()) {
-                Toast.makeText(context, "Cannot delete event without an ID", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            db.deleteEvent(event.getId()).addOnSuccessListener(success -> {
-                if (success) {
-                    remove(event);
-                    notifyDataSetChanged();
+            viewModel.deleteEvent(event, new EventDatabase.OnEventDeleteListener() {
+                @Override
+                public void onSuccess() {
                     Toast.makeText(context, event.getTitle() + " deleted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "Failed to delete event", Toast.LENGTH_SHORT).show();
+                    // No need to call remove() or notifyDataSetChanged(). LiveData will do it for us.
                 }
-            }).addOnFailureListener(e -> {
-                Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Toast.makeText(context, "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Log.e("Adapter", "Failed to delete event: " + errorMessage);
+                }
             });
         });
     }
 
     private void bindImageView(ImageViewHolder holder, Image_holder image) {
-        if (image != null) {
-            holder.imageView.setImageBitmap(image.getImage());
-            holder.description.setText(image.getDescription());
+        if (image == null) return;
+        holder.imageView.setImageBitmap(image.getImage());
+        holder.description.setText(image.getDescription());
 
-            holder.deleteButton.setOnClickListener(v -> {
-                if (ImageDatabase.getInstance().removeImage(image)) {
-                    remove(image);
-                    notifyDataSetChanged();
-                    Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "Failed to delete image", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        holder.deleteButton.setOnClickListener(v -> {
+            viewModel.deleteImage(image);
+            Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private static class EventViewHolder {
@@ -151,10 +145,10 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         TextView eventTitle, eventLocation, eventDate, eventAttendees;
         Button eventDetail, eventDelete;
     }
+
     private static class ImageViewHolder {
         ImageView imageView;
         TextView description;
         Button deleteButton;
     }
 }
-

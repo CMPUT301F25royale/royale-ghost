@@ -44,7 +44,6 @@ public class Organizer_profile_view extends Fragment {
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
-                //firebase change
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if(user.getPassword().equals(old)){
                         user.setPassword(_new);
@@ -59,7 +58,6 @@ public class Organizer_profile_view extends Fragment {
             });
         });
 
-        //reset Name
         Button nameRest = view.findViewById(R.id.name_change);
         nameRest.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
