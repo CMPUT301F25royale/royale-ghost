@@ -6,17 +6,11 @@ import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class Event {
 
@@ -116,49 +110,19 @@ public class Event {
         this.eventStartAt = time;
     }
 
-    public Event(
+    public Event(String eventId,
                  String organizerId,
                  String title,
                  String description,
                  String locationName,
                  String locationAddress,
                  String posterImageUrl,
-                 Long registrationOpensAtMs,
-                 Long registrationClosesAtMs,
-                 Long eventStartAtMs,
+                 long registrationOpensAtMs,
+                 long registrationClosesAtMs,
+                 long eventStartAtMs,
                  Long eventEndAtMs,
-                 Integer capacity,
-                 Float price) {
-        this();
-        this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
-        this.organizerId = organizerId;
-        this.title = title;
-        this.description = description;
-        this.locationName = locationName;
-        this.location = locationAddress;
-        this.posterImageUrl = posterImageUrl;
-        this.date_open = new Date(registrationOpensAtMs);
-        this.date_close = new Date(registrationClosesAtMs);
-        this.eventStartAt = new Timestamp(eventStartAtMs);
-        this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
-        this.capacity = capacity;
-        this.price = price;
-    }
-
-    public Event(
-            String eventId,
-            String organizerId,
-            String title,
-            String description,
-            String locationName,
-            String locationAddress,
-            String posterImageUrl,
-            Long registrationOpensAtMs,
-            Long registrationClosesAtMs,
-            Long eventStartAtMs,
-            Long eventEndAtMs,
-            Integer capacity,
-            Float price) {
+                 int capacity,
+                 float price) {
         this();
         this.id = eventId;
         this.organizerId = organizerId;
@@ -173,36 +137,6 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
-    }
-
-    /**
-     * generate random eventId that is unique
-     * @param organizerId
-     * @param title
-     * @param startTimeMs
-     * @return
-     */
-
-    @Exclude
-    private String generateUniqueId(String organizerId, String title, long startTimeMs) {
-        try {
-            String input = organizerId + title + startTimeMs + UUID.randomUUID().toString();
-
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return UUID.randomUUID().toString();
-        }
     }
 
 
@@ -270,19 +204,6 @@ public class Event {
     public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
     public void setAttendees(Integer attendees) { this.attendees = attendees; }
 
-    public List<String> getSelectedUserIds() {
-        return (selectedUserIds != null) ? selectedUserIds : new ArrayList<>();
-    }
-
-    public List<String> getDeclinedUserIds(){
-        return (declinedUserIds != null) ? declinedUserIds : new ArrayList<>();
-    }
-
-    public List<String> getAlternatesUserIds() {
-        return (alternatesUserIds != null) ? alternatesUserIds : new ArrayList<>();
-    }
-
-
 
     @Exclude
     public void addAttendant(String email){
@@ -315,7 +236,7 @@ public class Event {
         return Math.max(remaining, 0);
     }
     @Exclude
-    public boolean registrationOpen() {
+    public boolean registrationOpen(){
         Date currentDate = new Date();
         if (date_open == null || date_close == null) return false;
         boolean afterOpen = currentDate.after(date_open);
@@ -325,46 +246,18 @@ public class Event {
     }
 
     @Exclude
-    public long daysUntilClose() {
+    public long daysUntilClose(){
         Date currentDate = new Date();
         if (date_close == null) return 0;
-
-        long diff = date_close.getTime() - currentDate.getTime();
-
-        return TimeUnit.MILLISECONDS.toDays(diff);
+        return date_close.getTime() - currentDate.getTime();
     }
 
     @Exclude
-    public long hoursUntilClose() {
-        Date currentDate = new Date();
-        if (date_close == null) return 0;
-        long diff = date_close.getTime() - currentDate.getTime();
-        return TimeUnit.MILLISECONDS.toHours(diff);
-    }
-
-    @Exclude
-    public String registrationStatus() {
-        if (!registrationOpen()) {
-            return "Closed";
+    public String registrationStatus(){
+        if (registrationOpen()){
+            return "Open ("+daysUntilClose()+")";
         }
-
-        long days = daysUntilClose();
-
-        if (days > 1) {
-            return String.format("Open (%d days until close)", days);
-        }
-
-        if (days == 1) {
-            return "Open (1 day until close)";
-        }
-
-        long hours = hoursUntilClose();
-
-        if (hours == 0) {
-            return "Open (closes within 1 hour)";
-        }
-
-        return String.format("Open (closes within %d hours)", hours + 1);
+        return "Closed";
     }
 }
 
