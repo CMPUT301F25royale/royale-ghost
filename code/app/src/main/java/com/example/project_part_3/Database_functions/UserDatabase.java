@@ -17,9 +17,6 @@ public class UserDatabase {
 
     private UserDatabase(){
         database = new ArrayList<>();
-        database.add(new Entrant("john_doe", "test", "john@gmail.com", "7")); // test user
-        database.add(new Organizer("jack_doe", "test", "jack@gmail.com", "8")); // Test organizer
-        database.add(new Admin("jane_doe", "test", "jane@gmail.com", "9")); // Test admin
     }
 
     public static synchronized UserDatabase getInstance() {

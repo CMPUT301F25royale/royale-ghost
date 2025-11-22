@@ -328,4 +328,62 @@ public class Database {
             return (existingUser != null); // True if user exists, false otherwise
         });
     }
+
+    // Create an event with a unique ID
+    public Task<String> createEventWithId(@NonNull com.example.project_part_3.Events.Event event) {
+        DocumentReference docRef = db.collection("events").document();
+        event.setId(docRef.getId());
+        return docRef.set(event).continueWith(task -> {
+            if (!task.isSuccessful()) throw task.getException();
+            return docRef.getId();
+        });
+    }
+    // Search an event by its ID and return fully populated event object if exists
+    public Task<com.example.project_part_3.Events.Event> fetchEventById(@NonNull String eventId) {
+        return db.collection("events").document(eventId)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc == null || !doc.exists()) throw new Exception("Event not found");
+                    return doc.toObject(com.example.project_part_3.Events.Event.class);
+                });
+    }
+    public Task<Void> addUserToWaitlist(@NonNull String eventId, @NonNull String userId) {
+        return db.collection("events").document(eventId)
+                .update("waitlistUserIds", FieldValue.arrayUnion(userId));
+    }
+
+    public Task<Void> removeUserFromWaitlist(@NonNull String eventId, @NonNull String userId) {
+        return db.collection("events").document(eventId)
+                .update("waitlistUserIds", FieldValue.arrayRemove(userId));
+    }
+
+    public Task<Boolean> isUserOnWaitlist(@NonNull String eventId, @NonNull String userId) {
+        return db.collection("events").document(eventId)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    com.example.project_part_3.Events.Event ev =
+                            task.getResult().toObject(com.example.project_part_3.Events.Event.class);
+                    if (ev == null || ev.getWaitlistUserIds() == null) return false;
+                    return ev.getWaitlistUserIds().contains(userId);
+                });
+    }
+
+    // User Id's who confirmed
+    public Task<List<String>> getEventEntrantsEmails(@NonNull String eventId) {
+        return db.collection("events").document(eventId)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    com.example.project_part_3.Events.Event ev =
+                            task.getResult().toObject(com.example.project_part_3.Events.Event.class);
+                    // If you still want a non-lottery email list, add a field to Model.Event (e.g., registeredUserIds)
+                    return (ev != null && ev.getConfirmedUserIds() != null)
+                            ? ev.getConfirmedUserIds()
+                            : new ArrayList<>();
+                });
+    }
+
 }
