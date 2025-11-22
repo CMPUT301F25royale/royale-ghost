@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
@@ -47,15 +48,41 @@ public class Entrant_main_fragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        BottomNavigationView bottomNav = view.findViewById(R.id.entrant_bottom_nav);
-        NavHostFragment navHostFragment = (NavHostFragment) getChildFragmentManager()
-                .findFragmentById(R.id.entrant_nav_host_fragment);
+        String userEmail = getArguments() != null ? getArguments().getString("userEmail") : null;
 
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(bottomNav, navController);
-        }
+        NavHostFragment childHost = (NavHostFragment)
+                getChildFragmentManager().findFragmentById(R.id.entrant_nav_host_fragment);
+        if (childHost == null) return;
+        NavController childNav = childHost.getNavController();
+
+        // Give the start destination the arg
+        Bundle sharedArgs = new Bundle();
+        sharedArgs.putString("userEmail", userEmail);
+        childNav.setGraph(R.navigation.entrant_nav, sharedArgs);
+
+        BottomNavigationView bottom = view.findViewById(R.id.entrant_bottom_nav);
+
+        NavOptions navOpts = new NavOptions.Builder()
+                .setLaunchSingleTop(true)
+                .setRestoreState(true)
+                .setPopUpTo(childNav.getGraph().getId(), false, true)
+                .build();
+
+        bottom.setOnItemSelectedListener(item -> {
+            try {
+                childNav.navigate(item.getItemId(), sharedArgs, navOpts);
+                return true;
+            } catch (IllegalArgumentException ignored) {
+                return true;
+            }
+        });
+
+        childNav.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            bottom.getMenu().findItem(destination.getId()).setChecked(true);
+        });
     }
+
+
 }
 
 

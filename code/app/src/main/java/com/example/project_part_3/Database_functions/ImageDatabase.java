@@ -1,9 +1,12 @@
 package com.example.project_part_3.Database_functions;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.project_part_3.Image.Image_holder;
 
 import java.util.ArrayList;
-
+import java.util.List;
 
 
 /**
@@ -19,6 +22,12 @@ public class ImageDatabase {
 
     private static ImageDatabase instance;
     private ArrayList<Image_holder> database;
+
+    private final MutableLiveData<List<Image_holder>> allImagesLiveData = new MutableLiveData<>();
+
+    public LiveData<List<Image_holder>> getAllImagesLiveData() {
+        return allImagesLiveData;
+    }
 
     private ImageDatabase(){
         database = new ArrayList<>();

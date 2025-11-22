@@ -6,11 +6,15 @@ import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -112,7 +116,7 @@ public class Event {
         this.eventStartAt = time;
     }
 
-    public Event(String eventId,
+    public Event(
                  String organizerId,
                  String title,
                  String description,
@@ -126,7 +130,7 @@ public class Event {
                  Integer capacity,
                  Float price) {
         this();
-        this.id = eventId;
+        this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
@@ -139,6 +143,36 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+    }
+
+    /**
+     * generate random eventId that is unique
+     * @param organizerId
+     * @param title
+     * @param startTimeMs
+     * @return
+     */
+
+    @Exclude
+    private String generateUniqueId(String organizerId, String title, long startTimeMs) {
+        try {
+            String input = organizerId + title + startTimeMs + UUID.randomUUID().toString();
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return UUID.randomUUID().toString();
+        }
     }
 
 

@@ -7,8 +7,16 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.11.0"
 constraintlayout = "2.2.1"
+navigation = "2.7.7"
+
+# CameraX — use explicit versions (no BOM)
+camerax = "1.4.1"
+
+# Test
+
 firebaseFirestore = "26.0.2"
 cameraView = "1.5.1"
+identityJvm = "202411.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -20,6 +28,23 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraView" }
+
+# Navigation
+navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+navigation-ui-ktx       = { group = "androidx.navigation", name = "navigation-ui-ktx",       version.ref = "navigation" }
+
+# CameraX (no BOM; every artifact pinned to the same version)
+camerax-core      = { group = "androidx.camera", name = "camera-core",      version.ref = "camerax" }
+camerax-camera2   = { group = "androidx.camera", name = "camera-camera2",   version.ref = "camerax" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camerax-view      = { group = "androidx.camera", name = "camera-view",      version.ref = "camerax" }
+identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
+# Optional:
+# camerax-video     = { group = "androidx.camera", name = "camera-video",     version.ref = "camerax" }
+# camerax-extensions= { group = "androidx.camera", name = "camera-extensions",version.ref = "camerax" }
+
+# Test
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
