@@ -18,15 +18,21 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_adapter.VH> {
+
+    public enum Mode { MY_EVENTS, SEARCH } // Modes to determine which UI elements to show
+
 
     private final List<Event> items = new ArrayList<>();
     private final String currentUserEmail;
+    private final Mode mode;
 
-    public entrant_events_adapter(List<Event> initial, String currentUserEmail) {
+    public entrant_events_adapter(List<Event> initial,
+                                  String currentUserEmail,
+                                  Mode mode) {
         if (initial != null) items.addAll(initial);
         this.currentUserEmail = currentUserEmail;
+        this.mode = mode;
     }
 
     public void submitList(List<Event> newItems) {
@@ -53,20 +59,30 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         if (bmp != null) h.img.setImageBitmap(bmp);
         else h.img.setImageResource(android.R.drawable.ic_menu_report_image);
 
+        // View details
         View.OnClickListener openDetails = v -> {
             Intent i = new Intent(ctx, entrant_event_detail_activity.class);
-            i.putExtra("title", e.getTitle());
-            i.putExtra("organizerName", e.getOrganizer() != null ? e.getOrganizer().getName() : "");
+            i.putExtra("eventId", e.getId()); // if using Firestore id
             i.putExtra("viewerUserEmail", currentUserEmail);
             ctx.startActivity(i);
         };
         h.itemView.setOnClickListener(openDetails);
         h.btnPrimary.setOnClickListener(openDetails);
 
-        h.btnSecondary.setOnClickListener(v -> {
-            h.btnSecondary.setEnabled(false);
-            h.btnSecondary.setText("Canceled");
-        });
+        // Cancel button visibility depends on mode
+        if (mode == Mode.MY_EVENTS) {
+            h.btnSecondary.setVisibility(View.VISIBLE);
+            h.btnSecondary.setText("Cancel");
+            h.btnSecondary.setOnClickListener(v -> {
+                // TODO: call DB to remove this user from the event if they cancel
+                h.btnSecondary.setEnabled(false);
+                h.btnSecondary.setText("Canceled");
+            });
+        } else {
+            // SEARCH mode: hide the cancel button since it wouldnt make sense to have it here
+            h.btnSecondary.setVisibility(View.GONE);
+            h.btnSecondary.setOnClickListener(null);
+        }
     }
 
     @Override public int getItemCount() { return items.size(); }
@@ -84,3 +100,5 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         }
     }
 }
+
+

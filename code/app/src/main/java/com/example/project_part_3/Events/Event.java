@@ -225,6 +225,10 @@ public class Event {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
 
+    public List<String> getConfirmedUserIds() {
+        return (confirmedUserIds != null) ? confirmedUserIds : new ArrayList<>();
+    }
+
     @Exclude
     public int getRemainingCapacity() {
         int cap = (capacity != null) ? capacity : 0;
