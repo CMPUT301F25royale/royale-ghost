@@ -8,16 +8,26 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider; // <-- Add this import
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.project_part_3.Database_functions.EventDatabase;
+// Removed direct EventDatabase import as it's no longer needed here
 import com.example.project_part_3.R;
 
 public class Entrant_event_view extends Fragment {
 
+    private Entrant_event_model viewModel;
+    private entrant_events_adapter adapter;
+
     public Entrant_event_view() {
-        // Required empty public constructor
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this).get(Entrant_event_model.class);
     }
 
     @Nullable
@@ -29,14 +39,17 @@ public class Entrant_event_view extends Fragment {
         RecyclerView rv = root.findViewById(R.id.eventsRecycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // Fetch from session
-        String currentUserEmail= getArguments() != null ? getArguments().getString("userEmail") : null;
+        String currentUserEmail = getArguments() != null ? getArguments().getString("userEmail") : null;
 
-        entrant_events_adapter adapter = new entrant_events_adapter(EventDatabase.getInstance().getAllEvents(), currentUserEmail);
+        adapter = new entrant_events_adapter(currentUserEmail);
         rv.setAdapter(adapter);
 
-        // You can drop this in to refresh: (I need to test this, commented)
-        // adapter.submitList(EventDatabase.getInstance().getAllEvents());
+        viewModel.getAllEvents().observe(getViewLifecycleOwner(), events -> {
+            if (events != null) {
+                adapter.setData(events);
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         return root;
     }

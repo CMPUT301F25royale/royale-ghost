@@ -21,17 +21,24 @@ import java.util.List;
 
 public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_adapter.VH> {
 
+
     private final List<Event> items = new ArrayList<>();
     private final String currentUserEmail;
 
-    public entrant_events_adapter(List<Event> initial, String currentUserEmail) {
-        if (initial != null) items.addAll(initial);
+    public entrant_events_adapter(String currentUserEmail) {
         this.currentUserEmail = currentUserEmail;
     }
 
-    public void submitList(List<Event> newItems) {
+    /**
+     * Updates the adapter's data list and notifies the RecyclerView of the change.
+     * This method will be called by the LiveData observer in the Fragment.
+     * @param newItems The new list of events to display.
+     */
+    public void setData(List<Event> newItems) {
         items.clear();
-        if (newItems != null) items.addAll(newItems);
+        if (newItems != null) {
+            items.addAll(newItems);
+        }
         notifyDataSetChanged();
     }
 
@@ -50,16 +57,20 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         h.title.setText(e.getTitle() != null ? e.getTitle() : "—");
 
         Bitmap bmp = e.getPoster();
-        if (bmp != null) h.img.setImageBitmap(bmp);
-        else h.img.setImageResource(android.R.drawable.ic_menu_report_image);
+        if (bmp != null) {
+            h.img.setImageBitmap(bmp);
+        } else {
+            h.img.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
 
         View.OnClickListener openDetails = v -> {
             Intent i = new Intent(ctx, entrant_event_detail_activity.class);
-            i.putExtra("title", e.getTitle());
-            i.putExtra("organizerName", e.getOrganizer() != null ? e.getOrganizer().getName() : "");
+
+            i.putExtra("eventId", e.getId());
             i.putExtra("viewerUserEmail", currentUserEmail);
             ctx.startActivity(i);
         };
+
         h.itemView.setOnClickListener(openDetails);
         h.btnPrimary.setOnClickListener(openDetails);
 
@@ -69,7 +80,9 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         });
     }
 
-    @Override public int getItemCount() { return items.size(); }
+    @Override public int getItemCount() {
+        return items.size();
+    }
 
     static class VH extends RecyclerView.ViewHolder {
         ImageView img;

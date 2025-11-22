@@ -37,18 +37,15 @@ public class Entrant_profile_view extends Fragment {
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String username = prefs.getString("username", "");
 
-        //reset password here
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
-                //firebase change
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if(user.getPassword().equals(old)){
                         user.setPassword(_new);
                         db.setUser(user);
                     }
                 });
-                //change for shared prefs
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("password", _new);
                 editor.apply();

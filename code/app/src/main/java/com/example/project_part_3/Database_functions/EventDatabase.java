@@ -1,45 +1,35 @@
 package com.example.project_part_3.Database_functions;
 
-import android.graphics.Bitmap;
-import android.media.Image;
-
+import android.util.Log;
+import androidx.lifecycle.MutableLiveData;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Events.Event_Organizer;
-import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
-import com.example.project_part_3.Users.User;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import java.util.List;
 import java.util.Objects;
 
-
 /**
- * we might combine this database with UserDatabase and Image database for a central database
- * ultimately we need to have the Events as a weak key of the Organizer that way we can then ensure
- * that deleting a Organizer will delete all of their events. It must also be that
+ * High-level repository for managing Event data.
+ * This class abstracts away the Task-based nature of the low-level Database class,
+ * exposing LiveData and simple callbacks for use in ViewModels and UI controllers.
+ *
+ * NOTE: This is a hybrid class containing legacy singleton logic for backward compatibility.
+ * This legacy code should be removed once all dependent activities are refactored.
  */
 public class EventDatabase {
 
-    private static EventDatabase instance;
-    private ArrayList<Event> database;
+    private final Database db;
+    private final MutableLiveData<List<Event>> allEvents = new MutableLiveData<>();
+    private ListenerRegistration allEventsListener;
+    private ListenerRegistration singleEventListener;
 
-    private EventDatabase() {
-        database = new ArrayList<>();
-        Organizer sampleOrganizer = new Organizer("Campus Events Committee", "events@campus.edu", "123-456-7890", "Admin"); // dummy organizer will not appear in profiles as EventDatabase addUser should only be called in organizer class
-        long now = System.currentTimeMillis();
-        Date dateOpen = new Date(now);
-        Date dateClose = new Date(now + 1000 * 60 * 60 * 24 * 7);
-        Date futureDate = new Date(now + 1000 * 60 * 60 * 24 * 14);
-        Timestamp eventTime1 = new Timestamp(futureDate.getTime());
-        Timestamp eventTime2 = new Timestamp(futureDate.getTime() + 1000 * 60 * 60 * 24);
-        addEvent("Spring Fling Festival", "Annual campus spring festival with music, food, and games.", new ArrayList<>(), eventTime1, dateOpen, dateClose, sampleOrganizer, "Main Quad", 500, null);
-        addEvent("Tech Career Fair", "Meet with top tech companies looking to hire interns and graduates.", new ArrayList<>(), eventTime2, dateOpen, dateClose, sampleOrganizer, 0F, "Engineering Hall", 300, null);
-        addEvent("Art Exhibit Opening", "Showcasing student artwork from the past semester.", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 20), dateOpen, dateClose, sampleOrganizer, "Fine Arts Gallery", 150, null);
-        addEvent("Outdoor Movie Night: The Avengers", "Free outdoor screening of the classic Marvel movie. Bring a blanket!", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 5), dateOpen, new Date(now + 1000 * 60 * 60 * 24 * 4), sampleOrganizer, "Lawn by the Lake", 1000, null);
-        addEvent("Charity 5K Run", "A fun run to raise money for local charities. All fitness levels welcome.", new ArrayList<>(), new Timestamp(now + 1000 * 60 * 60 * 24 * 30), dateOpen, dateClose, sampleOrganizer, 25F, "Campus Recreation Center", 400, null);
-    }
+    // =================================================================================
+    // LEGACY CODE - FOR BACKWARD COMPATIBILITY
+    // TODO: This entire section should be removed after refactoring dependent classes.
+    // =================================================================================
+    private static EventDatabase instance;
 
     public static synchronized EventDatabase getInstance() {
         if (instance == null) {
@@ -48,58 +38,117 @@ public class EventDatabase {
         return instance;
     }
 
-    public Boolean addEvent(String title, String description, ArrayList<String> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, String location, Integer capacity, Bitmap poster) {
-        Event newEvent = new Event(title, description, attendant,  time, date_open, date_close, organizer, location, capacity, poster);
-        if (eventExists(newEvent.getTitle(), newEvent.getOrganizer())) {
-            return false;
-        }
-        database.add(newEvent);
-        return true;
-    }
-
-    public Boolean addEvent(String title, String description, ArrayList<String> attendant, Timestamp time, Date date_open, Date date_close, Organizer organizer, Float price, String location, Integer capacity, Bitmap poster) {
-        Event newEvent = new Event(title, description, attendant, time, date_open, date_close, organizer, price, location, capacity, poster);
-        if (eventExists(newEvent.getTitle(), newEvent.getOrganizer())) {
-            return false;
-        }
-        database.add(newEvent);
-        return true;
-    }
-
-    public boolean eventExists(String title, Organizer organizer) {
-        for (Event e : database) {
-            if (e.getTitle().equalsIgnoreCase(title) && Objects.equals(e.getOrganizer().getName(), organizer.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * LEGACY METHOD: Synchronously gets an event from the current LiveData value.
+     * @param title The title of the event.
+     * @param organizer The organizer of the event.
+     * @return The Event object if found, otherwise null.
+     */
     public Event getEvent(String title, Organizer organizer) {
-        for (Event event : database) {
-            if (event.getTitle().equalsIgnoreCase(title) && Objects.equals(event.getOrganizer().getName(), organizer.getName())) {
+        List<Event> currentEvents = allEvents.getValue();
+        if (currentEvents == null) {
+            return null; // Data not loaded yet
+        }
+        for (Event event : currentEvents) {
+            if (event.getTitle().equalsIgnoreCase(title) &&
+                    event.getOrganizerId() != null &&
+                    organizer.getEmail().equals(event.getOrganizerId())) {
                 return event;
             }
         }
         return null;
     }
-    public Event getEvent(String title, String organizerName) {
-        for (Event event : database) {
-            if (event.getTitle().equalsIgnoreCase(title)
-                    && event.getOrganizer() != null
-                    && organizerName.equals(event.getOrganizer().getName())) {
-                return event;
-            }
+    // =================================================================================
+    // END OF LEGACY CODE
+    // =================================================================================
+
+
+    public interface OnEventAddListener {
+        void onSuccess();
+        void onFailure(String errorMessage);
+    }
+
+    public interface OnEventDeleteListener {
+        void onSuccess();
+        void onFailure(String errorMessage);
+    }
+
+    public EventDatabase() {
+        // Initialize the low-level Database class
+        this.db = new Database(FirebaseFirestore.getInstance());
+        // Immediately start listening for changes to all events
+        listenForAllEvents();
+    }
+
+    private void listenForAllEvents() {
+        if (allEventsListener == null) {
+            allEventsListener = db.listenForEvents((querySnapshot, error) -> {
+                if (error != null) {
+                    Log.e("EventDatabase", "Listen for all events failed", error);
+                    return;
+                }
+                if (querySnapshot != null) {
+                    List<Event> eventList = querySnapshot.toObjects(Event.class);
+                    allEvents.postValue(eventList);
+                }
+            });
         }
-        return null;
     }
 
-    public boolean removeEvent(String title, String organizerName) {
-        return database.removeIf(event -> event.getTitle().equalsIgnoreCase(title) && event.getOrganizer().getName().equals(organizerName));
+    public MutableLiveData<List<Event>> getAllEvents() {
+        return allEvents;
     }
 
-    public ArrayList<Event> getAllEvents() {
-        return new ArrayList<>(database);
+    public void listenForSingleEvent(String eventId, MutableLiveData<Event> eventLiveData) {
+        if (singleEventListener != null) {
+            singleEventListener.remove();
+        }
+        singleEventListener = db.listenForSingleEvent(eventId, (querySnapshot, error) -> {
+            if (error != null) {
+                Log.e("EventDatabase", "Listen for single event failed", error);
+                eventLiveData.postValue(null);
+                return;
+            }
+            if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
+                eventLiveData.postValue(doc.toObject(Event.class));
+            } else {
+                eventLiveData.postValue(null);
+            }
+        });
+    }
+
+    public void deleteEvent(Event event, OnEventDeleteListener listener) {
+        db.deleteEvent(event).addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult()) {
+                listener.onSuccess();
+            } else {
+                String errorMessage = (task.getException() != null) ? task.getException().getMessage() : "Deletion failed.";
+                listener.onFailure(errorMessage);
+            }
+        });
+    }
+
+    public void addEvent(Event event, OnEventAddListener listener) {
+        db.addEvent(event).addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult()) {
+                listener.onSuccess();
+            } else {
+                String errorMessage = (task.getException() != null) ? task.getException().getMessage() : "Addition failed.";
+                listener.onFailure(errorMessage);
+            }
+        });
+    }
+
+    public void cleanupListeners() {
+        if (allEventsListener != null) {
+            allEventsListener.remove();
+            allEventsListener = null;
+        }
+        if (singleEventListener != null) {
+            singleEventListener.remove();
+            singleEventListener = null;
+        }
+        Log.d("EventDatabase", "All event listeners have been cleaned up.");
     }
 }
-

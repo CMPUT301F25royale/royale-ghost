@@ -6,11 +6,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.example.project_part_3.Database_functions.Database;
+import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -18,7 +19,13 @@ import java.util.List;
 
 public class Admin_event_detail_activity extends AppCompatActivity {
 
-    private Database db;
+    // No direct database access needed here anymore
+    private Admin_search_model viewModel;
+    private EventDatabase eventDb;
+
+    // A LiveData object to hold the details of just this one event
+    private final MutableLiveData<Event> eventDetails = new MutableLiveData<>();
+
     private ImageView poster;
     private TextView title;
     private TextView organizer;
@@ -41,7 +48,10 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.admin_event_detail);
 
-        db = new Database(FirebaseFirestore.getInstance());
+        // Initialize ViewModel and high-level EventDatabase
+        viewModel = new ViewModelProvider(this).get(Admin_search_model.class);
+        eventDb = new EventDatabase();
+
         setupViews();
         findViewById(R.id.btn_close).setOnClickListener(v -> finish());
 
@@ -53,12 +63,28 @@ public class Admin_event_detail_activity extends AppCompatActivity {
             return;
         }
 
-        db.fetchEvent(eventId)
-                .addOnSuccessListener(this::populateUI)
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to load event details: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    title.setText("Error loading event");
-                });
+        // Start listening for changes to this specific event
+        eventDb.listenForSingleEvent(eventId, eventDetails);
+
+        // Observe the LiveData for this event and update the UI when it changes
+        eventDetails.observe(this, event -> {
+            if (event != null) {
+                populateUI(event);
+            } else {
+                // This will be triggered if the event is deleted while being viewed
+                Toast.makeText(this, "This event has been removed.", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up the listeners from EventDatabase when the activity is destroyed
+        if (eventDb != null) {
+            eventDb.cleanupListeners();
+        }
     }
 
     private void setupViews() {

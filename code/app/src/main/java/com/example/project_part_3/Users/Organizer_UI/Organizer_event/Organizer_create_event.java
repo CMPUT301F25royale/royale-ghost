@@ -156,7 +156,6 @@ public class Organizer_create_event extends Fragment {
 
             String organizerId = organizerEmail;
             Event newEvent = new Event(
-                    null,
                     organizerId,
                     title,
                     description,
