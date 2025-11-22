@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Users.Organizer;
+import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.example.project_part_3.Users.User;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -101,6 +102,10 @@ public class Organizer_profile_view extends Fragment {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("username", _new);
                     editor.apply();
+
+                    //update shared view model as well
+                    OrganizerSharedViewModel model = new OrganizerSharedViewModel();
+                    model.setUserEmail(_new);
                 });
             });
         });

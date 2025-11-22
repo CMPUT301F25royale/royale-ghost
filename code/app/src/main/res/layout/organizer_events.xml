@@ -8,7 +8,7 @@
     <TextView
         android:id="@+id/organizer_events_text"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:text="Events"
         android:padding="15dp"
         android:textSize="24sp"
@@ -21,8 +21,8 @@
 
     <ListView
         android:id="@+id/organizer_events_list"
-        android:layout_width="415dp"
-        android:layout_height="720dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_marginTop="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,15 +32,13 @@
 
     <Button
         android:id="@+id/organizer_events_list_create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_width="120dp"
+        android:layout_height="50dp"
         android:layout_margin="8dp"
         android:padding="0dp"
-        android:textSize="10dp"
+        android:textSize="14sp"
         android:backgroundTint="@color/black"
         android:text="Create Event"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

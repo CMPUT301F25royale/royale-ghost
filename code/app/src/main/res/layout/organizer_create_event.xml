@@ -186,7 +186,7 @@
         app:layout_constraintTop_toBottomOf="@+id/create_event_time_value" />
 
     <EditText
-        android:id="@+id/cretae_event_price_input"
+        android:id="@+id/create_event_price_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"

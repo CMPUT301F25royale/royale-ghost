@@ -7,10 +7,12 @@ import com.example.project_part_3.Users.Organizer;import com.example.project_par
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class Event {
 
@@ -117,12 +119,12 @@ public class Event {
                  String locationName,
                  String locationAddress,
                  String posterImageUrl,
-                 long registrationOpensAtMs,
-                 long registrationClosesAtMs,
-                 long eventStartAtMs,
+                 Long registrationOpensAtMs,
+                 Long registrationClosesAtMs,
+                 Long eventStartAtMs,
                  Long eventEndAtMs,
-                 int capacity,
-                 float price) {
+                 Integer capacity,
+                 Float price) {
         this();
         this.id = eventId;
         this.organizerId = organizerId;
@@ -232,7 +234,7 @@ public class Event {
         return Math.max(remaining, 0);
     }
     @Exclude
-    public boolean registrationOpen(){
+    public boolean registrationOpen() {
         Date currentDate = new Date();
         if (date_open == null || date_close == null) return false;
         boolean afterOpen = currentDate.after(date_open);
@@ -242,16 +244,27 @@ public class Event {
     }
 
     @Exclude
-    public long daysUntilClose(){
+    public long daysUntilClose() {
         Date currentDate = new Date();
         if (date_close == null) return 0;
-        return date_close.getTime() - currentDate.getTime();
+
+        long diff = date_close.getTime() - currentDate.getTime();
+
+        return TimeUnit.MILLISECONDS.toDays(diff);
     }
 
     @Exclude
-    public String registrationStatus(){
+    public String registrationStatus() {
+        long daysLeft = daysUntilClose() + 1;
+
         if (registrationOpen()){
-            return "Open ("+daysUntilClose()+")";
+            if (daysLeft == 0) {
+                return "Open (closes today)";
+            } else if (daysLeft == 1) {
+                return "Open (1 day until close)";
+            } else if (daysLeft > 1) {
+                return "Open (" + daysLeft + " days until close)";
+            }
         }
         return "Closed";
     }

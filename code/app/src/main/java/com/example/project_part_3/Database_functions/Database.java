@@ -47,7 +47,7 @@ import java.util.List;
  *
  */
 public class Database {
-    FirebaseFirestore db;
+    public FirebaseFirestore db;
     public Database(FirebaseFirestore db) {
         this.db = db;
     }
@@ -95,6 +95,44 @@ public class Database {
                 return true;
             } else {
                 Log.e("addEvent", "Event failed to be written to database", setTask.getException());
+                return false;
+            }
+        });
+    }
+
+    public Task<Boolean> updateEvent(@NonNull Event event) {
+        DocumentReference docRef = db.collection("events").document(event.getId());
+
+        if (event.getId() == null) {
+            Log.d("updateEvent", "Event ID is null");
+            return Tasks.forException(new Exception("Event ID is null"));
+        }
+        return docRef.set(event).continueWith(setTask -> {
+            if (setTask.isSuccessful()) {
+                Log.d("updateEvent", "Event successfully written to database");
+                return true;
+            } else {
+                Log.e("updateEvent", "Event failed to be written to database", setTask.getException());
+                return false;
+            }
+        });
+    }
+
+    /**
+     * Sets an event in the database.
+     *
+     * @param event
+     * @return
+     */
+    public Task<Boolean> setEvent(@NonNull Event event) {
+        DocumentReference docRef = db.collection("events").document(event.getId());
+
+        return docRef.set(event).continueWith(setTask -> {
+            if (setTask.isSuccessful()) {
+                Log.d("setEvent", "Event successfully written to database");
+                return true;
+            } else {
+                Log.e("setEvent", "Event failed to be written to database", setTask.getException());
                 return false;
             }
         });

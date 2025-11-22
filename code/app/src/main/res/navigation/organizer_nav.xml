@@ -60,9 +60,18 @@
         <action
             android:id="@+id/action_organizerEventsFragment_to_organizerCreateEventFragment"
             app:destination="@id/organizerCreateEventFragment" />
+        <action
+            android:id="@+id/action_organizerEventsFragment_to_organizerEditEventFragment"
+            app:destination="@id/OrganizerEditEventFragment" />
     </fragment>
-
-
+    <fragment
+        android:id="@+id/OrganizerEditEventFragment"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_edit_event"
+        android:label="OrganizerEditEventFragment">
+        <action
+            android:id="@+id/action_organizer_edit_event_to_organizerEventsFragment"
+            app:destination="@id/organizerEventsFragment" />
+    </fragment>
 
 
 </navigation>
