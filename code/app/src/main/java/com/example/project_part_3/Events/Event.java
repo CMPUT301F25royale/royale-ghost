@@ -318,19 +318,36 @@ public class Event {
     }
 
     @Exclude
-    public String registrationStatus() {
-        long daysLeft = daysUntilClose() + 1;
+    public long hoursUntilClose() {
+        Date currentDate = new Date();
+        if (date_close == null) return 0;
+        long diff = date_close.getTime() - currentDate.getTime();
+        return TimeUnit.MILLISECONDS.toHours(diff);
+    }
 
-        if (registrationOpen()){
-            if (daysLeft == 0) {
-                return "Open (closes today)";
-            } else if (daysLeft == 1) {
-                return "Open (1 day until close)";
-            } else if (daysLeft > 1) {
-                return "Open (" + daysLeft + " days until close)";
-            }
+    @Exclude
+    public String registrationStatus() {
+        if (!registrationOpen()) {
+            return "Closed";
         }
-        return "Closed";
+
+        long days = daysUntilClose();
+
+        if (days > 1) {
+            return String.format("Open (%d days until close)", days);
+        }
+
+        if (days == 1) {
+            return "Open (1 day until close)";
+        }
+
+        long hours = hoursUntilClose();
+
+        if (hours == 0) {
+            return "Open (closes within 1 hour)";
+        }
+
+        return String.format("Open (closes within %d hours)", hours + 1);
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -32,6 +34,9 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
 
     protected Date registrationOpenDate;
     protected Date registrationCloseDate;
+    protected Date eventStartDate;
+    protected Date eventEndDate;
+
     protected String organizerEmail;
     protected Event selectedEvent;
 
@@ -45,6 +50,12 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
 
     protected Button openDateButton;
     protected Button closeDateButton;
+    protected Button startDateButton;
+    protected Button endDateButton;
+
+    protected interface DateSelectionCallback {
+        void onDateSelected(Date date);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +95,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         priceEditText = view.findViewById(R.id.create_event_price_input);
         openDateButton = view.findViewById(R.id.create_event_registration_open_button);
         closeDateButton = view.findViewById(R.id.create_event_registration_close_button);
+        startDateButton = view.findViewById(R.id.create_event_date_time_start_button);
+        endDateButton = view.findViewById(R.id.create_event_date_time_end_button);
     }
 
     protected void setupNavigation(@NonNull View view) {
@@ -91,9 +104,14 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         setupBottomNavigation(view);
     }
 
+    /**
+     * Sets up the listeners for all date/time buttons using a helper method.
+     */
     protected void setupDateButtons(@NonNull View view) {
-        setupRegistrationOpenButton(view, Calendar.getInstance());
-        setupRegistrationCloseButton(view, Calendar.getInstance());
+        setupDateTimePicker(openDateButton, date -> registrationOpenDate = date);
+        setupDateTimePicker(closeDateButton, date -> registrationCloseDate = date);
+        setupDateTimePicker(startDateButton, date -> eventStartDate = date);
+        setupDateTimePicker(endDateButton, date -> eventEndDate = date);
     }
 
     protected void setupObservers() {
@@ -210,6 +228,16 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             return;
         }
 
+        if (eventStartDate == null || eventEndDate == null) {
+            Toast.makeText(getContext(), "Please select both event dates", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (eventStartDate.after(eventEndDate)) {
+            Toast.makeText(getContext(), "Event start date must be before the end date", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // optional fields
         Integer capacity = null;
         Float price = null;
@@ -245,8 +273,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     null,
                     registrationOpenDate.getTime(),
                     registrationCloseDate.getTime(),
-                    registrationCloseDate.getTime(), // TODO: change to start time
-                    registrationCloseDate.getTime(), // TODO: change to end time
+                    eventStartDate.getTime(),
+                    eventEndDate.getTime(),
                     capacity, // optional, may be null
                     price // optional, may be null
             );
@@ -261,14 +289,52 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     null,
                     registrationOpenDate.getTime(),
                     registrationCloseDate.getTime(),
-                    registrationCloseDate.getTime(), // TODO: change to start time
-                    registrationCloseDate.getTime(), // TODO: change to end time
+                    eventStartDate.getTime(),
+                    eventEndDate.getTime(),
                     capacity, // optional, may be null
                     price // optional, may be null
             );
         }
 
         pushEventToDatabase(db, newEvent);
+    }
+
+    /**
+     * Generic helper to show a DatePicker followed immediately by a TimePicker.
+     * @param button The button to attach the listener to and update text.
+     * @param callback Interface to save the selected Date object to the correct variable.
+     */
+    protected void setupDateTimePicker(Button button, DateSelectionCallback callback) {
+        button.setOnClickListener(v -> {
+            final Calendar calendar = Calendar.getInstance();
+            int currentYear = calendar.get(Calendar.YEAR);
+            int currentMonth = calendar.get(Calendar.MONTH);
+            int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int currentMinute = calendar.get(Calendar.MINUTE);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view1, year, month, dayOfMonth) -> {
+
+                TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), (view2, hourOfDay, minute) -> {
+
+                    Calendar resultCalendar = Calendar.getInstance();
+                    resultCalendar.set(year, month, dayOfMonth, hourOfDay, minute);
+                    Date selectedDate = resultCalendar.getTime();
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
+                    String formattedDate = sdf.format(selectedDate);
+
+                    button.setText(formattedDate);
+                    callback.onDateSelected(selectedDate);
+
+                }, currentHour, currentMinute, false); // false = 12h format, true = 24h
+
+                timePickerDialog.show();
+
+            }, currentYear, currentMonth, currentDay);
+
+            datePickerDialog.show();
+        });
     }
 
     protected abstract void pushEventToDatabase(Database db, Event event);

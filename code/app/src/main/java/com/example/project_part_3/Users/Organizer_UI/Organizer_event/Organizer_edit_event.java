@@ -14,6 +14,7 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class Organizer_edit_event extends Organizer_create_edit_event_template {
@@ -30,28 +31,34 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
+        // Use DateTimeInstance to show both date and time
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
+
         if (event.getDate_open() != null) {
             registrationOpenDate = event.getDate_open();
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(registrationOpenDate);
-            setupRegistrationOpenButton(getView(), cal);
-
-            // Update text
             if (openDateButton != null) {
-                openDateButton.setText(DateFormat.getDateInstance().format(event.getDate_open()));
+                openDateButton.setText(sdf.format(event.getDate_open()));
             }
         }
 
         if (event.getDate_close() != null) {
             registrationCloseDate = event.getDate_close();
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(registrationCloseDate);
-            setupRegistrationCloseButton(getView(), cal);
-
             if (closeDateButton != null) {
-                closeDateButton.setText(DateFormat.getDateInstance().format(event.getDate_close()));
+                closeDateButton.setText(sdf.format(event.getDate_close()));
+            }
+        }
+
+        if (event.getEventStartAt() != null) {
+            eventStartDate = event.getEventStartAt();
+            if (startDateButton != null) {
+                startDateButton.setText(sdf.format(event.getEventStartAt()));
+            }
+        }
+
+        if (event.getEventEndAt() != null) {
+            eventEndDate = event.getEventEndAt();
+            if (endDateButton != null) {
+                endDateButton.setText(sdf.format(event.getEventEndAt()));
             }
         }
 
@@ -63,6 +70,7 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
             priceEditText.setText(String.format("%.2f", event.getPrice()));
         }
     }
+
     @Override
     protected void pushEventToDatabase(Database db, Event event) {
         db.updateEvent(event).addOnSuccessListener(success -> {
@@ -81,20 +89,11 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
     public void setupDateButtons(@NonNull View view) {
-        Calendar calOpen = Calendar.getInstance();
-        Calendar calClosed = Calendar.getInstance();
-
-        // safe check
-        if (registrationOpenDate != null) {
-            calOpen.setTime(registrationOpenDate);
-        }
-
-        if (registrationCloseDate != null) {
-            calClosed.setTime(registrationCloseDate);
-        }
-
-        setupRegistrationOpenButton(view, calOpen);
-        setupRegistrationCloseButton(view, calClosed);
+        // Use the helper from the parent class to enable Date + Time picking
+        setupDateTimePicker(openDateButton, date -> registrationOpenDate = date);
+        setupDateTimePicker(closeDateButton, date -> registrationCloseDate = date);
+        setupDateTimePicker(startDateButton, date -> eventStartDate = date);
+        setupDateTimePicker(endDateButton, date -> eventEndDate = date);
     }
 
     @Override
