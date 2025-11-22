@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 // Removed direct EventDatabase import as it's no longer needed here
 import com.example.project_part_3.R;
 
+import java.util.ArrayList;
+
 public class Entrant_event_view extends Fragment {
 
     private Entrant_event_model viewModel;
@@ -41,7 +43,11 @@ public class Entrant_event_view extends Fragment {
 
         String currentUserEmail = getArguments() != null ? getArguments().getString("userEmail") : null;
 
-        adapter = new entrant_events_adapter(currentUserEmail);
+        adapter = new entrant_events_adapter(
+                new ArrayList<>(),
+                currentUserEmail,
+                entrant_events_adapter.Mode.MY_EVENTS // Set the mode to determine UI display elements from adapter
+        );
         rv.setAdapter(adapter);
 
         viewModel.getAllEvents().observe(getViewLifecycleOwner(), events -> {

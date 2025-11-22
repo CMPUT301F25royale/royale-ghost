@@ -11,6 +11,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -181,6 +182,14 @@ public class Database {
                 }).addOnSuccessListener(success -> Log.d("deleteUser", "User and associated events deleted successfully"))
                 .addOnFailureListener(e -> Log.e("deleteUser", "Failed to delete user", e));
     }
+
+    public void addEntrant(String eventId, String email) {
+        DocumentReference docRef = db.collection("events").document(eventId);
+        // add email to the list of entrants
+        docRef.update("attendant_list", FieldValue.arrayUnion(email));
+    }
+
+
 
     public Task<Boolean> deleteEvent(Event event) {
 
