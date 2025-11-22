@@ -4,328 +4,188 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Users.Entrant;
-import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
-import java.util.Date;
-
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-/**
- * The Database class provides methods for interacting with the Firebase Firestore database. Most
- * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
- * Example usage:
- * <pre>
- *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
- *     Database db = new Database(ff);
- *
- *     String email = "ballsdeep69@gmail.com"
- *     db.fetchUser(email).addOnSuccessListener(user -> {
- *          user.setName("Dion"); // changes user name
- *     }
- *     db.fetchUser(email).addOnFailureListener(e -> {
- *          // e is the exception that was thrown
- *          Log.e("fetchUser", "Failed to fetch user", e);
- *     }
- *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
- *          // success = true if user was added
- *          // success = false if user exists already
- *     }
- * </pre>
- *
- */
+
 public class Database {
-    FirebaseFirestore db;
+    private final FirebaseFirestore db;
+    private static final String USERS_COLLECTION = "users";
+    private static final String EVENTS_SUBCOLLECTION = "organized_events";
+
     public Database(FirebaseFirestore db) {
         this.db = db;
     }
 
-    /**
-     * Adds a user to the Firebase database, but only if a user with that email doesn't already exist.
-     *
-     * @param user The user you would like to add.
-     * @return A Task that completes with a Boolean: `true` if the user was successfully added,
-     * `false` if the user already existed.
-     */
+    public ListenerRegistration listenForUsers(EventListener<QuerySnapshot> listener) {
+        return db.collection(USERS_COLLECTION).addSnapshotListener(listener);
+    }
+
+    public ListenerRegistration listenForSingleUser(String email, EventListener<DocumentSnapshot> listener) {
+        return db.collection(USERS_COLLECTION).document(email).addSnapshotListener(listener);
+    }
+
+    public ListenerRegistration listenForEvents(EventListener<QuerySnapshot> listener) {
+        return db.collectionGroup(EVENTS_SUBCOLLECTION).addSnapshotListener(listener);
+    }
+
+    public ListenerRegistration listenForSingleEvent(String eventId, EventListener<QuerySnapshot> listener) {
+        return db.collectionGroup(EVENTS_SUBCOLLECTION).whereEqualTo("id", eventId).limit(1).addSnapshotListener(listener);
+    }
+
+
     public Task<Boolean> addUser(@NonNull User user) {
-        // first, check if the user exists.
         return doesUserExist(user).continueWithTask(task -> {
             boolean exists = task.getResult();
-
             if (exists) {
-                // If the user already exists, complete the task immediately with `false`.
-                Log.d("addUser", "User already exists. Add operation cancelled.");
+                Log.d("Database", "addUser: User already exists.");
                 return Tasks.forResult(false);
             } else {
-                // If the user does not exist, proceed to add them.
-                DocumentReference docRef = db.collection("users").document(user.getEmail());
-
-                return docRef.set(user).continueWith(setTask -> {
-                    if (setTask.isSuccessful()) {
-                        Log.d("addUser", "User successfully written to database");
-                        return true; // The user was added
-                    } else {
-                        Log.e("addUser", "User failed to be written to database", setTask.getException());
-                        return false;
-                    }
-                });
+                return db.collection(USERS_COLLECTION).document(user.getEmail()).set(user)
+                        .continueWith(setTask -> setTask.isSuccessful());
             }
         });
     }
 
-    public Task<Boolean> addEvent(@NonNull Event event) {
-        DocumentReference docRef = db.collection("events").document();
-        event.setId(docRef.getId()); // gives the event a unique ID
-
-        return docRef.set(event).continueWith(setTask -> {
-            if (setTask.isSuccessful()) {
-                Log.d("addEvent", "Event successfully written to database");
-                return true;
+    public Task<User> checkUser(String email, String password) {
+        return fetchUser(email).continueWith(task -> {
+            if (!task.isSuccessful()) {
+                throw task.getException();
+            }
+            User user = task.getResult();
+            if (user == null) {
+                throw new Exception("User not found");
+            }
+            if (android.text.TextUtils.equals(user.getPassword(), password)) {
+                return user;
             } else {
-                Log.e("addEvent", "Event failed to be written to database", setTask.getException());
-                return false;
+                throw new Exception("Incorrect password");
             }
         });
     }
 
-    /**
-     * Fetches an event based on its ID.
-     *
-     * @param eventId
-     * @return
-     */
-    public Task<Event> fetchEvent(String eventId) {
-        DocumentReference docRef = db.collection("events").document(eventId);
-
-        return docRef.get().continueWith(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot doc = task.getResult();
-                if (doc != null && doc.exists()) {
-                    return doc.toObject(Event.class);
-                } else {
-                    throw new Exception("Event does not exist");
-                }
-            }
-            // else propagate exception
-            throw task.getException();
-        });
-    }
-
-    /**
-     * Fetches the user based on their email.
-     *
-     * @param email The email of the user you want to fetch.
-     * @return A Task that completes with the User object. Returns null if the user does not exist or an error occurs.
-     */
     public Task<User> fetchUser(String email) {
-        DocumentReference docRef = db.collection("users").document(email);
-        Task<DocumentSnapshot> getTask = docRef.get();
 
-        return getTask.continueWith(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot doc = task.getResult();
-
-                if (doc != null && doc.exists()) {
-                    return doc.toObject(User.class);
-                } else {
-                    Log.d("fetchUser", "User does not exist");
-                    throw new Exception("User does not exist");
-                }
-            } else {
-                Log.d("fetchUser", "Could not find document", task.getException());
-                throw task.getException();
-            }
-        });
-    }
-
-    /**
-     * Sets (replaces) a user in the database.
-     *
-     * @param user The user you would like to set.
-     */
-    public void setUser(User user) {
-        DocumentReference docRef = db.collection("users").document(user.getEmail());
-        docRef.set(user);
-    }
-
-    /**
-     * Gets all users from the database
-     *
-     * @return A Task that completes with a List of Users. The Task will fail if a database error occurs.
-     */
-    public Task<List<User>> getAllUsers() {
-        Task<QuerySnapshot> queryTask = db.collection("users").get();
-
-        return queryTask.continueWith(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot query = task.getResult();
-                List<User> users = new ArrayList<>();
-                if (query != null) {
-                    for (DocumentSnapshot doc : query.getDocuments()) {
-                        // Add an extra null check for safety
-                        if (doc != null && doc.exists()) {
-                            // This will also work now because of Fix 2
-                            users.add(doc.toObject(User.class));
-                        }
-                    }
-                }
-                return users;
-            } else {
-                Log.d("getAllUsers", "Could not get documents", task.getException());
-                throw task.getException();
-            }
-        });
-    }
-
-    public Task<List<Event>> getAllEvents() {
-        Task<QuerySnapshot> queryTask = db.collection("events").get();
-        return queryTask.continueWith(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot query = task.getResult();
-                List<Event> events = new ArrayList<>();
-                if (query != null) {
-                    for (DocumentSnapshot doc : query.getDocuments()) {
-                        events.add(doc.toObject(Event.class));
-                    }
-                }
-                return events;
-            } else {
-                Log.d("getAllEvents", "Could not get documents", task.getException());
-                throw task.getException();
-            }
-        });
-    }
-
-    /**
-     * Gets all events for a given organizer, given their email.
-     *
-     * @param email
-     * @return A task that when completed, returns a List of events that the organizer has created.
-     */
-    public Task<List<Event>> getEventsByOrganizer(@NonNull String email) {
-            Task<QuerySnapshot> query = db.collection("events")
-                    .whereEqualTo("organizerId", email)
-                    .get();
-            return query.continueWith(task -> {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-                if (task.getResult() == null) {
-                    return new ArrayList<>(); // if there are no events, return an empty list
-                }
-                List<Event> events = new ArrayList<>();
-                for (DocumentSnapshot doc : task.getResult().getDocuments()) {
-                    events.add(doc.toObject(Event.class));
-                }
-                return events;
-            });
-
-    }
-
-    public Task<ArrayList<String>> getEventEntrants(String eventId) {
-        DocumentReference docRef = db.collection("events").document(eventId);
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
         return docRef.get().continueWith(task -> {
             if (!task.isSuccessful()) {
                 throw task.getException();
             }
-            DocumentSnapshot document = task.getResult();
-            if (document == null || !document.exists()) {
-                throw new Exception("Event not found");
-            }
-            return document.toObject(Event.class).getAttendant_list();
+            DocumentSnapshot doc = task.getResult();
+            return (doc != null && doc.exists()) ? doc.toObject(User.class) : null;
         });
     }
 
-    /**
-     * Adds an entrant to an event.
-     * @param eventId
-     * @param email
-     */
-    public void addEntrant(String eventId, String email) {
-        DocumentReference docRef = db.collection("events").document(eventId);
-        // add email to the list of entrants
-        docRef.update("attendant_list", FieldValue.arrayUnion(email));
+    public void setUser(User user) {
+        db.collection(USERS_COLLECTION).document(user.getEmail()).set(user);
     }
 
-    public Task<Boolean> deleteUser(String email) {
-        DocumentReference docRef = db.collection("users").document(email);
-        return docRef.delete().continueWith(task -> {
-            if (task.isSuccessful()) {
-                Log.d("deleteUser", "User successfully deleted");
-                return true;
+    public Task<List<User>> getAllUsers() {
+
+        return db.collection(USERS_COLLECTION).get().continueWith(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                return task.getResult().toObjects(User.class);
             } else {
-                Log.e("deleteUser", "User failed to be deleted", task.getException());
-                return false;
-            }
-        });
-    }
-
-    public Task<Boolean> deleteEvent(String eventId) {
-        DocumentReference docRef = db.collection("events").document(eventId);
-        return docRef.delete().continueWith(task -> {
-            if (task.isSuccessful()) {
-                Log.d("deleteEvent", "Event successfully deleted");
-                return true;
-            } else {
-                Log.e("deleteEvent", "Event failed to be deleted", task.getException());
-                return false;
-            }
-        });
-    }
-
-    /**
-     * Verifies if email and password is correct, and returns the user for which it is correct.
-     *
-     * @param email
-     * @param password
-     * @return Task that completes with the User object. Returns null if the user does not exist or an error occurs.
-     */
-     public Task<User> checkUser(String email, String password) {
-        DocumentReference docRef = db.collection("users").document(email);
-
-        return docRef.get().continueWithTask(task -> {
-            if (!task.isSuccessful()) {
-                // propagate the original failure
                 throw task.getException();
-            }
-            DocumentSnapshot document = task.getResult();
-            if (document == null || !document.exists()) {
-                return Tasks.forException(new Exception("User not found"));
-            }
-            String storedPassword = document.getString("password");
-            if (android.text.TextUtils.equals(storedPassword, password)) {
-                // password matches, return a successful task with the User object
-                User user = document.toObject(User.class);
-                return Tasks.forResult(user);
-            } else {
-                // password mismatch, return a specific failed task
-                return Tasks.forException(new Exception("Incorrect password"));
             }
         });
     }
 
     public Task<Boolean> doesUserExist(User user) {
+
         return fetchUser(user.getEmail()).continueWith(task -> {
             if (!task.isSuccessful()) {
-                // Log the error but treat it as "user does not exist"
-                Log.e("doesUserExist", "Failed to check if user exists", task.getException());
+                Log.e("Database", "Failed to check if user exists", task.getException());
                 return false;
             }
-
-            User existingUser = task.getResult();
-            return (existingUser != null); // True if user exists, false otherwise
+            return task.getResult() != null;
         });
+    }
+
+    public Task<Boolean> addEvent(@NonNull Event event) {
+
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
+                .collection(EVENTS_SUBCOLLECTION).document();
+        event.setId(docRef.getId());
+        return docRef.set(event).continueWith(setTask -> setTask.isSuccessful());
+    }
+
+    public Task<Event> fetchEvent(String eventId) {
+
+        return db.collectionGroup(EVENTS_SUBCOLLECTION).whereEqualTo("id", eventId).limit(1).get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null || task.getResult().isEmpty()) {
+                        throw new Exception("Event with ID " + eventId + " does not exist.");
+                    }
+                    return task.getResult().getDocuments().get(0).toObject(Event.class);
+                });
+    }
+
+    public Task<List<Event>> getAllEvents() {
+
+        return db.collectionGroup(EVENTS_SUBCOLLECTION).get().continueWith(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                return task.getResult().toObjects(Event.class);
+            } else {
+                throw task.getException();
+            }
+        });
+    }
+
+    public Task<List<Event>> getEventsByOrganizer(@NonNull String email) {
+
+        return db.collection(USERS_COLLECTION).document(email).collection(EVENTS_SUBCOLLECTION).get()
+                .continueWith(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        return task.getResult().toObjects(Event.class);
+                    } else {
+                        throw task.getException();
+                    }
+                });
+    }
+
+    public Task<Boolean> deleteUser(String email) {
+        DocumentReference userDocRef = db.collection(USERS_COLLECTION).document(email);
+        return db.runTransaction(transaction -> {
+                    DocumentSnapshot userSnapshot = transaction.get(userDocRef);
+                    User user = userSnapshot.toObject(User.class);
+
+                    if (user != null && "Organizer".equals(user.getUserType())) {
+                        CollectionReference eventsCollection = userDocRef.collection(EVENTS_SUBCOLLECTION);
+                        QuerySnapshot eventsSnapshot = null;
+                        try {
+                            eventsSnapshot = Tasks.await(eventsCollection.get());
+                        } catch (ExecutionException e) {
+                            throw new RuntimeException(e);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        for (DocumentSnapshot eventDoc : eventsSnapshot.getDocuments()) {
+                            transaction.delete(eventDoc.getReference());
+                        }
+                    }
+                    transaction.delete(userDocRef);
+                    return true;
+                }).addOnSuccessListener(success -> Log.d("deleteUser", "User and associated events deleted successfully"))
+                .addOnFailureListener(e -> Log.e("deleteUser", "Failed to delete user", e));
+    }
+
+    public Task<Boolean> deleteEvent(Event event) {
+
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
+                .collection(EVENTS_SUBCOLLECTION).document(event.getId());
+        return docRef.delete().continueWith(task -> task.isSuccessful());
     }
 }

@@ -4,6 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/welcomeFragment">
+
+    <action
+        android:id="@+id/action_global_entrant_main"
+        app:destination="@id/entrant_main"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/welcomeFragment"
         android:name="com.example.project_part_3.Enter.WelcomeFragment"
