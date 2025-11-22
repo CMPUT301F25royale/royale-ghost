@@ -75,6 +75,7 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
             i.putExtra("title", e.getTitle());
             i.putExtra("organizerName", e.getOrganizer() != null ? e.getOrganizer().getName() : "");
             i.putExtra("viewerUserEmail", currentUserEmail);
+            i.putExtra("eventId", e.getId());
             ctx.startActivity(i);
         };
         h.itemView.setOnClickListener(openDetails);

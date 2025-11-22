@@ -183,18 +183,103 @@ public class Database {
                 .addOnFailureListener(e -> Log.e("deleteUser", "Failed to delete user", e));
     }
 
-    public void addEntrant(String eventId, String email) {
-        DocumentReference docRef = db.collection("events").document(eventId);
-        // add email to the list of entrants
-        docRef.update("attendant_list", FieldValue.arrayUnion(email));
-    }
-
-
-
     public Task<Boolean> deleteEvent(Event event) {
 
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document(event.getId());
         return docRef.delete().continueWith(task -> task.isSuccessful());
     }
+
+    /** Resolve the single organized_events doc for a given eventId. */
+    private Task<DocumentReference> findEventDocById(@NonNull String eventId) {
+        return db.collectionGroup(EVENTS_SUBCOLLECTION)
+                .whereEqualTo("id", eventId)
+                .limit(1)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    if (task.getResult() == null || task.getResult().isEmpty()) {
+                        throw new Exception("Event with ID " + eventId + " not found");
+                    }
+                    return task.getResult().getDocuments().get(0).getReference();
+                });
+    }
+
+    /** Add a user to the waitlistUserIds array for an event located via collectionGroup(id). */
+    public Task<Void> addUserToWaitlistById(@NonNull String eventId, @NonNull String userId) {
+        return findEventDocById(eventId)
+                .continueWithTask(t -> t.getResult()
+                        .update("waitlistUserIds", com.google.firebase.firestore.FieldValue.arrayUnion(userId)));
+    }
+
+    /** Remove a user from the waitlistUserIds array for an event located via collectionGroup(id). */
+    public Task<Void> removeUserFromWaitlistById(@NonNull String eventId, @NonNull String userId) {
+        return findEventDocById(eventId)
+                .continueWithTask(t -> t.getResult()
+                        .update("waitlistUserIds", com.google.firebase.firestore.FieldValue.arrayRemove(userId)));
+    }
+
+    /** Check whether a given user is on the waitlist for an event found via collectionGroup(id). */
+    public Task<Boolean> isUserOnWaitlistById(@NonNull String eventId, @NonNull String userId) {
+        return findEventDocById(eventId)
+                .continueWithTask(t -> t.getResult().get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    Event ev = task.getResult().toObject(Event.class);
+                    if (ev == null || ev.getWaitlistUserIds() == null) return false;
+                    return ev.getWaitlistUserIds().contains(userId);
+                });
+    }
+
+    public Task<List<Event>> getEventsUserWaitlisted(@NonNull String userId) {
+        return db.collectionGroup(EVENTS_SUBCOLLECTION)
+                .whereArrayContains("waitlistUserIds", userId)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    if (task.getResult() == null) return new ArrayList<>();
+                    return task.getResult().toObjects(Event.class);
+                });
+    }
+
+    // Helpers to locate an event doc by its id in users/*/organized_events/*
+    private Task<DocumentReference> findEventDocRefById(@NonNull String eventId) {
+        return db.collectionGroup(EVENTS_SUBCOLLECTION)
+                .whereEqualTo("id", eventId)
+                .limit(1)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null || task.getResult().isEmpty()) {
+                        throw new Exception("Event with ID " + eventId + " not found");
+                    }
+                    DocumentSnapshot snap = task.getResult().getDocuments().get(0);
+                    return snap.getReference();
+                });
+    }
+
+    // Waitlist functions
+    public Task<Void> addUserToWaitlist(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update("waitlistUserIds", FieldValue.arrayUnion(userEmail)));
+    }
+
+    // TODO: Wire this to fire when user clicks cancel button on the "events youve signed up for" tab
+    public Task<Void> removeUserFromWaitlist(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update("waitlistUserIds", FieldValue.arrayRemove(userEmail)));
+    }
+
+    public Task<Boolean> isUserOnWaitlist(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) return false;
+                    List<String> waitlist = (List<String>) task.getResult().get("waitlistUserIds");
+                    return waitlist != null && waitlist.contains(userEmail);
+                });
+    }
+
+
+
+
 }

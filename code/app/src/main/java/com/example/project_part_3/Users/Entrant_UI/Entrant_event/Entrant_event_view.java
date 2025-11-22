@@ -8,23 +8,23 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider; // <-- Add this import
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-// Removed direct EventDatabase import as it's no longer needed here
+import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Entrant_event_view extends Fragment {
 
     private Entrant_event_model viewModel;
     private entrant_events_adapter adapter;
 
-    public Entrant_event_view() {
-
-    }
+    public Entrant_event_view() { }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,25 +38,50 @@ public class Entrant_event_view extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.entrant_main, container, false);
+
         RecyclerView rv = root.findViewById(R.id.eventsRecycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // email was forwarded from Entrant_main_fragment
         String currentUserEmail = getArguments() != null ? getArguments().getString("userEmail") : null;
 
         adapter = new entrant_events_adapter(
                 new ArrayList<>(),
                 currentUserEmail,
-                entrant_events_adapter.Mode.MY_EVENTS // Set the mode to determine UI display elements from adapter
+                entrant_events_adapter.Mode.MY_EVENTS
         );
         rv.setAdapter(adapter);
 
-        viewModel.getAllEvents().observe(getViewLifecycleOwner(), events -> {
-            if (events != null) {
-                adapter.setData(events);
+        // Observe the shared list and filter to “my events” for display
+        viewModel.getAllEvents().observe(getViewLifecycleOwner(), allEvents -> {
+            if (allEvents == null) {
+                adapter.setData(new ArrayList<>());
                 adapter.notifyDataSetChanged();
+                return;
             }
+            List<Event> mine = filterForUser(allEvents, currentUserEmail);
+            adapter.setData(mine);
+            adapter.notifyDataSetChanged();
         });
 
         return root;
     }
+
+    private List<Event> filterForUser(List<Event> all, String email) {
+        if (all == null || email == null || email.isEmpty()) return new ArrayList<>();
+        return all.stream().filter(e -> {
+            List<String> w  = e.getWaitlistUserIds();
+            List<String> c  = e.getConfirmedUserIds();
+            List<String> s  = e.getSelectedUserIds();
+            List<String> d  = e.getDeclinedUserIds();
+            List<String> alt= e.getAlternatesUserIds();
+            return (w  != null && w.contains(email))
+                    || (c  != null && c.contains(email))
+                    || (s  != null && s.contains(email))
+                    || (d  != null && d.contains(email))
+                    || (alt!= null && alt.contains(email));
+        }).toList();
+    }
+
+
 }

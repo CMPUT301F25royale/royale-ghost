@@ -238,6 +238,19 @@ public class Event {
     public Integer getAttendees(){ return (attendant_list != null) ? attendant_list.size() : 0; }
     public void setAttendees(Integer attendees) { this.attendees = attendees; }
 
+    public List<String> getSelectedUserIds() {
+        return (selectedUserIds != null) ? selectedUserIds : new ArrayList<>();
+    }
+
+    public List<String> getDeclinedUserIds(){
+        return (declinedUserIds != null) ? declinedUserIds : new ArrayList<>();
+    }
+
+    public List<String> getAlternatesUserIds() {
+        return (alternatesUserIds != null) ? alternatesUserIds : new ArrayList<>();
+    }
+
+
 
     @Exclude
     public void addAttendant(String email){
