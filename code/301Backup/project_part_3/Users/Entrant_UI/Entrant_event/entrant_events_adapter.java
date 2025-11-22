@@ -35,16 +35,9 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         this.mode = mode;
     }
 
-    /**
-     * Updates the adapter's data list and notifies the RecyclerView of the change.
-     * This method will be called by the LiveData observer in the Fragment.
-     * @param newItems The new list of events to display.
-     */
-    public void setData(List<Event> newItems) {
+    public void submitList(List<Event> newItems) {
         items.clear();
-        if (newItems != null) {
-            items.addAll(newItems);
-        }
+        if (newItems != null) items.addAll(newItems);
         notifyDataSetChanged();
     }
 
@@ -63,19 +56,14 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         h.title.setText(e.getTitle() != null ? e.getTitle() : "—");
 
         Bitmap bmp = e.getPoster();
-        if (bmp != null) {
-            h.img.setImageBitmap(bmp);
-        } else {
-            h.img.setImageResource(android.R.drawable.ic_menu_report_image);
-        }
+        if (bmp != null) h.img.setImageBitmap(bmp);
+        else h.img.setImageResource(android.R.drawable.ic_menu_report_image);
 
         // View details
         View.OnClickListener openDetails = v -> {
             Intent i = new Intent(ctx, entrant_event_detail_activity.class);
-            i.putExtra("title", e.getTitle());
-            i.putExtra("organizerName", e.getOrganizer() != null ? e.getOrganizer().getName() : "");
+            i.putExtra("eventId", e.getId()); // if using Firestore id
             i.putExtra("viewerUserEmail", currentUserEmail);
-            i.putExtra("eventId", e.getId());
             ctx.startActivity(i);
         };
         h.itemView.setOnClickListener(openDetails);
@@ -97,15 +85,7 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         }
     }
 
-    public void submitList(List<Event> newItems) {
-        items.clear();
-        if (newItems != null) items.addAll(newItems);
-        notifyDataSetChanged();
-    }
-
-    @Override public int getItemCount() {
-        return items.size();
-    }
+    @Override public int getItemCount() { return items.size(); }
 
     static class VH extends RecyclerView.ViewHolder {
         ImageView img;
@@ -120,3 +100,5 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         }
     }
 }
+
+
