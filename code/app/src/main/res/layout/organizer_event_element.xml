@@ -1,107 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
+        android:id="@+id/organizer_event_seperator"
         android:layout_width="match_parent"
         android:layout_height="25dp"
+        android:background="#808080"
         android:textAlignment="center"
-        android:id="@+id/organizer_event_seperator"
-        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#808080"/>
+        app:layout_constraintVertical_bias="0.036" />
 
     <ImageView
         android:id="@+id/organizer_event_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_margin="16dp"
-        android:contentDescription="Event Image"
         android:background="#E0E0E0"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_seperator"
+        android:contentDescription="Event Image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_seperator"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/organizer_event_name"
-        android:layout_width="152dp"
+        android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_image" />
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_image"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:layout_width="80dp"
-        android:layout_height="17dp"
         android:id="@+id/organizer_event_location"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_name"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:layout_width="80dp"
+        android:layout_width="wrap_content"
         android:layout_height="17dp"
-        android:id="@+id/organizer_event_date"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_name"
-        app:layout_constraintStart_toEndOf="@id/organizer_event_location"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_name"
+        app:layout_constraintVertical_bias="0.098" />
 
     <TextView
-        android:layout_width="152dp"
-        android:layout_height="25dp"
+        android:id="@+id/organizer_event_date"
+        android:layout_width="wrap_content"
+        android:layout_height="17dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintStart_toEndOf="@id/organizer_event_location"
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_name"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
         android:id="@+id/organizer_event_registration_status"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/organizer_event_location"
-        android:layout_marginTop="8dp"
-        android:layout_marginHorizontal="16dp"/>
+        app:layout_constraintVertical_bias="0.066" />
 
     <TextView
+        android:id="@+id/organizer_event_capacity"
         android:layout_width="match_parent"
         android:layout_height="25dp"
-        android:paddingHorizontal="16dp"
-        android:id="@+id/organizer_event_capacity"
         android:layout_marginTop="8dp"
+        android:background="#e0e0e0"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/organizer_event_registration_status"
-        android:background="#e0e0e0"/>
+        app:layout_constraintVertical_bias="0.095" />
 
     <Button
+        android:id="@+id/organizer_event_edit_event_button"
         android:layout_width="120dp"
         android:layout_height="50dp"
-        android:id="@+id/organizer_event_edit_event_button"
+        android:layout_margin="8dp"
+        android:layout_marginStart="28dp"
+        android:backgroundTint="@color/black"
         android:text="Edit Event"
         android:textSize="12sp"
-        android:backgroundTint="@color/black"
-        android:layout_margin="8dp"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.041"
         app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
+        app:layout_constraintVertical_bias="0.529" />
 
     <Button
+        android:id="@+id/organizer_event_view_entrants_button"
         android:layout_width="120dp"
         android:layout_height="50dp"
-        android:id="@+id/organizer_event_view_entrants_button"
-        android:text="View Entrants"
-        android:backgroundTint="@color/black"
         android:layout_margin="8dp"
+        android:backgroundTint="@color/black"
+        android:text="Entrants"
         android:textSize="12sp"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.104"
         app:layout_constraintStart_toEndOf="@id/organizer_event_edit_event_button"
-        />
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity" />
 
     <ImageButton
+        android:id="@+id/organizer_event_qr_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:id="@+id/organizer_event_qr_button"
         android:layout_margin="8dp"
-        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_secure"/>
+        app:layout_constraintHorizontal_bias="0.847"
+        app:layout_constraintStart_toEndOf="@+id/organizer_event_view_entrants_button"
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
+        app:srcCompat="@android:drawable/ic_secure" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

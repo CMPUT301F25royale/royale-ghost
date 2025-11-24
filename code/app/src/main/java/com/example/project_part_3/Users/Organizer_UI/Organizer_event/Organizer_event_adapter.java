@@ -48,9 +48,9 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
         if (event != null) {
             holder.eventName.setText(event.getTitle());
             holder.eventLocation.setText(event.getLocation());
-            holder.eventDate.setText(event.getDate_open().toString());//TODO: include close date
+            holder.eventDate.setText(String.format("Date: %s", event.getDate_open().toString()));//TODO: include close date
             holder.eventRegistrationStatus.setText(event.registrationStatus());
-            holder.eventCapacity.setText(String.valueOf(event.getCapacity()));
+            holder.eventCapacity.setText(String.format("Capacity: %s", String.valueOf(event.getCapacity())));
             return view;
         }
         return view;

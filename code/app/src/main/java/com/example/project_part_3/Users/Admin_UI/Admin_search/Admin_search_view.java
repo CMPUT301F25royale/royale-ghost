@@ -91,6 +91,14 @@ public class Admin_search_view extends Fragment {
                 Event event = (Event) item;
                 if (event.getTitle() != null && event.getTitle().toLowerCase().contains(query)) {
                     filteredResults.add(event);
+                } else if (event.getLocationName() != null && event.getLocationName().toLowerCase().contains(query)) {
+                    filteredResults.add(event);
+                }
+                else if (event.getDescription() != null && event.getDescription().toLowerCase().contains(query)) {
+                    filteredResults.add(event);
+                }
+                else if (event.getOrganizerId() != null && event.getOrganizerId().toLowerCase().contains(query)) {
+                    filteredResults.add(event);
                 }
             } else if (item instanceof Image_holder) {
                 Image_holder image = (Image_holder) item;

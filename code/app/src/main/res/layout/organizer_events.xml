@@ -32,15 +32,19 @@
 
     <Button
         android:id="@+id/organizer_events_list_create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_width="105dp"
+        android:layout_height="45dp"
         android:layout_margin="8dp"
-        android:padding="0dp"
-        android:textSize="10dp"
         android:backgroundTint="@color/black"
+        android:padding="0dp"
         android:text="Create Event"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/organizer_events_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintHorizontal_bias="0.947"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
