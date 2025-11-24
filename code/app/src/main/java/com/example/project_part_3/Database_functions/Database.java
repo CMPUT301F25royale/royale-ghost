@@ -20,7 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-
+/**
+ * The Database class provides methods for interacting with the Firebase Firestore database. Most
+ * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
+ * Example usage:
+ * <pre>
+ *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
+ *     Database db = new Database(ff);
+ *
+ *     String email = "ballsdeep69@gmail.com"
+ *     db.fetchUser(email).addOnSuccessListener(user -> {
+ *          user.setName("Dion"); // changes user name
+ *     }
+ *     db.fetchUser(email).addOnFailureListener(e -> {
+ *          // e is the exception that was thrown
+ *          Log.e("fetchUser", "Failed to fetch user", e);
+ *     }
+ *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
+ *          // success = true if user was added
+ *          // success = false if user exists already
+ *     }
+ * </pre>
+ *
+ */
 public class Database {
     private final FirebaseFirestore db;
     private static final String USERS_COLLECTION = "users";
@@ -88,7 +110,6 @@ public class Database {
             return (doc != null && doc.exists()) ? doc.toObject(User.class) : null;
         });
     }
-
     public void setUser(User user) {
         db.collection(USERS_COLLECTION).document(user.getEmail()).set(user);
     }
@@ -99,6 +120,7 @@ public class Database {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(User.class);
             } else {
+                Log.d("getAllUsers", "Could not get documents", task.getException());
                 throw task.getException();
             }
         });
@@ -140,6 +162,7 @@ public class Database {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(Event.class);
             } else {
+                Log.d("getAllEvents", "Could not get documents", task.getException());
                 throw task.getException();
             }
         });
@@ -187,7 +210,13 @@ public class Database {
 
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document(event.getId());
-        return docRef.delete().continueWith(task -> task.isSuccessful());
+        return docRef.delete().continueWith(Task::isSuccessful);
+    }
+
+    public Task<Boolean> updateEvent(Event event) {
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId());
+        docRef = docRef.collection(EVENTS_SUBCOLLECTION).document(event.getId());
+        return docRef.set(event).continueWith(Task::isSuccessful);
     }
 
     /** Resolve the single organized_events doc for a given eventId. */

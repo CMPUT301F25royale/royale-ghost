@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Create / Edit Event"
+        android:text="Create Event"
         android:textAlignment="center"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -83,54 +83,99 @@
         app:layout_constraintStart_toEndOf="@+id/create_event_capacity_text"
         app:layout_constraintTop_toBottomOf="@+id/create_event_description_input" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/create_event_registration_text"
-        android:text="Registration:"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_capacity_input" />
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="60dp"
         android:layout_marginTop="6dp"
         android:gravity="bottom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/create_event_registration_text"
         app:layout_constraintTop_toBottomOf="@+id/create_event_capacity_input">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Opens:"
-            android:textStyle="bold" />
+            android:id="@+id/create_event_registration_text"
+            android:text="Registration:"
+            android:textStyle="bold"
+            android:layout_marginEnd="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opens:"/>
 
         <Button
             android:id="@+id/create_event_registration_open_button"
             android:layout_width="80dp"
-            android:layout_height="36dp"
+            android:layout_height="50dp"
             android:layout_marginStart="16dp"
+            android:backgroundTint="@color/black"
             android:padding="0dp"
+            android:textSize="11sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Closes:"/>
+
+        <Button
+            android:id="@+id/create_event_registration_close_button"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@color/black"
+            android:padding="0dp"
+            android:textSize="11sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/create_event_date_time_container"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="6dp"
+        android:gravity="bottom"
+        app:layout_constraintStart_toStartOf="@id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+        <TextView
+            android:id="@+id/create_event_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time:"
+            android:layout_marginEnd="62dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Starts:" />
+
+        <Button
+            android:id="@+id/create_event_date_time_start_button"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="18dp"
+            android:padding="0dp"
+            android:textSize="11sp"
             android:backgroundTint="@color/black"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="Closes:"
-            android:textStyle="bold" />
+            android:layout_marginEnd="14dp"
+            android:text="Ends:"/>
 
         <Button
-            android:id="@+id/create_event_registration_close_button"
+            android:id="@+id/create_event_date_time_end_button"
             android:layout_width="80dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="16dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="14dp"
             android:padding="0dp"
+            android:textSize="11sp"
             android:backgroundTint="@color/black"/>
 
     </LinearLayout>
@@ -143,27 +188,7 @@
         android:text="Location:"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
-
-    <TextView
-        android:id="@+id/create_event_time_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Time:"
-        android:textStyle="bold"
-        android:layout_margin="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
-
-    <Button
-        android:id="@+id/create_event_time_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="12:00pm"
-        android:backgroundTint="@color/black"
-        app:layout_constraintStart_toEndOf="@id/create_event_time_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
+        app:layout_constraintTop_toBottomOf="@+id/create_event_date_time_container" />
 
     <EditText
         android:id="@+id/create_event_location_input"
@@ -173,7 +198,7 @@
         android:hint="Add Address"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/create_event_location_text"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/create_event_date_time_container" />
 
     <TextView
         android:id="@+id/create_event_price_text"
@@ -183,10 +208,10 @@
         android:text="Price:\n (Optional)"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_time_value" />
+        app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
 
     <EditText
-        android:id="@+id/cretae_event_price_input"
+        android:id="@+id/create_event_price_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
@@ -194,7 +219,7 @@
         android:inputType="numberDecimal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/create_event_price_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_time_value" />
+        app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
 
     <Switch
         android:id="@+id/create_event_geolocation_switch"
@@ -237,6 +262,5 @@
         android:text="Back"
         app:layout_constraintStart_toEndOf="@+id/create_event_poster_button"
         app:layout_constraintTop_toBottomOf="@+id/create_event_geolocation_switch" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

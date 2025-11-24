@@ -5,26 +5,47 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.R;
+import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 
 import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class Organizer_event_adapter extends ArrayAdapter<Event> {
     private final int resourceLayout;
     private final ArrayList<Event> events;
 
-    public Organizer_event_adapter(Context context, int resource, ArrayList<Event> events) {
+
+    public interface onEventClickListener {
+        void onEditClick(Event event);
+        void onSeeEntrantsClick(Event event);
+        void onQrClick(Event event);
+    }
+
+    private onEventClickListener listener;
+
+
+    public Organizer_event_adapter(Context context, int resource, ArrayList<Event> events, onEventClickListener listener) {
         super(context, resource, events);
         this.resourceLayout = resource;
         this.events = events;
+        this.listener = listener;
     }
 
 
 
+    @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
@@ -38,6 +59,9 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.eventDate = view.findViewById(R.id.organizer_event_date);
             holder.eventRegistrationStatus = view.findViewById(R.id.organizer_event_registration_status);
             holder.eventCapacity = view.findViewById(R.id.organizer_event_capacity);
+            holder.seeEntrantsButton = view.findViewById(R.id.organizer_event_view_entrants_button);
+            holder.editEventButton = view.findViewById(R.id.organizer_event_edit_event_button);
+            holder.qrButton = view.findViewById(R.id.organizer_event_qr_button);
             view.setTag(holder);
         } else {
             holder = (Organizer_event_adapter.ViewHolder) view.getTag();
@@ -48,19 +72,39 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
         if (event != null) {
             holder.eventName.setText(event.getTitle());
             holder.eventLocation.setText(event.getLocation());
-            holder.eventDate.setText(String.format("Date: %s", event.getDate_open().toString()));//TODO: include close date
+
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
+
             holder.eventRegistrationStatus.setText(event.registrationStatus());
-            holder.eventCapacity.setText(String.format("Capacity: %s", String.valueOf(event.getCapacity())));
-            return view;
+
+            if (event.getCapacity() == null || event.getCapacity() == 0) {
+                holder.eventCapacity.setText("Capacity: None");
+            } else {
+                holder.eventCapacity.setText(String.valueOf("Capacity: " + event.getCapacity()));
+            }
+
+            holder.editEventButton.setOnClickListener(v -> {
+                if (listener != null) listener.onEditClick(event);
+            });
+            holder.seeEntrantsButton.setOnClickListener(v -> {
+                if (listener != null) listener.onSeeEntrantsClick(event);
+            });
+            holder.qrButton.setOnClickListener(v -> {
+                if (listener != null) listener.onQrClick(event);
+            });
         }
         return view;
     }
 
-    private static class ViewHolder {
+    public static class ViewHolder {
         TextView eventName;
         TextView eventLocation;
         TextView eventDate;
         TextView eventRegistrationStatus;
         TextView eventCapacity;
+        Button seeEntrantsButton;
+        Button editEventButton;
+        ImageButton qrButton;
     }
 }
