@@ -57,7 +57,9 @@ public class Login_view extends Fragment {
         Database db = new Database(FirebaseFirestore.getInstance());
 
         submit.setOnClickListener(v -> {
-            String nameText = name.getText().toString();
+            submit.setEnabled(false); // Disable the button to prevent multiple clicks
+
+            String nameText = name.getText().toString().toLowerCase();
             String passwordText = password.getText().toString();
 
             SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
@@ -68,6 +70,7 @@ public class Login_view extends Fragment {
 
             if (nameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                submit.setEnabled(true); // re-enable the button after failure
                 return;
             }
             db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
@@ -97,9 +100,11 @@ public class Login_view extends Fragment {
                     }
                 } else {
                     Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+                    submit.setEnabled(true);
                 }
             }).addOnFailureListener(e -> {
                 Toast.makeText(getActivity(), "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                submit.setEnabled(true);
             });
 
         });
@@ -111,7 +116,6 @@ public class Login_view extends Fragment {
                 navController.navigate(R.id.action_loginFragment_to_admin_main);
                 break;
             case "Organizer":
-                //Toast.makeText(getContext(), "Organizer navigation not implemented.", Toast.LENGTH_SHORT).show();
                 Bundle bundleO = new Bundle();
                 bundleO.putString("userEmail", userEmail);
                 Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
