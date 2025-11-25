@@ -367,31 +367,8 @@ public class Event {
         return String.format("Open (closes within %d hours)", hours + 1);
     }
 
-
-    @Exclude
-    private String formatDuration(long millis) {
-        long days = TimeUnit.MILLISECONDS.toDays(millis);
-        millis -= TimeUnit.DAYS.toMillis(days);
-        long hours = TimeUnit.MILLISECONDS.toHours(millis);
-        millis -= TimeUnit.HOURS.toMillis(hours);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
-
-        StringBuilder sb = new StringBuilder();
-        if (days > 0) {
-            sb.append(days).append("d ");
-        }
-        if (hours > 0 || days > 0) {
-            sb.append(hours).append("h ");
-        }
-        if (days == 0) {
-            sb.append(minutes).append("m");
-        }
-
-        if (sb.length() > 0) {
-            return sb.toString().trim() + " left";
-        } else {
-            return "less than a minute left";
-        }
+    public void declineAttendant(String email) {
+        declinedUserIds.add(email);
     }
 }
 

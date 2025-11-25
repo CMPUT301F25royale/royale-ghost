@@ -4,6 +4,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Users.Admin;
+import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -100,16 +103,35 @@ public class Database {
     }
 
     public Task<User> fetchUser(String email) {
-
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
+
         return docRef.get().continueWith(task -> {
             if (!task.isSuccessful()) {
                 throw task.getException();
             }
+
             DocumentSnapshot doc = task.getResult();
-            return (doc != null && doc.exists()) ? doc.toObject(User.class) : null;
+
+            if (doc == null || !doc.exists()) {
+                return null;
+            }
+
+            String userType = doc.getString("userType");
+
+            if ("Entrant".equals(userType)) {
+                return doc.toObject(Entrant.class); // Returns an Entrant object
+            } else if ("Organizer".equals(userType)) {
+                return doc.toObject(Organizer.class); // Returns an Organizer object
+            } else if ("Admin".equals(userType)) {
+                return doc.toObject(Admin.class); // Returns an Organizer object
+            } else {
+                // fallback: how did we get here?
+                Log.e("Database", "Unknown user type: " + userType);
+                return doc.toObject(User.class);
+            }
         });
     }
+
     public void setUser(User user) {
         db.collection(USERS_COLLECTION).document(user.getEmail()).set(user);
     }
@@ -340,5 +362,74 @@ public class Database {
 
     public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
+    public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
+        ArrayList<String> entrantIDs = event.getAttendant_list();
+
+        // return empty list if no entrants
+        if (entrantIDs == null || entrantIDs.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
+
+        List<Task<User>> tasks = new ArrayList<>();
+
+        for (String id : entrantIDs) {
+            tasks.add(fetchUser(id));
+        }
+
+        return Tasks.whenAllSuccess(tasks).continueWith(task -> {
+            List<Object> results = task.getResult();
+            List<Entrant> entrants = new ArrayList<>();
+
+            for (Object result : results) {
+                if (result instanceof Entrant) {
+                    // Cast the result to Entrant
+                    Entrant entrant = (Entrant) result;
+
+                    if (entrant.getUserType().equals("Entrant")) {
+                        entrants.add(entrant);
+                    }
+                }
+            }
+            // Return the list of entrants
+            return entrants;
+        });
+    }
+
+    public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
+        ArrayList<String> entrantIDs = new ArrayList<>(event.getWaitlistUserIds());
+
+        // return empty list if no entrants
+        if (entrantIDs == null || entrantIDs.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
+
+        List<Task<User>> tasks = new ArrayList<>();
+
+        for (String id : entrantIDs) {
+            tasks.add(fetchUser(id));
+        }
+
+        return Tasks.whenAllSuccess(tasks).continueWith(task -> {
+            List<Object> results = task.getResult();
+            List<Entrant> entrants = new ArrayList<>();
+
+            for (Object result : results) {
+                if (result instanceof Entrant) {
+                    // Cast the result to Entrant
+                    Entrant entrant = (Entrant) result;
+
+                    if (entrant.getUserType().equals("Entrant")) {
+                        entrants.add(entrant);
+                    }
+                }
+            }
+            // Return the list of entrants
+            return entrants;
+        });
+    }
+
+    public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
+        event.declineAttendant(entrant.getEmail());
+        return updateEvent(event);
     }
 }

@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider; // Import this
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -20,7 +20,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -79,7 +78,10 @@ public class Organizer_event_view extends Fragment {
 
                     @Override
                     public void onSeeEntrantsClick(Event event) {
-                        //TODO: implement
+                        model.setSelectedEvent(event);
+
+                        NavController navController = NavHostFragment.findNavController(Organizer_event_view.this);
+                        navController.navigate(R.id.action_organizerEventsFragment_to_organizerEntrantViewFragment);
                     }
 
                     @Override

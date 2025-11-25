@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,7 +50,7 @@ public class Organizer_create_event extends Organizer_create_edit_event_template
 
     @Override
     protected void setupBackButton(@NonNull View view) {
-        Button back = view.findViewById(R.id.back);
+        ImageButton back = view.findViewById(R.id.organizer_create_edit_event_back);
         back.setOnClickListener(v -> {
             NavController navBack = NavHostFragment.findNavController(this);
             navBack.navigate(R.id.create_to_event);

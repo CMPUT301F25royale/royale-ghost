@@ -24,8 +24,6 @@ import java.util.Locale;
 
 public class Organizer_event_adapter extends ArrayAdapter<Event> {
     private final int resourceLayout;
-    private final ArrayList<Event> events;
-
 
     public interface onEventClickListener {
         void onEditClick(Event event);
@@ -33,13 +31,11 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
         void onQrClick(Event event);
     }
 
-    private onEventClickListener listener;
-
+    private final onEventClickListener listener;
 
     public Organizer_event_adapter(Context context, int resource, ArrayList<Event> events, onEventClickListener listener) {
         super(context, resource, events);
         this.resourceLayout = resource;
-        this.events = events;
         this.listener = listener;
     }
 

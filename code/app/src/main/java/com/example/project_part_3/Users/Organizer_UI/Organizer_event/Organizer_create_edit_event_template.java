@@ -260,26 +260,21 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             }
         }
 
-        // if selectedEvent is null, it's a new event (pass null ID), else use existing ID
+        // if selectedEvent is null, it's a new event (pass null ID), else modify the existing event
         Event newEvent;
         if (selectedEvent != null) {
-            newEvent = new Event(
-                    selectedEvent.getId(), // use the ID of the selected event
-                    organizerEmail,
-                    title,
-                    description,
-                    location,
-                    location,
-                    null,
-                    registrationOpenDate.getTime(),
-                    registrationCloseDate.getTime(),
-                    eventStartDate.getTime(),
-                    eventEndDate.getTime(),
-                    capacity, // optional, may be null
-                    price // optional, may be null
-            );
+            newEvent = selectedEvent;
+            newEvent.setTitle(title);
+            newEvent.setDescription(description);
+            newEvent.setLocation(location);
+            newEvent.setCapacity(capacity);
+            newEvent.setPrice(price);
+            newEvent.setDate_open(registrationOpenDate);
+            newEvent.setDate_close(registrationCloseDate);
+            newEvent.setEventStartAt(eventStartDate);
+            newEvent.setEventEndAt(eventEndDate);
         } else {
-            // else, create a new ID
+            // else, create a new event
             newEvent = new Event(
                     organizerEmail,
                     title,
