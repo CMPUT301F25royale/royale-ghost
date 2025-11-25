@@ -38,9 +38,7 @@
         android:padding="0dp"
         android:textSize="14sp"
         android:backgroundTint="@color/black"
-        android:padding="0dp"
         android:text="Create Event"
-        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/organizer_events_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>

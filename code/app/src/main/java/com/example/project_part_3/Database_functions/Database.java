@@ -294,6 +294,7 @@ public class Database {
 
     // TODO: Wire this to fire when user clicks cancel button on the "events youve signed up for" tab
     public Task<Void> removeUserFromWaitlist(@NonNull String eventId, @NonNull String userEmail) {
+        removeEventFromUser(userEmail, eventId);
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update("waitlistUserIds", FieldValue.arrayRemove(userEmail)));
     }
@@ -308,7 +309,36 @@ public class Database {
                 });
     }
 
+    public Task<List<String>> getEventsUserSelected(@NonNull String userId) {
+        return db.collection(USERS_COLLECTION).whereEqualTo("email", userId)
+                .limit(1)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    QuerySnapshot querySnapshots = task.getResult();
+                    if (querySnapshots == null || querySnapshots.isEmpty()) {
+                        Log.w("getEventsUserSelected", "User with ID " + userId + " not found");
+                        return new ArrayList<String>();
+                    }
+                    DocumentSnapshot snap = querySnapshots.getDocuments().get(0);
+                    if(snap.contains("eventsAppliedFor")){
+                        List<String> events = (List<String>) snap.get("eventsAppliedFor");
+                        if(events != null) {
+                            return events;
+                        }
+                    }
+                    return new ArrayList<String>();
+                });
+    }
 
+    public Task<Void> addEventToUser(@NonNull String userId, @NonNull String eventId) {
+        return db.collection(USERS_COLLECTION).document(userId)
+                .update("eventsAppliedFor", FieldValue.arrayUnion(eventId));
+    }
 
-
+    public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
+        return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
+    }
 }
