@@ -69,13 +69,17 @@ public class Sign_up_view extends Fragment {
 
         Organizer_button_sign_up.setOnClickListener(v -> selectOption(Organizer_button_sign_up));
         Entrant_button_sign_up.setOnClickListener(v -> selectOption(Entrant_button_sign_up));
+
         submit_sign_up.setOnClickListener(v -> {
+            submit_sign_up.setEnabled(false); // Disable the button to prevent multiple clicks
+
             String name = Objects.requireNonNull(nameText.getText()).toString();
             String password = Objects.requireNonNull(passwordText.getText()).toString();
             String email = Objects.requireNonNull(emailText.getText()).toString();
             String phone = phoneText.getText().toString();
             if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                submit_sign_up.setEnabled(true); // re-enable the button after failure
                 return;
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
@@ -92,10 +96,13 @@ public class Sign_up_view extends Fragment {
                         navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Sign up failed User already exists", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
+                    submit_sign_up.setEnabled(true); // re-enable the button after failure
                 }
             }).addOnFailureListener(e -> {
                 Log.d("Sign_up", "Failed to sign up");
+                Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                submit_sign_up.setEnabled(true); // re-enable the button after failure
             });
         });
     }

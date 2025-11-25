@@ -74,6 +74,11 @@ public class Login_view extends Fragment {
                 return;
             }
             db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
+                if (getView() == null || !isAdded()) {
+                    // If the view is destroyed (user pressed back, or previous nav happened), stop.
+                    return;
+                }
+
                 if (user != null) {
                     Toast.makeText(getActivity(), "Login successful", Toast.LENGTH_SHORT).show();
 
