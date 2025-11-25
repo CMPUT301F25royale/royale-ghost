@@ -2,6 +2,7 @@ package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +26,7 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         if (titleEditText == null || event == null || getView() == null) return;
 
         TextView pageName = getView().findViewById(R.id.create_event_title);
-        pageName.setText(String.format("Edit Event: %s", event.getTitle()));
+        pageName.setText(String.format("Editing: %s", event.getTitle()));
 
         titleEditText.setText(event.getTitle());
         descriptionEditText.setText(event.getDescription());
@@ -98,7 +99,7 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
     protected void setupBackButton(@NonNull View view) {
-        Button back = view.findViewById(R.id.back);
+        ImageButton back = view.findViewById(R.id.organizer_create_edit_event_back);
         back.setOnClickListener(v -> {
             NavController navBack = NavHostFragment.findNavController(this);
             navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);

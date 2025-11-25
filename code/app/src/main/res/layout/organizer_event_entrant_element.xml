@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/organizer_event_entrant_profile_image"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_margin="8dp"
+        android:contentDescription="User avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <TextView
+        android:id="@+id/organizer_event_entrant_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_margin="8dp"
+        android:text="User Name"
+        app:layout_constraintTop_toTopOf="@id/organizer_event_entrant_profile_image"
+        app:layout_constraintStart_toEndOf="@id/organizer_event_entrant_profile_image"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/organizer_event_entrant_email"
+        android:layout_below="@+id/organizer_event_entrant_name"
+        android:textSize="12sp"
+        android:layout_marginHorizontal="8dp"
+        android:text="example@email.com"
+        app:layout_constraintTop_toBottomOf="@+id/organizer_event_entrant_name"
+        app:layout_constraintStart_toEndOf="@id/organizer_event_entrant_profile_image"/>
+    <ImageButton
+        android:id="@+id/organizer_event_entrant_decline_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="Cancel Entrant"
+        android:src="@drawable/cancel_cross"
+        android:background="@null"
+        app:layout_constraintEnd_toStartOf="@id/organizer_event_entrant_status"
+        app:layout_constraintTop_toTopOf="@id/organizer_event_entrant_profile_image"
+        app:layout_constraintBottom_toBottomOf="@id/organizer_event_entrant_profile_image"/>
+    <TextView
+        android:id="@+id/organizer_event_entrant_status"
+        android:layout_width="85dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:text="Accepted"
+        android:textColor="@color/black"
+        android:background="@drawable/btn_pill_black"
+        android:backgroundTint="@color/green"
+        app:layout_constraintTop_toTopOf="@id/organizer_event_entrant_profile_image"
+        app:layout_constraintBottom_toBottomOf="@id/organizer_event_entrant_profile_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

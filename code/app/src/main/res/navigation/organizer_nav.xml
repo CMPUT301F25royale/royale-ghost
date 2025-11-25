@@ -63,6 +63,9 @@
         <action
             android:id="@+id/action_organizerEventsFragment_to_organizerEditEventFragment"
             app:destination="@id/OrganizerEditEventFragment" />
+        <action
+            android:id="@+id/action_organizerEventsFragment_to_organizerEntrantViewFragment"
+            app:destination="@id/organizer_entrant_view" />
     </fragment>
     <fragment
         android:id="@+id/OrganizerEditEventFragment"
@@ -70,6 +73,14 @@
         android:label="OrganizerEditEventFragment">
         <action
             android:id="@+id/action_organizer_edit_event_to_organizerEventsFragment"
+            app:destination="@id/organizerEventsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/organizer_entrant_view"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_entrant_view"
+        android:label="Organizer_entrant_view" >
+        <action
+            android:id="@+id/action_organizer_entrant_view_to_organizerEventsFragment"
             app:destination="@id/organizerEventsFragment" />
     </fragment>
 
