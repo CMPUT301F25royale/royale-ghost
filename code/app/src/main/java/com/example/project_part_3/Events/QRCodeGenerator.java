@@ -1,0 +1,35 @@
+package com.example.project_part_3.Events;
+
+import android.graphics.Bitmap;
+import android.graphics.Color;
+
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+
+public class QRCodeGenerator {
+
+    final static int size = 256;
+    public static Bitmap generateQRCode(String id) throws WriterException {
+
+        String data = "myeventapp://event/"+id;
+        BitMatrix QRCode = new MultiFormatWriter().encode(data, BarcodeFormat.QR_CODE, size, size);
+
+        int[] pixels = new int[size * size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (QRCode.get(j, i)) {
+                    pixels[i * size + j] = Color.BLACK;
+                } else {
+                    pixels[i * size + j] = Color.WHITE;
+                }
+            }
+        }
+        Bitmap QRCodeImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        return QRCodeImage;
+    }
+
+}

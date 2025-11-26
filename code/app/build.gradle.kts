@@ -68,4 +68,10 @@ dependencies {
     // Optional extras:
     // implementation("androidx.camera:camera-video")
     // implementation("androidx.camera:camera-extensions")
+
+
+    // ===== QR Code stuff =====
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:android-embedded:3.5.3")
+
 }
