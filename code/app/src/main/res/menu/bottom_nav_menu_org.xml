@@ -18,7 +18,7 @@
     <item
         android:id="@+id/organizerNotificationsFragment"
         android:icon="@drawable/ic_notifications"
-        android:title="Alerts" />
+        android:title="Notification" />
 
     <item
         android:id="@+id/organizerProfilesFragment"

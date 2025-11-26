@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project_part_3.Database_functions.Database;
@@ -45,6 +46,12 @@ public class Organizer_profile_view extends Fragment {
 
         //get password
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+
+        // change text at top so that it displays the user's name
+        TextView profileName = view.findViewById(R.id.Profile_Title);
+        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+            profileName.setText("Profile: " + user.getName());
+        });
 
         //reset password here
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
