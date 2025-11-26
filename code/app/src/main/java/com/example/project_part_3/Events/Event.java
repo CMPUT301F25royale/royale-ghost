@@ -10,11 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class Event {
 
@@ -121,14 +123,44 @@ public class Event {
                  String locationName,
                  String locationAddress,
                  String posterImageUrl,
-                 long registrationOpensAtMs,
-                 long registrationClosesAtMs,
-                 long eventStartAtMs,
+                 Long registrationOpensAtMs,
+                 Long registrationClosesAtMs,
+                 Long eventStartAtMs,
                  Long eventEndAtMs,
-                 int capacity,
-                 float price) {
+                 Integer capacity,
+                 Float price) {
         this();
         this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
+        this.organizerId = organizerId;
+        this.title = title;
+        this.description = description;
+        this.locationName = locationName;
+        this.location = locationAddress;
+        this.posterImageUrl = posterImageUrl;
+        this.date_open = new Date(registrationOpensAtMs);
+        this.date_close = new Date(registrationClosesAtMs);
+        this.eventStartAt = new Timestamp(eventStartAtMs);
+        this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
+        this.capacity = capacity;
+        this.price = price;
+    }
+
+    public Event(
+            String eventId,
+            String organizerId,
+            String title,
+            String description,
+            String locationName,
+            String locationAddress,
+            String posterImageUrl,
+            Long registrationOpensAtMs,
+            Long registrationClosesAtMs,
+            Long eventStartAtMs,
+            Long eventEndAtMs,
+            Integer capacity,
+            Float price) {
+        this();
+        this.id = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
@@ -283,7 +315,7 @@ public class Event {
         return Math.max(remaining, 0);
     }
     @Exclude
-    public boolean registrationOpen(){
+    public boolean registrationOpen() {
         Date currentDate = new Date();
         if (date_open == null || date_close == null) return false;
         boolean afterOpen = currentDate.after(date_open);
@@ -293,18 +325,50 @@ public class Event {
     }
 
     @Exclude
-    public long daysUntilClose(){
+    public long daysUntilClose() {
         Date currentDate = new Date();
         if (date_close == null) return 0;
-        return date_close.getTime() - currentDate.getTime();
+
+        long diff = date_close.getTime() - currentDate.getTime();
+
+        return TimeUnit.MILLISECONDS.toDays(diff);
     }
 
     @Exclude
-    public String registrationStatus(){
-        if (registrationOpen()){
-            return "Open ("+daysUntilClose()+")";
+    public long hoursUntilClose() {
+        Date currentDate = new Date();
+        if (date_close == null) return 0;
+        long diff = date_close.getTime() - currentDate.getTime();
+        return TimeUnit.MILLISECONDS.toHours(diff);
+    }
+
+    @Exclude
+    public String registrationStatus() {
+        if (!registrationOpen()) {
+            return "Closed";
         }
-        return "Closed";
+
+        long days = daysUntilClose();
+
+        if (days > 1) {
+            return String.format("Open (%d days until close)", days);
+        }
+
+        if (days == 1) {
+            return "Open (1 day until close)";
+        }
+
+        long hours = hoursUntilClose();
+
+        if (hours == 0) {
+            return "Open (closes within 1 hour)";
+        }
+
+        return String.format("Open (closes within %d hours)", hours + 1);
+    }
+
+    public void declineAttendant(String email) {
+        declinedUserIds.add(email);
     }
 }
 

@@ -2,6 +2,10 @@ package com.example.project_part_3.Users;
 
 public class Organizer extends User {
 
+    public Organizer() {
+        super();
+    }
+
     public Organizer(String name, String password, String email, String phone) {
         super(name, password, email, phone);
     }

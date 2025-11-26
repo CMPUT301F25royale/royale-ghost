@@ -6,19 +6,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider; // Import this
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Events.Event_Organizer;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,7 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class Organizer_event_view extends Fragment{
+public class Organizer_event_view extends Fragment {
     ListView eventList;
     Organizer_event_adapter adapter;
     Button createEventButton;
@@ -66,7 +67,28 @@ public class Organizer_event_view extends Fragment{
 
             db.getEventsByOrganizer(email).addOnSuccessListener(events -> {
                 ArrayList<Event> eventArrayList = new ArrayList<>(events);
-                adapter = new Organizer_event_adapter(getContext(), R.layout.organizer_event_element, eventArrayList);
+                adapter = new Organizer_event_adapter(getContext(), R.layout.organizer_event_element, eventArrayList, new Organizer_event_adapter.onEventClickListener() {
+                    @Override
+                    public void onEditClick(Event event) {
+                        model.setSelectedEvent(event);
+
+                        NavController navController = NavHostFragment.findNavController(Organizer_event_view.this);
+                        navController.navigate(R.id.action_organizerEventsFragment_to_organizerEditEventFragment);
+                    }
+
+                    @Override
+                    public void onSeeEntrantsClick(Event event) {
+                        model.setSelectedEvent(event);
+
+                        NavController navController = NavHostFragment.findNavController(Organizer_event_view.this);
+                        navController.navigate(R.id.action_organizerEventsFragment_to_organizerEntrantViewFragment);
+                    }
+
+                    @Override
+                    public void onQrClick(Event event) {
+                        //TODO: implement
+                    }
+                });
                 eventList.setAdapter(adapter);
             });
         });

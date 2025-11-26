@@ -4,6 +4,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Users.Admin;
+import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -20,7 +23,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-
+/**
+ * The Database class provides methods for interacting with the Firebase Firestore database. Most
+ * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
+ * Example usage:
+ * <pre>
+ *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
+ *     Database db = new Database(ff);
+ *
+ *     String email = "ballsdeep69@gmail.com"
+ *     db.fetchUser(email).addOnSuccessListener(user -> {
+ *          user.setName("Dion"); // changes user name
+ *     }
+ *     db.fetchUser(email).addOnFailureListener(e -> {
+ *          // e is the exception that was thrown
+ *          Log.e("fetchUser", "Failed to fetch user", e);
+ *     }
+ *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
+ *          // success = true if user was added
+ *          // success = false if user exists already
+ *     }
+ * </pre>
+ *
+ */
 public class Database {
     private final FirebaseFirestore db;
     private static final String USERS_COLLECTION = "users";
@@ -78,14 +103,32 @@ public class Database {
     }
 
     public Task<User> fetchUser(String email) {
-
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
+
         return docRef.get().continueWith(task -> {
             if (!task.isSuccessful()) {
                 throw task.getException();
             }
+
             DocumentSnapshot doc = task.getResult();
-            return (doc != null && doc.exists()) ? doc.toObject(User.class) : null;
+
+            if (doc == null || !doc.exists()) {
+                return null;
+            }
+
+            String userType = doc.getString("userType");
+
+            if ("Entrant".equals(userType)) {
+                return doc.toObject(Entrant.class); // Returns an Entrant object
+            } else if ("Organizer".equals(userType)) {
+                return doc.toObject(Organizer.class); // Returns an Organizer object
+            } else if ("Admin".equals(userType)) {
+                return doc.toObject(Admin.class); // Returns an Organizer object
+            } else {
+                // fallback: how did we get here?
+                Log.e("Database", "Unknown user type: " + userType);
+                return doc.toObject(User.class);
+            }
         });
     }
 
@@ -99,6 +142,7 @@ public class Database {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(User.class);
             } else {
+                Log.d("getAllUsers", "Could not get documents", task.getException());
                 throw task.getException();
             }
         });
@@ -140,6 +184,7 @@ public class Database {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(Event.class);
             } else {
+                Log.d("getAllEvents", "Could not get documents", task.getException());
                 throw task.getException();
             }
         });
@@ -187,7 +232,13 @@ public class Database {
 
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document(event.getId());
-        return docRef.delete().continueWith(task -> task.isSuccessful());
+        return docRef.delete().continueWith(Task::isSuccessful);
+    }
+
+    public Task<Boolean> updateEvent(Event event) {
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId());
+        docRef = docRef.collection(EVENTS_SUBCOLLECTION).document(event.getId());
+        return docRef.set(event).continueWith(Task::isSuccessful);
     }
 
     /** Resolve the single organized_events doc for a given eventId. */
@@ -279,7 +330,74 @@ public class Database {
                 });
     }
 
+    public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
+        ArrayList<String> entrantIDs = event.getAttendant_list();
 
+        // return empty list if no entrants
+        if (entrantIDs == null || entrantIDs.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
 
+        List<Task<User>> tasks = new ArrayList<>();
 
+        for (String id : entrantIDs) {
+            tasks.add(fetchUser(id));
+        }
+
+        return Tasks.whenAllSuccess(tasks).continueWith(task -> {
+            List<Object> results = task.getResult();
+            List<Entrant> entrants = new ArrayList<>();
+
+            for (Object result : results) {
+                if (result instanceof Entrant) {
+                    // Cast the result to Entrant
+                    Entrant entrant = (Entrant) result;
+
+                    if (entrant.getUserType().equals("Entrant")) {
+                        entrants.add(entrant);
+                    }
+                }
+            }
+            // Return the list of entrants
+            return entrants;
+        });
+    }
+
+    public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
+        ArrayList<String> entrantIDs = new ArrayList<>(event.getWaitlistUserIds());
+
+        // return empty list if no entrants
+        if (entrantIDs == null || entrantIDs.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
+
+        List<Task<User>> tasks = new ArrayList<>();
+
+        for (String id : entrantIDs) {
+            tasks.add(fetchUser(id));
+        }
+
+        return Tasks.whenAllSuccess(tasks).continueWith(task -> {
+            List<Object> results = task.getResult();
+            List<Entrant> entrants = new ArrayList<>();
+
+            for (Object result : results) {
+                if (result instanceof Entrant) {
+                    // Cast the result to Entrant
+                    Entrant entrant = (Entrant) result;
+
+                    if (entrant.getUserType().equals("Entrant")) {
+                        entrants.add(entrant);
+                    }
+                }
+            }
+            // Return the list of entrants
+            return entrants;
+        });
+    }
+
+    public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
+        event.declineAttendant(entrant.getEmail());
+        return updateEvent(event);
+    }
 }
