@@ -67,10 +67,10 @@
         android:textSize="15dp"
         app:layout_constraintEnd_toStartOf="@+id/profile_photo"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+        app:layout_constraintTop_toBottomOf="@+id/Profile_Title" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/Profile_Title"
         android:layout_width="180dp"
         android:layout_height="40dp"
         android:layout_marginTop="30dp"

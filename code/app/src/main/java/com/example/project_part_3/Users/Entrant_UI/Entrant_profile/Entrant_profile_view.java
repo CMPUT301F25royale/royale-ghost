@@ -2,6 +2,7 @@ package com.example.project_part_3.Users.Entrant_UI.Entrant_profile;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,10 +13,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
-import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.MainActivity;
+import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -52,19 +56,29 @@ public class Entrant_profile_view extends Fragment {
 
         profileImageView.setOnClickListener(v -> showImagePopup());
 
+        // change text at top so that it displays the user's name
+        TextView profileName = view.findViewById(R.id.Profile_Title);
+        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+            profileName.setText("Profile: " + user.getName());
+        });
+
+        //reset password here
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if(user.getPassword().equals(old)){
                         user.setPassword(_new);
                         db.setUser(user);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
+                //change for shared prefs
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("password", _new);
                 editor.apply();
-
             });
         });
 
@@ -72,11 +86,14 @@ public class Entrant_profile_view extends Fragment {
         Button nameRest = view.findViewById(R.id.name_change);
         nameRest.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
-                //firebase change
+                String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if(user.getName().equals(old)){
                         user.setName(_new);
                         db.setUser(user);
+                        profileName.setText(_new);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
             });
@@ -86,11 +103,13 @@ public class Entrant_profile_view extends Fragment {
         Button phone = view.findViewById(R.id.number_Change);
         phone.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
-                //firebase change
+                String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if(user.getPhone().equals(old)){
                         user.setPhone(_new);
                         db.setUser(user);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
             });
@@ -100,13 +119,15 @@ public class Entrant_profile_view extends Fragment {
         Button emailReset = view.findViewById(R.id.change_email);
         emailReset.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user->{
                     String name = user.getName();
                     String password = user.getPassword();
                     String number = user.getPhone();
                     db.deleteUser(username);
-                    Entrant new_user = new Entrant(name,password,_new,number);
+                    Organizer new_user = new Organizer(name,password,_new,number);
                     db.addUser(new_user);
+
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("username", _new);
                     editor.apply();
@@ -117,7 +138,24 @@ public class Entrant_profile_view extends Fragment {
         //delete user
         Button delete = view.findViewById(R.id.delete_user_button);
         delete.setOnClickListener(v -> {
-            db.deleteUser(username).addOnSuccessListener(user -> {});
+            String username = prefs.getString("username", "");
+            db.fetchUser(username).addOnSuccessListener(user -> {
+                db.deleteUser(username);
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.apply();
+                Toast.makeText(getActivity(), "Have a nice day!", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(requireActivity(), MainActivity.class); //prep MainActivity
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//Start with a fresh instance and be ready to clear this one
+                startActivity(intent);
+
+                // Kill this activity so organizer UI (bottom view) is gone
+                requireActivity().finish();
+
+
+            });
         });
 
     }
