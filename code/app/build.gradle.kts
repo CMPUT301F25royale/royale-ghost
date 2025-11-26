@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.camera.view)
     implementation(libs.identity.jvm)
+    implementation(libs.firebase.storage)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -63,7 +65,6 @@ dependencies {
     implementation("androidx.camera:camera-camera2")
     implementation("androidx.camera:camera-lifecycle")
     implementation("androidx.camera:camera-view")
-    implementation("com.google.android.material:material:1.12.0")
 // <-- PreviewView lives here
     // Optional extras:
     // implementation("androidx.camera:camera-video")

@@ -14,6 +14,9 @@ public class User implements Serializable {
     private String email;
     private String phone; // optional
     private String userType;
+    private String profilePicUrl;
+
+
 
     public User() {
         // required for firebase
@@ -24,6 +27,7 @@ public class User implements Serializable {
         this.password = password;
         this.email = email;
         this.phone = phone;
+        this.profilePicUrl = null;
     }
 
     public User(String name, String password, String email) {
@@ -31,14 +35,16 @@ public class User implements Serializable {
         this.password = password;
         this.email = email;
         this.phone = null;
+        this.profilePicUrl = null;
     }
 
-    public User(String janeSmith, String mail, String number, String password456, String organizer, Object o) {
+    public User(String janeSmith, String mail, String number, String password456, String organizer) {
         this.name = janeSmith;
         this.password = password456;
         this.email = mail;
         this.phone = number;
         this.userType = organizer;
+        this.profilePicUrl = null;
     }
 
     public String getName() {
@@ -79,5 +85,13 @@ public class User implements Serializable {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getProfilePicUrl() {
+        return profilePicUrl;
+    }
+
+    public void setProfilePicUrl(String profilePicUrl) {
+        this.profilePicUrl = profilePicUrl;
     }
 }

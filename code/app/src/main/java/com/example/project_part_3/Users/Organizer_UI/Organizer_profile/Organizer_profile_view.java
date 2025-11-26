@@ -3,28 +3,35 @@ package com.example.project_part_3.Users.Organizer_UI.Organizer_profile;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
-import com.example.project_part_3.Users.User;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class Organizer_profile_view extends Fragment {
+    private Database db;
+    private String username;
+    private ImageView OrganizerProfileImageView;
+    private Uri ImageUri;
 
     @Nullable
     @Override
@@ -35,11 +42,16 @@ public class Organizer_profile_view extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Database db = new Database(FirebaseFirestore.getInstance());
+        db = new Database(FirebaseFirestore.getInstance());
 
         //get password
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        String username = prefs.getString("username", "");
+        username = prefs.getString("username", "");
+
+        OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
+        loadProfileImage();
+
+        OrganizerProfileImageView.setOnClickListener(v -> showImagePopup());
 
         //reset password here
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
@@ -109,11 +121,28 @@ public class Organizer_profile_view extends Fragment {
         });
 
         //delete user
-        Button delete = view.findViewById(R.id.pass_Reset);
+        Button delete = view.findViewById(R.id.delete_user_button);
         delete.setOnClickListener(v -> {
             db.deleteUser(username).addOnSuccessListener(user -> {});
         });
 
+    }
+
+    private void loadProfileImage() {
+        if (username != null && !username.isEmpty()) {
+            db.fetchUser(username).addOnSuccessListener(user -> {
+                if (user != null && user.getProfilePicUrl() != null) {
+                    Glide.with(requireContext())
+                            .load(user.getProfilePicUrl())
+                            .placeholder(android.R.drawable.sym_def_app_icon)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                            .dontAnimate()
+                            .into(OrganizerProfileImageView);
+                }
+            }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to load profile image.", e);
+            });
+        }
     }
 
     private void InputDialog(InputDialogCallback callback){
@@ -135,6 +164,53 @@ public class Organizer_profile_view extends Fragment {
                 .create();
 
         dialog.show();
+    }
+
+    private void showImagePopup() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.image_popup, null);
+
+        ImageView popupImagePreview = dialogView.findViewById(R.id.popup_image_preview);
+        Button changeImageButton = dialogView.findViewById(R.id.popup_change_image_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        Glide.with(requireContext())
+                .load(OrganizerProfileImageView.getDrawable())
+                .into(popupImagePreview);
+
+        changeImageButton.setOnClickListener(v -> {
+            galleryLauncher.launch("image/*");
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    ImageUri = uri;
+                    uploadProfilePicture();
+                }
+            });
+    private void uploadProfilePicture() {
+        if (ImageUri != null) {
+            db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {
+                String imageUrl = downloadUrl.toString();
+                db.fetchUser(username).addOnSuccessListener(user -> {
+                    if (user != null) {
+                        user.setProfilePicUrl(imageUrl);
+                        db.setUser(user);
+                        Glide.with(requireContext()).load(imageUrl).into(OrganizerProfileImageView);
+                    }
+                });
+            }).addOnFailureListener(e -> {
+            });
+        }
     }
 }
 
