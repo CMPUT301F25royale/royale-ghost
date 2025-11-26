@@ -2,6 +2,7 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.widget.Toast;
 
 
 import com.google.zxing.BarcodeFormat;
@@ -29,6 +30,7 @@ public class QRCodeGenerator {
         }
         Bitmap QRCodeImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 
+        QRCodeImage.setPixels(pixels, 0, size, 0, 0, size, size); // Set the bitmap pixels
         return QRCodeImage;
     }
 

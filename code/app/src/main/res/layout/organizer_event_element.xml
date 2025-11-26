@@ -94,14 +94,17 @@
         />
 
     <ImageButton
+        android:id="@+id/organizer_event_qr_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:id="@+id/organizer_event_qr_button"
         android:layout_margin="8dp"
-        android:contentDescription="QR code"
+        android:src="@drawable/ic_qr_code"
+        android:scaleType="fitXY"
+        android:background="@null"
+        android:contentDescription="@string/back"
         app:layout_constraintTop_toBottomOf="@id/organizer_event_capacity"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_secure"/>
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

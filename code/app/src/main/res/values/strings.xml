@@ -19,4 +19,7 @@
     <string name="email">Email</string>
     <string name="enter_your_name">Enter your name...</string>
     <string name="enter_your_password">Enter your password...</string>
+    <string name="save_to_photos">Save to photos</string>
+    <string name="back">back</string>
+    <string name="qr_code">QR Code</string>
 </resources>

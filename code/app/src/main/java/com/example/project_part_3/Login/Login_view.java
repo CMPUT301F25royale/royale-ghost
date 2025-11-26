@@ -40,8 +40,6 @@ public class Login_view extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
     }
 
     @Override
@@ -113,28 +111,5 @@ public class Login_view extends Fragment {
             });
 
         });
-    }
-
-    public void navigationBasedonType(String userType, String userEmail, NavController navController){
-        switch (userType) {
-            case "Admin":
-                navController.navigate(R.id.action_loginFragment_to_admin_main);
-                break;
-            case "Organizer":
-                Bundle bundleO = new Bundle();
-                bundleO.putString("userEmail", userEmail);
-                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_organizer_main, bundleO);
-                break;
-            case "Entrant":
-                Bundle bundleE = new Bundle();
-                bundleE.putString("userEmail", userEmail);
-                Toast.makeText(getActivity(), userEmail, Toast.LENGTH_SHORT).show();
-                navController.navigate(R.id.action_loginFragment_to_entrant_main, bundleE);
-                break;
-            default:
-                Toast.makeText(getContext(), "Invalid user type!", Toast.LENGTH_SHORT).show();
-                break;
-        }
     }
 }
