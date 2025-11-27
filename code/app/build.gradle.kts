@@ -70,4 +70,6 @@ dependencies {
 
     // ===== QR Code Generation Stuff =====
     implementation("com.google.zxing:core:3.5.4")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")}
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.guava:guava:31.1-android")
+}
