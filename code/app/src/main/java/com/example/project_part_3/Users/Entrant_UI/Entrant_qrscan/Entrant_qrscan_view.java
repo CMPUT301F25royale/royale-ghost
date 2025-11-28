@@ -38,7 +38,8 @@ public class Entrant_qrscan_view extends Fragment {
 
     private PreviewView cameraPreviewView;
     private ExecutorService cameraExecutor;
-    private boolean isProcessingQr = false; // Flag to prevent duplicate scans
+    private boolean isProcessingQr = false;
+
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -85,6 +86,12 @@ public class Entrant_qrscan_view extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        isProcessingQr = false;
+    }
+
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture
                 = ProcessCameraProvider.getInstance(requireContext());
@@ -126,8 +133,6 @@ public class Entrant_qrscan_view extends Fragment {
                             }
 
                             startActivity(intent);
-                        } else {
-                            Toast.makeText(requireContext(), "Invalid QR code", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
