@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">code</string>
+    <string name="app_name">RoyaleEventApp</string>
     <string name="login_welcome">Login</string>
     <string name="signup_welcome">Sign up</string>
     <string name="Welcome_text">Welcome! Please login or sign up if you already have an account</string>

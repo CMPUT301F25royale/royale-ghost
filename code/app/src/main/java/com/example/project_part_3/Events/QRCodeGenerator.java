@@ -1,10 +1,12 @@
 package com.example.project_part_3.Events;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.widget.Toast;
 
 
+import com.example.project_part_3.R;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -14,8 +16,7 @@ public class QRCodeGenerator {
 
     final static int size = 256;
     public static Bitmap generateQRCode(String id) throws WriterException {
-
-        String data = "myeventapp://event/"+id;
+        String data = "RoyaleEventApp" + "://event/" + id;
         BitMatrix QRCode = new MultiFormatWriter().encode(data, BarcodeFormat.QR_CODE, size, size);
 
         int[] pixels = new int[size * size];

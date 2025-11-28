@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ public class Entrant_qrscan_view extends Fragment {
 
     private PreviewView cameraPreviewView;
     private ExecutorService cameraExecutor;
+    private boolean isProcessingQr = false; // Flag to prevent duplicate scans
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -105,20 +107,30 @@ public class Entrant_qrscan_view extends Fragment {
                 .build();
 
         imageAnalysis.setAnalyzer(cameraExecutor, new QR_code_handler(qrCode -> {
-            // TODO: fix bug
-            if (isAdded() && getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    if (qrCode != null) {
-                        String eventID = getEventIDFromQRCode(qrCode);
-                        if (eventID != null) {
-                            Intent intent = new Intent(requireActivity(), entrant_event_detail_activity.class);
+            if (isProcessingQr) return;
 
+            if (qrCode != null) {
+                String eventID = getEventIDFromQRCode(qrCode);
+
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (eventID != null && !eventID.isEmpty()) {
+                            isProcessingQr = true; // Stop further processing
+
+                            Intent intent = new Intent(requireActivity(), entrant_event_detail_activity.class);
                             intent.putExtra("eventId", eventID);
-                            intent.putExtra("viewerUserEmail", getArguments().getString("userEmail"));
+
+                            Bundle args = getArguments();
+                            if (args != null) {
+                                intent.putExtra("viewerUserEmail", args.getString("userEmail"));
+                            }
+
                             startActivity(intent);
+                        } else {
+                            Toast.makeText(requireContext(), "Invalid QR code", Toast.LENGTH_SHORT).show();
                         }
-                    }
-                });
+                    });
+                }
             }
         }));
 
@@ -140,8 +152,8 @@ public class Entrant_qrscan_view extends Fragment {
     }
 
     private String getEventIDFromQRCode(String qrCode) {
-        if (qrCode.startsWith("myeventapp://event/")) {
-            return qrCode.replace("myeventapp://event/", "");
+        if (qrCode.startsWith("RoyaleEventApp://event/")) {
+            return qrCode.replace("RoyaleEventApp://event/", "");
         }
         return null;
     }
