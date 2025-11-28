@@ -35,8 +35,6 @@ public class Organizer_entrant_view extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
-        db = new Database(FirebaseFirestore.getInstance());
     }
 
     @Nullable
@@ -48,6 +46,9 @@ public class Organizer_entrant_view extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        model = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
+        db = new Database(FirebaseFirestore.getInstance());
 
         setUpBackButton(view);
         model.getSelectedEvent().observe(getViewLifecycleOwner(), event -> {
@@ -64,7 +65,7 @@ public class Organizer_entrant_view extends Fragment {
     }
 
     public void setUpBackButton(View view) {
-        ImageButton back = view.findViewById(R.id.organizer_event_view_back_button); // Ensure this ID exists in this layout
+        ImageButton back = view.findViewById(R.id.organizer_event_view_back_button);
         if (back != null) {
             back.setOnClickListener(v -> {
                 NavController navBack = NavHostFragment.findNavController(this);

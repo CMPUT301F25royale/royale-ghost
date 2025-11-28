@@ -39,7 +39,6 @@ public class Organizer_main_fragment extends Fragment {
             String email = getArguments().getString("userEmail");
             if (email != null && !email.isEmpty()) {
                 sharedViewModel.setUserEmail(email);
-                Toast.makeText(getContext(), "Email Received: " + email, Toast.LENGTH_LONG).show();
             }
         }
     }

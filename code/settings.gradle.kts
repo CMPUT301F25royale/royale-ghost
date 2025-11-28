@@ -18,6 +18,7 @@ dependencyResolutionManagement {
         mavenCentral()
         // Add this line to include the repository for CameraX and other libraries
         maven { url = uri("https://maven.google.com") }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
