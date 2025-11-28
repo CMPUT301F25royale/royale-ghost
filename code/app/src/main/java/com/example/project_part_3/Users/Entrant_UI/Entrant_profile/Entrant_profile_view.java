@@ -35,6 +35,7 @@ public class Entrant_profile_view extends Fragment {
     private String username;
     private ImageView profileImageView;
     private Uri ImageUri;
+    private String name;
 
 
     @Nullable
@@ -59,6 +60,7 @@ public class Entrant_profile_view extends Fragment {
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
         db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+            name = user.getName();
             profileName.setText("Profile: " + user.getName());
         });
 
@@ -231,8 +233,8 @@ public class Entrant_profile_view extends Fragment {
             });
     private void uploadProfilePicture() {
         if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.toString();
+            db.uploadImage(ImageUri, "profile_pic", "profile pic of"+username, username, null).addOnSuccessListener(downloadUrl -> {
+                String imageUrl = downloadUrl.getUrl();
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
                         user.setProfilePicUrl(imageUrl);

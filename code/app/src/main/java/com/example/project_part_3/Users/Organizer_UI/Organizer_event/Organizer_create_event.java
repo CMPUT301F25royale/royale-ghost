@@ -32,21 +32,7 @@ import java.util.Date;
 public class Organizer_create_event extends Organizer_create_edit_event_template {
 
 
-    @Override
-    protected void pushEventToDatabase(Database db, Event event) {
-        db.addEvent(event).addOnSuccessListener(success -> {
-            if (success) {
-                Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show();
-                // Navigate back to the event list
-                NavController navController = NavHostFragment.findNavController(this);
-                navController.navigate(R.id.create_to_event);
-            } else {
-                Toast.makeText(getContext(), "Failed to publish event.", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        });
-    }
+
 
     @Override
     protected void setupBackButton(@NonNull View view) {

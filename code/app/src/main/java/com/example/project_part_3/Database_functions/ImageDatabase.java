@@ -3,7 +3,7 @@ package com.example.project_part_3.Database_functions;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.ImageMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,37 +21,16 @@ import java.util.List;
 public class ImageDatabase {
 
     private static ImageDatabase instance;
-    private ArrayList<Image_holder> database;
+    private ArrayList<ImageMetadata> database;
 
-    private final MutableLiveData<List<Image_holder>> allImagesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<ImageMetadata>> allImagesLiveData = new MutableLiveData<List<ImageMetadata>>();
 
-    public LiveData<List<Image_holder>> getAllImagesLiveData() {
+    public LiveData<List<ImageMetadata>> getAllImagesLiveData() {
         return allImagesLiveData;
     }
 
     private ImageDatabase(){
         database = new ArrayList<>();
-        database.add(new Image_holder(
-                null,
-                "Profile picture of user John Doe",
-                "profile"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Official poster for the Annual Tech Conference 2025",
-                "poster"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Avatar for Jane Smith",
-                "profile"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Promotional banner for the Summer Music Festival",
-                "poster"
-        , null));
-
     }
 
     public static synchronized ImageDatabase getInstance() {
@@ -61,17 +40,17 @@ public class ImageDatabase {
         return instance;
     }
 
-    public Boolean addImage(Image_holder image){ //
+    public Boolean addImage(ImageMetadata image){ //
         database.add(image);
         return true;
     }
 
-    public Boolean removeImage(Image_holder image){
+    public Boolean removeImage(ImageMetadata image){
         return database.remove(image);
     }
 
-    public Image_holder getImage(String token){
-        for (Image_holder image : database) {
+    public ImageMetadata getImage(String token){
+        for (ImageMetadata image : database) {
             if (image.getDescription().contains(token)) {
                 return image;
             }
@@ -79,7 +58,7 @@ public class ImageDatabase {
         return null;
     }
 
-    public ArrayList<Image_holder> getAllImages(){
+    public ArrayList<ImageMetadata> getAllImages(){
         return new ArrayList<>(database);
     }
 

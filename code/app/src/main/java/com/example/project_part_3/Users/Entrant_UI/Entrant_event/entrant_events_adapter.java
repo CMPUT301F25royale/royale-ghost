@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -65,11 +66,15 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
 
         h.title.setText(e.getTitle() != null ? e.getTitle() : "—");
 
-        Bitmap bmp = e.getPoster();
-        if (bmp != null) {
-            h.img.setImageBitmap(bmp);
+        if (e.getPosterImageUrl() != null && !e.getPosterImageUrl().isEmpty()) {
+            Glide.with(ctx)
+                    .load(e.getPosterImageUrl())
+                    .placeholder(android.R.drawable.sym_def_app_icon)
+                    .error(android.R.drawable.sym_def_app_icon)
+                    .into(h.img);
         } else {
-            h.img.setImageResource(android.R.drawable.ic_menu_report_image);
+            Glide.with(ctx).clear(h.img);
+            h.img.setImageResource(android.R.drawable.sym_def_app_icon);
         }
 
         // View details

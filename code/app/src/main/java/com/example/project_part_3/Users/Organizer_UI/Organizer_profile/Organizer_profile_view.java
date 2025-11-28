@@ -20,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.Users.Organizer;
-import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,9 +27,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.R;
 
@@ -232,9 +228,10 @@ public class Organizer_profile_view extends Fragment {
                 }
             });
     private void uploadProfilePicture() {
+        String desc = "profile picture" + username;
         if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.toString();
+            db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(downloadUrl -> {
+                String imageUrl = downloadUrl.getUrl();
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
                         user.setProfilePicUrl(imageUrl);
