@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Entrant extends User {
-    List<String> eventsAppliedFor; // the IDs of events the user has applied for
+    List<String> eventsAppliedFor;
 
     public Entrant() {
         super();

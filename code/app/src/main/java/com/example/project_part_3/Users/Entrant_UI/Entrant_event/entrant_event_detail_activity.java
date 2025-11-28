@@ -158,6 +158,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                     if (isOnWaitlist) {
                         joinBtn.setText("Entered");
                         joinBtn.setEnabled(false);
+
                     } else {
                         joinBtn.setText("Enter lottery");
                         joinBtn.setEnabled(true);
@@ -170,6 +171,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                                         Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
                                         // Bump the waitlist count on screen... will add checks and such later.
                                         List<String> list = event.getWaitlistUserIds();
+                                        db.addEventToUser(viewerUserEmail, event.getId());//adds to array holding each event User signed up for
                                         int newCount = (list == null ? 0 : list.size()) + 1;
                                         vWaitlist.setText(String.valueOf(newCount));
                                     })

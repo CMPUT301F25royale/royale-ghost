@@ -57,7 +57,7 @@ public class Login_view extends Fragment {
         submit.setOnClickListener(v -> {
             submit.setEnabled(false); // Disable the button to prevent multiple clicks
 
-            String nameText = name.getText().toString().toLowerCase();
+            String nameText = name.getText().toString();// please do not change this line whoever edited this
             String passwordText = password.getText().toString();
 
             SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);

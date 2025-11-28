@@ -89,7 +89,6 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     private void bindEventView(EventViewHolder holder, Event event) {
         if (event == null) return;
-        // UI binding logic remains the same...
         holder.eventTitle.setText(event.getTitle());
         holder.eventLocation.setText(event.getLocation());
 
@@ -131,7 +130,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     private void bindImageView(ImageViewHolder holder, Image_holder image) {
         if (image == null) return;
-        holder.imageView.setImageBitmap(image.getImage());
+        holder.imageView.setImageBitmap(null);//@TODO: add image
         holder.description.setText(image.getDescription());
 
         holder.deleteButton.setOnClickListener(v -> {

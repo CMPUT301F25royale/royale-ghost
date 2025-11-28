@@ -2,6 +2,8 @@
 
 package com.example.project_part_3.Signup;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -77,6 +79,13 @@ public class Sign_up_view extends Fragment {
             String password = Objects.requireNonNull(passwordText.getText()).toString();
             String email = Objects.requireNonNull(emailText.getText()).toString();
             String phone = phoneText.getText().toString();
+
+            SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("username", name);
+            editor.putString("password", password);
+            editor.apply();
+
             if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
