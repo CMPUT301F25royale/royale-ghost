@@ -35,6 +35,7 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
+    private Boolean lotteryDone;
     private ImageMetadata imageinfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
@@ -89,6 +90,7 @@ public class Event {
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
         this.imageinfo = null;
+        resetLotteryState();
     }
 
     public Event(String title,
@@ -115,6 +117,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        resetLotteryState();
         this.imageinfo = null;
     }
 
@@ -146,6 +149,8 @@ public class Event {
         this.capacity = capacity;
         this.price = price;
         this.imageinfo = null;
+        resetLotteryState();
+
     }
 
     public Event(
@@ -177,6 +182,8 @@ public class Event {
         this.capacity = capacity;
         this.price = price;
         this.imageinfo = null;
+        resetLotteryState();
+
     }
 
     /**
@@ -237,6 +244,9 @@ public class Event {
 
     public Integer getCapacity(){ return capacity; }
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public Boolean getLotteryDone() { return lotteryDone; }
+    public void setLotteryDone(Boolean lotteryDone) { this.lotteryDone = lotteryDone; }
 
     public String getId() { return id; }
     public void setId(String eventId) { this.id = eventId; }
@@ -379,6 +389,15 @@ public class Event {
 
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
+    }
+
+    public void resetLotteryState() {
+        waitlistUserIds = new ArrayList<>();
+        selectedUserIds = new ArrayList<>();
+        alternatesUserIds = new ArrayList<>();
+        confirmedUserIds = new ArrayList<>();
+        declinedUserIds = new ArrayList<>();
+        lotteryDone = false;
     }
 }
 

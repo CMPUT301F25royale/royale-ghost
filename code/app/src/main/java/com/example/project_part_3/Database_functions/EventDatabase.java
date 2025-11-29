@@ -130,6 +130,7 @@ public class EventDatabase {
     }
 
     public void addEvent(Event event, OnEventAddListener listener) {
+        event.setLotteryDone(false);
         db.addEvent(event).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult()) {
                 listener.onSuccess();
