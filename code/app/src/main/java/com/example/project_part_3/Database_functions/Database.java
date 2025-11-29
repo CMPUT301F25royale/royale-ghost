@@ -485,14 +485,35 @@ public class Database {
                 });
     }
 
+    /**
+     * Adds an event to a user
+     *
+     * @param userId The ID of the user to add the event to.
+     * @param eventId The ID of the event to add to the user.
+     * @return A task that completes when the event is added to the user.
+     */
     public Task<Void> addEventToUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId)
                 .update("eventsAppliedFor", FieldValue.arrayUnion(eventId));
     }
 
+    /**
+     * Remove an event from a user.
+     *
+     * @param userId The ID of the user to remove the event from.
+     * @param eventId The ID of the event to remove from the user.
+     * @return A task that completes when the event is removed from the user.
+     */
     public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
     }
+
+    /**
+     * Get a list of all entrants who have accepted an invitation to a given event.
+     *
+     * @param event The event to get entrants for.
+     * @return A task that contains a list of entrants.
+     */
     public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = event.getAttendant_list();
 
@@ -524,6 +545,13 @@ public class Database {
         });
     }
 
+    /**
+     * Get a list of all entrants who are on the waitlist for an event.
+     *
+     * @param event The event to get entrants for.
+     * @return A task that contains a list of entrants.
+     */
+
     public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = new ArrayList<>(event.getWaitlistUserIds());
 
@@ -553,11 +581,25 @@ public class Database {
         });
     }
 
+    /**
+     * Decline an entrant from an event.
+     *
+     * @param event The event to decline the entrant from.
+     * @param entrant The entrant to decline.
+     * @return A task that completes when the entrant is declined.
+     */
     public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
         event.declineAttendant(entrant.getEmail());
         return updateEvent(event);
     }
 
+    /**
+     * Upload an image to Firebase Storage.
+     *
+     * @param imageUri The URI of the image to upload.
+     * @param folderPath The path to the folder to upload the image to.
+     * @return A task that completes when the image is uploaded.
+     */
     public Task<Uri> uploadImage(@NonNull Uri imageUri, @NonNull String folderPath) {
         String fileName = "IMG_" + System.currentTimeMillis() + ".jpg";
         StorageReference storageRef = storage.getReference().child(folderPath + "/" + fileName);
@@ -571,6 +613,12 @@ public class Database {
         });
     }
 
+    /**
+     * Delete an image from Firebase Storage.
+     *
+     * @param imageUrl The URL of the image to delete.
+     * @return A task that completes when the image is deleted.
+     */
     public Task<Void> deleteImageByUrl(@NonNull String imageUrl) {
         StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
         return photoRef.delete();

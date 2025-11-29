@@ -18,6 +18,9 @@ import java.util.UUID;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represents an event with associated data. Contains various methods relating to interactions with users
+ */
 public class Event {
 
     private String id;
@@ -53,6 +56,8 @@ public class Event {
     private ArrayList<String> attendant_list;
     @Exclude
     private Integer attendees;
+
+
     public Event(){
         this.waitlistUserIds = new ArrayList<>();
         this.selectedUserIds = new ArrayList<>();
@@ -184,7 +189,7 @@ public class Event {
 
     /**
      * generate random eventId that is unique
-     * @param organizerId
+     * @param organizerId The ID of the organizer
      * @param title
      * @param startTimeMs
      * @return
