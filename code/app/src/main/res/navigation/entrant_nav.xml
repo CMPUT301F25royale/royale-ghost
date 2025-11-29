@@ -43,6 +43,17 @@
         </fragment>
 
     <fragment
+        android:id="@+id/entrant_notifications_fragment"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_notifications.Entrant_notifications_fragment"
+        android:label="Entrant_notifications"
+        tools:layout="@layout/organizer_notifications">
+
+        <argument
+            android:name="userEmail"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
         android:id="@+id/entrant_event_detail"
         android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_event.EntrantEventDetailFragment"
         android:label="Event details"

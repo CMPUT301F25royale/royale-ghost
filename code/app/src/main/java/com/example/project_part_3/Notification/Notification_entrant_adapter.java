@@ -25,10 +25,7 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
-    // Replace this with the actual item layout file name if it's different
     private static final int ITEM_LAYOUT = R.layout.organizer_notifications_element;
-    // ^^^ if your row XML is named differently, change this
-
     public Notification_entrant_adapter(@NonNull Context context,
                                       @NonNull List<Notification_Entrant> notifications) {
         super(context, 0, notifications);
@@ -77,9 +74,9 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                 holder.date.setText("");
             }
 
-        // Optional: bell click behavior (e.g., open event details)
+        // Should add this if specification requires it
             holder.bell.setOnClickListener(v -> {
-                // TODO: navigate to event screen using notif.getEventId(), if you want
+                // TODO: navigate to event screen using notif.getEventId()
             });
         }
 

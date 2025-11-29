@@ -14,7 +14,6 @@ public class Notification_Entrant {
     // Required empty constructor for Firestore
     public Notification_Entrant() {}
 
-    // Full constructor (all fields)
     public Notification_Entrant(String title,
                                 String entrantEmail,
                                 String message,
@@ -39,7 +38,6 @@ public class Notification_Entrant {
         this(title, entrantEmail, message, time_sent, null, null, null);
     }
 
-    // ---- Getters ----
     public String getTitle() {
         return title;
     }
