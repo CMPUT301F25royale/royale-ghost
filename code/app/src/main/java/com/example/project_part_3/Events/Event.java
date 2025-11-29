@@ -37,6 +37,7 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
+    private Boolean lotteryDone;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -88,6 +89,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        resetLotteryState();
     }
 
     public Event(String title,
@@ -114,6 +116,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        resetLotteryState();
     }
 
     public Event(
@@ -143,6 +146,8 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        resetLotteryState();
+
     }
 
     public Event(
@@ -173,6 +178,8 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        resetLotteryState();
+
     }
 
     /**
@@ -227,6 +234,9 @@ public class Event {
 
     public Integer getCapacity(){ return capacity; }
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public Boolean getLotteryDone() { return lotteryDone; }
+    public void setLotteryDone(Boolean lotteryDone) { this.lotteryDone = lotteryDone; }
 
     public String getId() { return id; }
     public void setId(String eventId) { this.id = eventId; }
@@ -342,6 +352,7 @@ public class Event {
         return TimeUnit.MILLISECONDS.toHours(diff);
     }
 
+
     @Exclude
     public String registrationStatus() {
         if (!registrationOpen()) {
@@ -369,6 +380,15 @@ public class Event {
 
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
+    }
+
+    public void resetLotteryState() {
+        waitlistUserIds = new ArrayList<>();
+        selectedUserIds = new ArrayList<>();
+        alternatesUserIds = new ArrayList<>();
+        confirmedUserIds = new ArrayList<>();
+        declinedUserIds = new ArrayList<>();
+        lotteryDone = false;
     }
 }
 

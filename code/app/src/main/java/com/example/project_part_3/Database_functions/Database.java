@@ -209,7 +209,7 @@ public class Database {
      * @return A task that completes when the event is added to the database.
      */
     public Task<Boolean> addEvent(@NonNull Event event) {
-
+        event.setLotteryDone(false);
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document();
         event.setId(docRef.getId());
