@@ -5,12 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +20,10 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.project_part_3.Database_functions.Database;
+import com.example.project_part_3.Database_functions.NotificationMessagingService;
 import com.example.project_part_3.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.example.project_part_3.Database_functions.NotificationMessagingService;
-
 
 public class Login_view extends Fragment {
     private TextView name;
@@ -57,7 +50,7 @@ public class Login_view extends Fragment {
         submit.setOnClickListener(v -> {
             submit.setText("Logging in...");
             submit.setEnabled(false);
-            // handles the login logic in a separate thread
+            // handles the login logic in a separate thread to allow UI update
             new Handler(Looper.getMainLooper()).post(() -> {
                 performLogin(db);
             });
@@ -92,27 +85,33 @@ public class Login_view extends Fragment {
                 String userType = user.getUserType();
                 String userEmail = user.getEmail();
 
+                // Create arguments for navigation
                 Bundle args = new Bundle();
                 args.putString("userEmail", userEmail);
-                    // Need to save the token for this user to get notifications from cloud
-                    FirebaseMessaging.getInstance().getToken()
-                            .addOnCompleteListener(task -> {
-                                if (!task.isSuccessful()) {
-                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
-                                    return;
-                                }
-                                String token = task.getResult();
-                                if (token != null) {
-                                    NotificationMessagingService.saveTokenForEmail(userEmail, token);
-                                }
-                            });
 
+                // Save token for notifications (runs in background)
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (!task.isSuccessful()) {
+                                Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                                return;
+                            }
+                            String token = task.getResult();
+                            if (token != null) {
+                                NotificationMessagingService.saveTokenForEmail(userEmail, token);
+                            }
+                        });
 
-                    Bundle args = new Bundle();
-                    args.putString("userEmail", userEmail);
+                // Save email and password to shared preferences
+                SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
 
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("userEmail", userEmail);
+                editor.putString("userType", userType);
+                editor.apply();
+
+                // Navigate to appropriate fragment based on user type
                 NavController nav = Navigation.findNavController(requireView());
-
                 try {
                     switch (userType) {
                         case "Admin":

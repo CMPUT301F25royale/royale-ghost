@@ -106,6 +106,16 @@ public class Sign_up_view extends Fragment {
                                 }
                             });
                     clearForm();
+
+                    // Save email and password to shared preferences
+                    SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("userEmail", email);
+                    editor.putString("userType", selectedOption);
+                    editor.apply();
+
+                    // Navigate based on user type
                     Bundle args = new Bundle();
                     args.putString("userEmail", email);
                     NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
