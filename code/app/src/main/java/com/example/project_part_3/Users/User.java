@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import android.util.Log;
@@ -21,6 +22,7 @@ public class User implements Serializable {
     private String userType;
     private String profilePicUrl;
     private ImageMetadata imageInfo;
+    private HashSet<String> deviceIDs;
 
 
 
@@ -111,4 +113,8 @@ public class User implements Serializable {
     public void setProfilePicUrl(String profilePicUrl) {
         this.profilePicUrl = profilePicUrl;
     }
+
+    public HashSet<String> getDeviceIDs() {return deviceIDs;}
+
+    public void addDeviceID(String deviceID) {this.deviceIDs.add(deviceID);}
 }
