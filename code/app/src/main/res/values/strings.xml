@@ -2,7 +2,7 @@
     <string name="app_name">RoyaleEventApp</string>
     <string name="login_welcome">Login</string>
     <string name="signup_welcome">Sign up</string>
-    <string name="Welcome_text">Welcome! Please login or sign up if you already have an account</string>
+    <string name="Welcome_text">Please login, or sign up if you already have an account</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="name_sign_up">Name</string>
     <string name="password_sign_up">Password</string>
