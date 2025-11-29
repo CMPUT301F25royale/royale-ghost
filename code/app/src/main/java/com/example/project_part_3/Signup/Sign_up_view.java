@@ -18,9 +18,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.project_part_3.Database_functions.NotificationMessagingService;
 import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.R;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Objects;
 
@@ -86,6 +88,18 @@ public class Sign_up_view extends Fragment {
             sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
                 if (wasAdded) {
                     Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                    // Grab token now!
+                    FirebaseMessaging.getInstance().getToken()
+                            .addOnCompleteListener(task -> {
+                                if (!task.isSuccessful()) {
+                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                                    return;
+                                }
+                                String token = task.getResult();
+                                if (token != null) {
+                                    NotificationMessagingService.saveTokenForEmail(email, token);
+                                }
+                            });
                     clearForm();
                     Bundle args = new Bundle();
                     args.putString("userEmail", email);

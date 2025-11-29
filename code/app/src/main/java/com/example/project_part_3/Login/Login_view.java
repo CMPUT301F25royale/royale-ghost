@@ -9,6 +9,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,9 @@ import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Login.Login_model;
 import com.example.project_part_3.R;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.example.project_part_3.Database_functions.NotificationMessagingService;
+
 
 public class Login_view extends Fragment {
     private String userType;
@@ -84,6 +88,20 @@ public class Login_view extends Fragment {
 
                     String userType = user.getUserType();
                     String userEmail = user.getEmail();
+
+                    // Need to save the token for this user to get notifications from cloud
+                    FirebaseMessaging.getInstance().getToken()
+                            .addOnCompleteListener(task -> {
+                                if (!task.isSuccessful()) {
+                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                                    return;
+                                }
+                                String token = task.getResult();
+                                if (token != null) {
+                                    NotificationMessagingService.saveTokenForEmail(userEmail, token);
+                                }
+                            });
+
 
                     Bundle args = new Bundle();
                     args.putString("userEmail", userEmail);
