@@ -117,16 +117,18 @@
         <Button
             android:id="@+id/create_event_registration_open_button"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set Open"/>
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:textColor="@color/black"
+            android:text="Opens"/>
         <Button
             android:id="@+id/create_event_registration_close_button"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
             android:layout_marginStart="8dp"
-            android:text="Set Close"/>
+            android:textColor="@color/black"
+            android:text="Closes"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/create_event_date_time_container"
@@ -134,6 +136,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:gravity="center_vertical"
+        android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
         <TextView
@@ -145,16 +148,20 @@
         <Button
             android:id="@+id/create_event_date_time_start_button"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set Start" />
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:text="Starts"
+            android:textColor="@color/black"
+            />
         <Button
             android:id="@+id/create_event_date_time_end_button"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
             android:layout_marginStart="8dp"
-            android:text="Set End" />
+            android:text="Ends"
+            android:textColor="@color/black"
+            />
     </LinearLayout>
 
     <TextView
@@ -199,16 +206,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/create_event_price_text"
         app:layout_constraintTop_toTopOf="@id/create_event_price_text" />
-    <Switch
+
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/create_event_geolocation_switch"
+        android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Geolocation"
+        android:checked="true"
+        app:trackTint="@color/switch_track_selector"
+        android:text="Geolocation:"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/create_event_price_text"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
+        app:layout_constraintTop_toBottomOf="@id/create_event_price_text"/>
 
     <!-- POSTER BUTTON -->
     <Button
@@ -218,6 +227,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="Upload Poster Image"
+        android:backgroundTint="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/create_event_geolocation_switch" />
 
@@ -229,6 +239,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:text="Publish"
+        android:backgroundTint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
