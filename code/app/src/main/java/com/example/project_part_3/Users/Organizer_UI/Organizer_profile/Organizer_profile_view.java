@@ -58,18 +58,19 @@ public class Organizer_profile_view extends Fragment {
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");
 
+        // Setup Name Title
+        TextView profileName = view.findViewById(R.id.Profile_Title);
+        db.fetchUser(username).addOnSuccessListener(user -> {
+            if (user != null) {
+                profileName.setText("Profile: " + user.getName());
+            }
+        });
+
         // Setup Image
         profileImageView = view.findViewById(R.id.profile_photo);
         loadProfileImage();
         profileImageView.setOnClickListener(v -> showImagePopup());
 
-        // Setup Name Title
-        TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(username).addOnSuccessListener(user -> {
-            if (user != null) {
-                profileName.setText(user.getName());
-            }
-        });
 
         setupButtons(view, profileName);
     }

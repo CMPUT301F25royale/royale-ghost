@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.UserDatabase;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
@@ -29,6 +31,7 @@ public class Admin_profile_info extends Fragment {
     private TextView nameTextView;
     private TextView emailTextView;
     private TextView phoneTextView;
+    private ImageView profilePhoto;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,6 +55,7 @@ public class Admin_profile_info extends Fragment {
         nameTextView = view.findViewById(R.id.profile_info_name);
         emailTextView = view.findViewById(R.id.profile_info_email);
         phoneTextView = view.findViewById(R.id.profile_info_phone);
+        profilePhoto = view.findViewById(R.id.profile_info_image);
 
         Button backButton = view.findViewById(R.id.button2);
         backButton.setOnClickListener(v -> Navigation.findNavController(view).navigateUp());
@@ -75,7 +79,23 @@ public class Admin_profile_info extends Fragment {
         if (currentUser != null) {
             nameTextView.setText("Name: " + currentUser.getName());
             emailTextView.setText("Email: " + currentUser.getEmail());
-            phoneTextView.setText("Phone: " + currentUser.getPhone());
+            if (currentUser.getPhone() == null || currentUser.getPhone().isEmpty()) {
+                phoneTextView.setText("Phone: Not provided"); // Placeholder text
+            } else {
+                phoneTextView.setText("Phone: " + currentUser.getPhone());
+            }
+            if (currentUser.getProfilePicUrl() != null && currentUser.getImageInfo().getUrl() != null) {
+                Glide.with(getContext())
+                        .load(currentUser.getImageInfo().getUrl())
+                        .placeholder(R.drawable.ic_person) // Placeholder while loading
+                        .error(R.drawable.ic_person)       // Placeholder on error
+                        .into(profilePhoto);
+            } else {
+                Glide.with(getContext())
+                        .load(R.drawable.ic_person)
+                        .into(profilePhoto);
+                profilePhoto.setImageResource(R.drawable.ic_person);
+            }
         }
     }
 

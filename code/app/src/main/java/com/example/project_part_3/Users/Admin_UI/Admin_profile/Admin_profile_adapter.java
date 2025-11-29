@@ -50,11 +50,11 @@ public class Admin_profile_adapter extends ArrayAdapter<User> {
             if (profile.getImageInfo() != null && profile.getImageInfo().getUrl() != null) {
                 Glide.with(getContext())
                         .load(profile.getImageInfo().getUrl())
-                        .placeholder(android.R.drawable.sym_def_app_icon) // Placeholder while loading
-                        .error(android.R.drawable.sym_def_app_icon)       // Placeholder on error
+                        .placeholder(R.drawable.ic_person) // Placeholder while loading
+                        .error(R.drawable.ic_person)       // Placeholder on error
                         .into(holder.imageView);
             } else {
-                holder.imageView.setImageResource(android.R.drawable.sym_def_app_icon);
+                holder.imageView.setImageResource(R.drawable.ic_person);
             }
         }
         return view;
