@@ -1,5 +1,3 @@
-// In file: app/src/main/java/com/example/project_part_3/Signup/Sign_up_view.java
-
 package com.example.project_part_3.Signup;
 
 import android.content.Context;
@@ -22,7 +20,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.Database_functions.NotificationMessagingService;
-import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -40,7 +37,6 @@ public class Sign_up_view extends Fragment {
     private TextInputEditText phoneText;
     Sign_up_model sign_up_model;
 
-
     public Sign_up_view() {
         // Required empty public constructor
     }
@@ -49,6 +45,7 @@ public class Sign_up_view extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
     public static Sign_up_view newInstance(String param1, String param2) {
         Sign_up_view fragment = new Sign_up_view();
         Bundle args = new Bundle();
@@ -78,61 +75,70 @@ public class Sign_up_view extends Fragment {
 
         submit_sign_up.setOnClickListener(v -> {
             submit_sign_up.setText("Signing up...");
-            submit_sign_up.setEnabled(false); // Disable the button to prevent multiple clicks
+            submit_sign_up.setEnabled(false);
 
-            String name = Objects.requireNonNull(nameText.getText()).toString();
-            String password = Objects.requireNonNull(passwordText.getText()).toString();
-            String email = Objects.requireNonNull(emailText.getText()).toString();
-            String phone = phoneText.getText().toString();
-            if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
-                Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                submit_sign_up.setEnabled(true); // re-enable the button after failure
-                return;
-            }
-            sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
-            sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
-                if (wasAdded) {
-                    Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                    // Grab token now!
-                    FirebaseMessaging.getInstance().getToken()
-                            .addOnCompleteListener(task -> {
-                                if (!task.isSuccessful()) {
-                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
-                                    return;
-                                }
-                                String token = task.getResult();
-                                if (token != null) {
-                                    NotificationMessagingService.saveTokenForEmail(email, token);
-                                }
-                            });
-                    clearForm();
+            // Use Handler to allow UI to update text before heavy logic runs
+            new Handler(Looper.getMainLooper()).post(this::performSignUp);
+        });
+    }
 
-                    // Save email and password to shared preferences
+    private void performSignUp() {
+        String name = Objects.requireNonNull(nameText.getText()).toString();
+        String password = Objects.requireNonNull(passwordText.getText()).toString();
+        String email = Objects.requireNonNull(emailText.getText()).toString();
+        String phone = phoneText.getText().toString();
+
+        if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
+            Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            resetButton();
+            return;
+        }
+
+        sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
+        sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+            if (wasAdded) {
+                Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                // get token
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                NotificationMessagingService.saveTokenForEmail(email, task.getResult());
+                            }
+                        });
+
+                // save preferences
+                if (getContext() != null) {
                     SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("userEmail", email);
-                    editor.putString("userType", selectedOption);
+                    editor.putString("userType", selectedOption); // SelectedOption is still valid here
                     editor.apply();
-
-                    // Navigate based on user type
-                    Bundle args = new Bundle();
-                    args.putString("userEmail", email);
-                    NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
-                    if ("Organizer".equals(selectedOption)) {
-                        navController.navigate(R.id.action_sign_up_fragment_to_organizer_main_fragment, args);
-                    } else if ("Entrant".equals(selectedOption)) {
-                        navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
-                    submit_sign_up.setEnabled(true); // re-enable the button after failure
                 }
-            }).addOnFailureListener(e -> {
-                Log.d("Sign_up", "Failed to sign up");
+
+                // navigate
+                Bundle args = new Bundle();
+                args.putString("userEmail", email);
+                NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
+
+                if ("Organizer".equals(selectedOption)) {
+                    navController.navigate(R.id.action_sign_up_fragment_to_organizer_main_fragment, args);
+                } else if ("Entrant".equals(selectedOption)) {
+                    navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
+                }
+
+                // clear form
+                clearForm();
+
+            } else {
+                Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
+                resetButton();
+            }
+        }).addOnFailureListener(e -> {
+            Log.d("Sign_up", "Failed to sign up");
+            if (getContext() != null) {
                 Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                submit_sign_up.setEnabled(true); // re-enable the button after failure
-            });
+            }
+            resetButton();
         });
     }
 
@@ -160,7 +166,6 @@ public class Sign_up_view extends Fragment {
         emailText.setText("");
         phoneText.setText("");
         Organizer_button_sign_up.setBackgroundColor(Color.DKGRAY);
-        selectedOption = null;
-        resetButton(); // Ensure button is reset when form is cleared
+        resetButton();
     }
 }

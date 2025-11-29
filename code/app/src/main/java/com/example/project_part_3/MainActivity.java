@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         if (getSharedPreferences("UserData", MODE_PRIVATE).contains("userEmail")) {
             String userEmail = getSharedPreferences("UserData", MODE_PRIVATE).getString("userEmail", "");
             String userType = getSharedPreferences("UserData", MODE_PRIVATE).getString("userType", "");
-            Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
 
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.nav_host_fragment);
