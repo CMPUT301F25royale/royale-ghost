@@ -4,18 +4,23 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.Toast;
 
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Users.Entrant;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
@@ -29,15 +34,55 @@ public class Entrant_profile_view extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Database db = new Database(FirebaseFirestore.getInstance());
+        FirebaseFirestore ff = FirebaseFirestore.getInstance();
+        Database db = new Database(ff);
 
-        //get password
-        SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        SharedPreferences prefs = requireContext()
+                .getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String username = prefs.getString("username", "");
 
-        Button passwordReset = view.findViewById(R.id.Pass_Reset);
+        SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
+        // local default = true if we don't have anything stored yet
+        boolean localPref = prefs.getBoolean("receiveNotifications", true);
+        notificationsSwitch.setChecked(localPref);
+        notificationsSwitch.setEnabled(false); // disable until we finish syncing so we dont get that stupid toggle behavior
+
+        if (username == null || username.isEmpty()) {
+            notificationsSwitch.setEnabled(false);
+        } else {
+            ff.collection("users")
+                    .document(username)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        Boolean remotePref = doc.getBoolean("receiveNotifications");
+                        boolean remoteValue = (remotePref == null) ? true : remotePref;
+
+                        // Only update UI & local if remote differs
+                        if (remoteValue != localPref) {
+                            notificationsSwitch.setChecked(remoteValue);
+
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putBoolean("receiveNotifications", remoteValue);
+                            editor.apply();
+                        }
+
+                        // Attach listener after initial state is correct
+                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
+
+                        notificationsSwitch.setEnabled(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
+                        notificationsSwitch.setEnabled(true);
+                    });
+        }
+
+
+
+    Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
             InputDialog((old,_new) -> {
                 db.fetchUser(username).addOnSuccessListener(user -> {
@@ -105,6 +150,32 @@ public class Entrant_profile_view extends Fragment {
             db.deleteUser(username).addOnSuccessListener(user -> {});
         });
 
+    }
+
+    private void attachNotificationListener(SwitchCompat notificationsSwitch,
+                                            FirebaseFirestore ff,
+                                            String username,
+                                            SharedPreferences prefs) {
+        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Update Firestore
+            ff.collection("users")
+                    .document(username)
+                    .update("receiveNotifications", isChecked)
+                    .addOnSuccessListener(unused -> {
+                        // Also update local SharedPreferences so next load is instant
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("receiveNotifications", isChecked);
+                        editor.apply();
+                    })
+                    .addOnFailureListener(e -> {
+                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
+                        android.widget.Toast.makeText(getContext(),
+                                "Failed to update notification setting",
+                                android.widget.Toast.LENGTH_SHORT).show();
+                        // revert UI if update failed
+                        buttonView.setChecked(!isChecked);
+                    });
+        });
     }
 
     private void InputDialog(InputDialogCallback callback){
