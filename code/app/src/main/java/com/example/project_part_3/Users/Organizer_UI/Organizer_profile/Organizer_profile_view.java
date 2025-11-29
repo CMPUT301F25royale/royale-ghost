@@ -230,16 +230,22 @@ public class Organizer_profile_view extends Fragment {
     private void uploadProfilePicture() {
         String desc = "profile picture" + username;
         if (ImageUri != null) {
-            db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.getUrl();
+            db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
+                if(getContext() == null) return;
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
+                        String imageUrl = ImageMetadata.getUrl();
+                        user.setImageInfo(ImageMetadata);
                         user.setProfilePicUrl(imageUrl);
+
                         db.setUser(user);
                         Glide.with(requireContext()).load(imageUrl).into(OrganizerProfileImageView);
                     }
+                }).addOnFailureListener(e -> {
+                    Log.e("EntrantProfile", "Failed to load profile image.", e);
                 });
             }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to upload profile image.", e);
             });
         }
     }

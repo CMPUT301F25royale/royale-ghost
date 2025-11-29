@@ -67,13 +67,13 @@ public class Entrant_profile_view extends Fragment {
         //reset password here
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
+            InputDialog((old, _new) -> {
                 String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getPassword().equals(old)){
+                    if (user.getPassword().equals(old)) {
                         user.setPassword(_new);
                         db.setUser(user);
-                    }else{
+                    } else {
                         Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -87,14 +87,14 @@ public class Entrant_profile_view extends Fragment {
         //reset Name
         Button nameRest = view.findViewById(R.id.name_change);
         nameRest.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
+            InputDialog((old, _new) -> {
                 String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getName().equals(old)){
+                    if (user.getName().equals(old)) {
                         user.setName(_new);
                         db.setUser(user);
                         profileName.setText(_new);
-                    }else{
+                    } else {
                         Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -104,13 +104,13 @@ public class Entrant_profile_view extends Fragment {
         //reset phone
         Button phone = view.findViewById(R.id.number_Change);
         phone.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
+            InputDialog((old, _new) -> {
                 String username = prefs.getString("username", "");
                 db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getPhone().equals(old)){
+                    if (user.getPhone().equals(old)) {
                         user.setPhone(_new);
                         db.setUser(user);
-                    }else{
+                    } else {
                         Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -120,14 +120,14 @@ public class Entrant_profile_view extends Fragment {
         //reset email
         Button emailReset = view.findViewById(R.id.change_email);
         emailReset.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
+            InputDialog((old, _new) -> {
                 String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user->{
+                db.fetchUser(username).addOnSuccessListener(user -> {
                     String name = user.getName();
                     String password = user.getPassword();
                     String number = user.getPhone();
                     db.deleteUser(username);
-                    Organizer new_user = new Organizer(name,password,_new,number);
+                    Organizer new_user = new Organizer(name, password, _new, number);
                     db.addUser(new_user);
 
                     SharedPreferences.Editor editor = prefs.edit();
@@ -179,9 +179,9 @@ public class Entrant_profile_view extends Fragment {
         }
     }
 
-    private void InputDialog(InputDialogCallback callback){
+    private void InputDialog(InputDialogCallback callback) {
         LayoutInflater inflator = LayoutInflater.from(requireContext());
-        View dialogView = inflator.inflate(R.layout.profile_popup,null);
+        View dialogView = inflator.inflate(R.layout.profile_popup, null);
 
         EditText old = dialogView.findViewById(R.id.oldpass);
         EditText _new = dialogView.findViewById(R.id.newpass);
@@ -192,7 +192,7 @@ public class Entrant_profile_view extends Fragment {
                 .setPositiveButton("OK", (d, which) -> {
                     String oldtext = old.getText().toString().trim();
                     String newtext = _new.getText().toString().trim();
-                    callback.onInputSubmitted(oldtext,newtext);
+                    callback.onInputSubmitted(oldtext, newtext);
                 })
                 .setNegativeButton("Cancel", (d, which) -> d.dismiss())
                 .create();
@@ -231,21 +231,28 @@ public class Entrant_profile_view extends Fragment {
                     uploadProfilePicture();
                 }
             });
+
     private void uploadProfilePicture() {
+        String desc = "profile picture" + username;
         if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pic", "profile pic of"+username, username, null).addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.getUrl();
+            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
+                if (getContext() == null) return;
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
+                        String imageUrl = ImageMetadata.getUrl();
+                        user.setImageInfo(ImageMetadata);
                         user.setProfilePicUrl(imageUrl);
+
                         db.setUser(user);
                         Glide.with(requireContext()).load(imageUrl).into(profileImageView);
                     }
+                }).addOnFailureListener(e -> {
+                    Log.e("EntrantProfile", "Failed to load profile image.", e);
                 });
             }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to upload profile image.", e);
             });
         }
+
     }
-
 }
-

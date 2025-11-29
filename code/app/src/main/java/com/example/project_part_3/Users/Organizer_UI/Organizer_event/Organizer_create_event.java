@@ -31,9 +31,6 @@ import java.util.Date;
 
 public class Organizer_create_event extends Organizer_create_edit_event_template {
 
-
-
-
     @Override
     protected void setupBackButton(@NonNull View view) {
         ImageButton back = view.findViewById(R.id.organizer_create_edit_event_back);

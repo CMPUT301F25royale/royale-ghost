@@ -2,15 +2,8 @@ package com.example.project_part_3.Users;
 
 import java.io.Serializable;
 
-import com.example.project_part_3.Image.ImageMetadata;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import android.util.Log;
+import com.example.project_part_3.Image.Image_datamap;
+import com.google.firebase.firestore.PropertyName;
 
 
 public class User implements Serializable {
@@ -20,7 +13,7 @@ public class User implements Serializable {
     private String phone; // optional
     private String userType;
     private String profilePicUrl;
-    private ImageMetadata imageInfo;
+    private Image_datamap imageinfo;
 
 
 
@@ -34,7 +27,7 @@ public class User implements Serializable {
         this.email = email;
         this.phone = phone;
         this.profilePicUrl = null;
-        this.imageInfo = null;
+        this.imageinfo = null;
     }
 
     public User(String name, String password, String email) {
@@ -43,7 +36,7 @@ public class User implements Serializable {
         this.email = email;
         this.phone = null;
         this.profilePicUrl = null;
-        this.imageInfo = null;
+        this.imageinfo = null;
     }
 
     public User(String janeSmith, String mail, String number, String password456, String organizer) {
@@ -53,18 +46,19 @@ public class User implements Serializable {
         this.phone = number;
         this.userType = organizer;
         this.profilePicUrl = null;
-        this.imageInfo = null;
+        this.imageinfo = null;
     }
 
     public String getName() {
         return name;
     }
-    public ImageMetadata getImageInfo() {
-        return imageInfo;
+    @PropertyName("imageinfo")
+    public Image_datamap getImageInfo() {
+        return imageinfo;
     }
-
-    public void setImageInfo(ImageMetadata imageInfo) {
-        this.imageInfo = imageInfo;
+    @PropertyName("imageinfo")
+    public void setImageInfo(Image_datamap imageinfo) {
+        this.imageinfo = imageinfo;
     }
 
 

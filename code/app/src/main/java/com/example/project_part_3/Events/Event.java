@@ -2,7 +2,7 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Image.ImageMetadata;
+import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
@@ -12,7 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +37,7 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
-    private ImageMetadata imageinfo;
+    private Image_datamap imageinfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -209,11 +211,11 @@ public class Event {
         }
     }
 
-    public ImageMetadata getImageInfo(){
+    public Image_datamap getImageInfo(){
         return this.imageinfo ;
     }
 
-    public void setImageInfo( ImageMetadata imageInfo){
+    public void setImageInfo( Image_datamap imageInfo){
         this.imageinfo = imageInfo;
     }
 
@@ -379,6 +381,33 @@ public class Event {
 
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("title", title);
+        map.put("description", description);
+        map.put("organizerId", organizerId);
+        map.put("location", location);
+        map.put("locationName", locationName);
+        map.put("posterImageUrl", posterImageUrl);
+        map.put("date_open", date_open);
+        map.put("date_close", date_close);
+        map.put("eventStartAt", eventStartAt);
+        map.put("eventEndAt", eventEndAt);
+        map.put("price", price);
+        map.put("capacity", capacity);
+        map.put("seed", seed);
+        map.put("lastLotteryTs", lastLotteryTs);
+        map.put("imageinfo", imageinfo);
+        map.put("waitlistUserIds", waitlistUserIds);
+        map.put("selectedUserIds", selectedUserIds);
+        map.put("confirmedUserIds", confirmedUserIds);
+        map.put("declinedUserIds", declinedUserIds);
+        map.put("alternatesUserIds", alternatesUserIds);
+        map.put("attendant_list", attendant_list);
+        return map;
     }
 }
 
