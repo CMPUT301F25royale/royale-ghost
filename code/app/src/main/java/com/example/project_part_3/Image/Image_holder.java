@@ -2,6 +2,10 @@ package com.example.project_part_3.Image;
 
 import android.graphics.Bitmap;
 
+/**
+ * Used for storing images and related information for the database.
+ */
+
 public class Image_holder {
     private String url;
     private String Description;

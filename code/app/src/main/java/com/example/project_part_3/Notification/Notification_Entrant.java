@@ -2,6 +2,9 @@ package com.example.project_part_3.Notification;
 
 import com.google.firebase.Timestamp;
 
+/**
+ * Class to hold notifications for entrants. Contains various properties relating to notifications.
+ */
 public class Notification_Entrant {
     private String title;
     private String entrantEmail;

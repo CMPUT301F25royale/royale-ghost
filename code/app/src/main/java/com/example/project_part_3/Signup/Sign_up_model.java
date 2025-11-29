@@ -7,7 +7,9 @@ import com.example.project_part_3.Users.*;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
+/**
+ * Model which initializes the user based on which typer of user logs in.
+ */
 public class Sign_up_model {
 
     private User user;

@@ -28,6 +28,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Objects;
 
+/**
+ * Fragment for signing up. Initializes various buttons and text fields to allow the user
+ * to sign up and create a new account as an entrant or an organizer
+ */
 public class Sign_up_view extends Fragment {
     private Button Organizer_button_sign_up;
     private Button Entrant_button_sign_up;

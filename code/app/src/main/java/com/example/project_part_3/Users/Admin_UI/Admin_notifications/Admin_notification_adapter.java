@@ -12,6 +12,9 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter for admin notifications.
+ */
 public class Admin_notification_adapter extends ArrayAdapter<Notification_Organizer> {
     private final int resourceLayout;
     private final ArrayList<Notification_Organizer> organizers;

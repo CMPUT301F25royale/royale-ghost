@@ -12,6 +12,9 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+/**
+ * Utility class for generating QR codes.
+ */
 public class QRCodeGenerator {
 
     final static int size = 256;

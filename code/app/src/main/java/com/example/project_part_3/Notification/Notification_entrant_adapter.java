@@ -19,6 +19,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter for notifications for entrants.
+ */
 public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entrant> {
 
     private final LayoutInflater inflater;

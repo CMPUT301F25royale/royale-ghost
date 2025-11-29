@@ -190,9 +190,9 @@ public class Event {
     /**
      * generate random eventId that is unique
      * @param organizerId The ID of the organizer
-     * @param title
-     * @param startTimeMs
-     * @return
+     * @param title The event title
+     * @param startTimeMs The start time of the event
+     * @return The unique event ID
      */
 
     @Exclude
@@ -216,8 +216,6 @@ public class Event {
             return UUID.randomUUID().toString();
         }
     }
-
-
 
     public String getTitle(){ return title; }
     public void setTitle(String title) { this.title = title; }
@@ -358,6 +356,10 @@ public class Event {
     }
 
 
+    /**
+     *
+     * @return A string representing the registration status of the event.
+     */
     @Exclude
     public String registrationStatus() {
         if (!registrationOpen()) {
@@ -387,6 +389,9 @@ public class Event {
         declinedUserIds.add(email);
     }
 
+    /**
+     * Resets the lottery for this event.
+     */
     public void resetLotteryState() {
         waitlistUserIds = new ArrayList<>();
         selectedUserIds = new ArrayList<>();

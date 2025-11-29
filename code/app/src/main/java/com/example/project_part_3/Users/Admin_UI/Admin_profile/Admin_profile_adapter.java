@@ -16,6 +16,11 @@ import com.example.project_part_3.Users.User;
 
 import java.util.ArrayList;
 
+/**
+ * An ArrayAdapter for displaying a list of Users and date relating to the users
+ * This adapter is responsible for taking a list of User objects and converting them
+ * into segments that display the  name, email, and profile picture of the user.
+ */
 public class Admin_profile_adapter extends ArrayAdapter<User> {
 
     private final int resourceLayout;
