@@ -22,4 +22,7 @@
     <string name="save_to_photos">Save to photos</string>
     <string name="back">back</string>
     <string name="qr_code">QR Code</string>
+    <string name="export_as_csv">Export as CSV</string>
+    <string name="show_cancelled_entrants">Show cancelled entrants</string>
+    <string name="show_chosen_entrants">Show chosen entrants</string>
 </resources>

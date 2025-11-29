@@ -144,52 +144,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
     }
 
     /**
-     * Sets up the listener for the registration open date button to show a DatePickerDialog.
-     * @param view The fragment's root view.
-     * @param c The calendar instance used for date selection.
-     */
-    protected void setupRegistrationOpenButton(@NonNull View view, Calendar c) {
-        openDateButton.setOnClickListener(v -> {
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view1, year1, month1, dayOfMonth) -> {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(year1, month1, dayOfMonth);
-                registrationOpenDate = calendar.getTime();
-                String dateString = DateFormat.getDateInstance().format(registrationOpenDate);
-                openDateButton.setText(dateString);
-            }, year, month, day);
-
-            datePickerDialog.show();
-        });
-    }
-
-    /**
-     * Sets up the listener for the registration close date button to show a DatePickerDialog.
-     * @param view The fragment's root view.
-     * @param c The calendar instance used for date selection.
-     */
-    protected void setupRegistrationCloseButton(@NonNull View view, Calendar c) {
-        closeDateButton.setOnClickListener(v -> {
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), (view2, year2, month2, dayOfMonth) -> {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(year2, month2, dayOfMonth);
-                registrationCloseDate = calendar.getTime();
-                String dateString = DateFormat.getDateInstance().format(registrationCloseDate);
-                closeDateButton.setText(dateString);
-            }, year, month, day);
-
-            datePickerDialog.show();
-        });
-    }
-
-    /**
      * Initializes the views and listener for the publish event button.
      * @param view The fragment's root view.
      */

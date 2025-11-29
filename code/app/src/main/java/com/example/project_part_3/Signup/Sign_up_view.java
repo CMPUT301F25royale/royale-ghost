@@ -74,6 +74,7 @@ public class Sign_up_view extends Fragment {
 
         submit_sign_up.setOnClickListener(v -> {
             submit_sign_up.setEnabled(false); // Disable the button to prevent multiple clicks
+            submit_sign_up.setText("Signing up...");
 
             String name = Objects.requireNonNull(nameText.getText()).toString();
             String password = Objects.requireNonNull(passwordText.getText()).toString();
@@ -89,6 +90,7 @@ public class Sign_up_view extends Fragment {
             if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
+                submit_sign_up.setText("Sign Up");
                 return;
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
@@ -107,11 +109,13 @@ public class Sign_up_view extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
                     submit_sign_up.setEnabled(true); // re-enable the button after failure
+                    submit_sign_up.setText("Sign Up");
                 }
             }).addOnFailureListener(e -> {
                 Log.d("Sign_up", "Failed to sign up");
                 Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
+                submit_sign_up.setText("Sign Up");
             });
         });
     }

@@ -56,6 +56,8 @@ public class Login_view extends Fragment {
 
         submit.setOnClickListener(v -> {
             submit.setEnabled(false); // Disable the button to prevent multiple clicks
+            submit.setText("Logging in...");
+
 
             String nameText = name.getText().toString();// please do not change this line whoever edited this
             String passwordText = password.getText().toString();
@@ -69,6 +71,7 @@ public class Login_view extends Fragment {
             if (nameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 submit.setEnabled(true); // re-enable the button after failure
+                submit.setText("Login");
                 return;
             }
             db.checkUser(nameText, passwordText).addOnSuccessListener(user -> {
@@ -104,10 +107,12 @@ public class Login_view extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
                     submit.setEnabled(true);
+                    submit.setText("Login");
                 }
             }).addOnFailureListener(e -> {
                 Toast.makeText(getActivity(), "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 submit.setEnabled(true);
+                submit.setText("Login");
             });
 
         });
