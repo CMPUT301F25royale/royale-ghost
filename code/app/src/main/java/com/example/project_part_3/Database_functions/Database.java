@@ -160,7 +160,7 @@ public class Database {
     }
 
     public Task<Boolean> addEvent(@NonNull Event event) {
-
+        event.setLotteryDone(false);
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
                 .collection(EVENTS_SUBCOLLECTION).document();
         event.setId(docRef.getId());
