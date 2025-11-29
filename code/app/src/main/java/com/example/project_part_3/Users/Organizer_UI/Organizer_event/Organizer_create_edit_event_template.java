@@ -1,15 +1,20 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -18,6 +23,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -52,6 +58,18 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
     protected Button closeDateButton;
     protected Button startDateButton;
     protected Button endDateButton;
+    protected Button imagebutton;
+    protected ImageView EventImageView;
+    protected Uri ImageUri;
+    public String imageURL;
+    protected String title;
+    protected String description;
+    protected String location;
+    protected String capacityStr;
+    protected String priceStr;
+
+
+
 
     protected interface DateSelectionCallback {
         void onDateSelected(Date date);
@@ -78,6 +96,58 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         setupDateButtons(view);
         setupObservers();
         setupPublishButton(view);
+        setupImageUpload(view);
+    }
+
+    private void setupImageUpload(View view) {
+        Button posterbutton = view.findViewById(R.id.create_event_poster_button);
+        posterbutton.setOnClickListener(v -> showImagePopup());
+    }
+
+    private void showImagePopup() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.image_popup, null);
+
+        ImageView popupImagePreview = dialogView.findViewById(R.id.popup_image_preview);
+        Button changeImageButton = dialogView.findViewById(R.id.popup_change_image_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        Glide.with(requireContext())
+                .load(EventImageView.getDrawable())
+                .into(popupImagePreview);
+
+        changeImageButton.setOnClickListener(v -> {
+            galleryLauncher.launch("image/*");
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    ImageUri = uri;
+                    uploadProfilePicture();
+                }
+            });
+    private void uploadProfilePicture() {
+        if(ImageUri != null & EventImageView != null){
+
+            EventImageView.setVisibility(View.VISIBLE);
+
+            Glide.with(requireContext())
+                    .load(ImageUri)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(EventImageView);
+
+        }
+
     }
 
     @Override
@@ -97,6 +167,9 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         closeDateButton = view.findViewById(R.id.create_event_registration_close_button);
         startDateButton = view.findViewById(R.id.create_event_date_time_start_button);
         endDateButton = view.findViewById(R.id.create_event_date_time_end_button);
+        imagebutton = view.findViewById(R.id.create_event_poster_button);
+        EventImageView = view.findViewById(R.id.eventImage);
+
     }
 
     protected void setupNavigation(@NonNull View view) {
@@ -160,11 +233,13 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
      * @param db Database instance.
      */
     protected void handlePublishClick(Database db) {
-        String title = titleEditText.getText().toString().trim();
-        String description = descriptionEditText.getText().toString().trim();
-        String location = locationEditText.getText().toString().trim();
-        String capacityStr = capacityEditText.getText().toString().trim();
-        String priceStr = priceEditText.getText().toString().trim();
+        Integer capacity = null;
+        Float price = null;
+        title = titleEditText.getText().toString().trim();
+        description = descriptionEditText.getText().toString().trim();
+        location = locationEditText.getText().toString().trim();
+        capacityStr = capacityEditText.getText().toString().trim();
+        priceStr = priceEditText.getText().toString().trim();
 
         // must fill in only mandatory fields
         if (title.isEmpty() || description.isEmpty() || location.isEmpty()) {
@@ -192,10 +267,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             return;
         }
 
-        // optional fields
-        Integer capacity = null;
-        Float price = null;
-
         if (!capacityStr.isEmpty()) {
             try {
                 capacity = Integer.parseInt(capacityStr);
@@ -215,38 +286,99 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         }
 
         // if selectedEvent is null, it's a new event (pass null ID), else modify the existing event
-        Event newEvent;
-        if (selectedEvent != null) {
-            newEvent = selectedEvent;
-            newEvent.setTitle(title);
-            newEvent.setDescription(description);
-            newEvent.setLocation(location);
-            newEvent.setCapacity(capacity);
-            newEvent.setPrice(price);
-            newEvent.setDate_open(registrationOpenDate);
-            newEvent.setDate_close(registrationCloseDate);
-            newEvent.setEventStartAt(eventStartDate);
-            newEvent.setEventEndAt(eventEndDate);
+
+
+        if (ImageUri != null) {
+            String imageType = "event_poster";
+            String eventIdForUpload = (selectedEvent != null) ? selectedEvent.getId() : null;
+
+            Integer finalCapacity = capacity;
+            Float finalPrice = price;
+
+            db.uploadImage(ImageUri, imageType, description, organizerEmail, eventIdForUpload)
+                    .addOnSuccessListener(imageMetadata -> {
+                        CreateOrUpdateEvent(db, imageMetadata.getUrl(), finalCapacity, finalPrice);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed to upload new poster image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
         } else {
-            // else, create a new event
-            newEvent = new Event(
+            String existingImageUrl = (selectedEvent != null) ? selectedEvent.getPosterImageUrl() : null;
+            CreateOrUpdateEvent(db, existingImageUrl, capacity, price);
+        }
+
+    }
+
+
+
+    protected void CreateOrUpdateEvent(Database db, String imageUrl, Integer capacity, Float price) {
+        if (selectedEvent != null) {
+            selectedEvent.setTitle(title);
+            selectedEvent.setDescription(description);
+            selectedEvent.setLocation(location);
+            selectedEvent.setCapacity(capacity);
+            selectedEvent.setPrice(price);
+            selectedEvent.setDate_open(registrationOpenDate);
+            selectedEvent.setDate_close(registrationCloseDate);
+            selectedEvent.setEventStartAt(eventStartDate);
+            selectedEvent.setEventEndAt(eventEndDate);
+            selectedEvent.setPosterImageUrl(imageUrl);
+
+            pushEventToDatabase(db, selectedEvent, false); // isNewEvent = false
+
+        } else {
+            // --- CREATE a new event ---
+            Event newEvent = new Event(
                     organizerEmail,
                     title,
                     description,
                     location,
                     location,
-                    null,
+                    imageUrl,
                     registrationOpenDate.getTime(),
                     registrationCloseDate.getTime(),
                     eventStartDate.getTime(),
                     eventEndDate.getTime(),
-                    capacity, // optional, may be null
-                    price // optional, may be null
-            );
-        }
+                    capacity,
+                    price);
 
-        pushEventToDatabase(db, newEvent);
+            pushEventToDatabase(db, newEvent, true); // isNewEvent = true
+        }
     }
+    protected void pushEventToDatabase(Database db, Event event, boolean isNewEvent) {
+        if (isNewEvent) {
+            db.addEvent(event).addOnSuccessListener(success -> {
+                if (success) {
+                    Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show();
+                    navigateBack();
+                } else {
+                    Toast.makeText(getContext(), "Failed to create event.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Error creating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+        } else {
+            db.updateEvent(event).addOnSuccessListener(success -> {
+                if (success) {
+                    Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
+                    navigateBack();
+                } else {
+                    Toast.makeText(getContext(), "Failed to update event.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getContext(), "Error updating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+        }
+    }
+
+
+    private void navigateBack() {
+        if (getView() != null) {
+            NavHostFragment.findNavController(this).popBackStack();
+        }
+    }
+
+
 
     /**
      * Generic helper to show a DatePicker followed immediately by a TimePicker.
@@ -285,8 +417,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             datePickerDialog.show();
         });
     }
-
-    protected abstract void pushEventToDatabase(Database db, Event event);
 
     protected void populateFields(Event event) {
         // Hook to populate fields with event data (implemented in subclasses)

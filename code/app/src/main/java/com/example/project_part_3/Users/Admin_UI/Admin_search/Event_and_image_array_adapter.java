@@ -13,9 +13,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.ImageMetadata;
 import com.example.project_part_3.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -81,7 +83,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             bindEventView(holder, (Event) item);
         } else {
             ImageViewHolder holder = (ImageViewHolder) convertView.getTag();
-            bindImageView(holder, (Image_holder) item);
+            bindImageView(holder, (ImageMetadata) item);
         }
 
         return convertView;
@@ -98,10 +100,15 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         }
         holder.eventAttendees.setText("Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity());
 
-        if (event.getPoster() != null) {
-            holder.eventImage.setImageBitmap(event.getPoster());
+        if (event.getPosterImageUrl() != null && !event.getPosterImageUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(event.getPosterImageUrl())
+                    .placeholder(android.R.drawable.ic_menu_report_image) // Use a consistent placeholder
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(holder.eventImage);
         } else {
-            holder.eventImage.setImageResource(android.R.drawable.ic_menu_myplaces);
+            Glide.with(context).clear(holder.eventImage);
+            holder.eventImage.setImageResource(android.R.drawable.ic_menu_report_image); // Set a default
         }
 
         holder.eventDetail.setOnClickListener(v -> {
@@ -128,10 +135,19 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         });
     }
 
-    private void bindImageView(ImageViewHolder holder, Image_holder image) {
+    private void bindImageView(ImageViewHolder holder, ImageMetadata image) {
         if (image == null) return;
-        holder.imageView.setImageBitmap(null);//@TODO: add image
         holder.description.setText(image.getDescription());
+        if (image.getUrl() != null && !image.getUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(image.getUrl())
+                    .placeholder(android.R.drawable.ic_menu_report_image)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(holder.imageView);
+        } else {
+            Glide.with(context).clear(holder.imageView);
+            holder.imageView.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
 
         holder.deleteButton.setOnClickListener(v -> {
             viewModel.deleteImage(image);

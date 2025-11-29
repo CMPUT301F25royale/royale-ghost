@@ -2,20 +2,18 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Users.Entrant;
-import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
+import com.example.project_part_3.Image.ImageMetadata;
+import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Event {
@@ -37,6 +35,7 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
+    private ImageMetadata imageinfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -59,6 +58,7 @@ public class Event {
         this.declinedUserIds = new ArrayList<>();
         this.alternatesUserIds = new ArrayList<>();
         this.attendant_list = new ArrayList<>();
+        this.imageinfo = null;
         this.attendees = 0;
     }
 
@@ -88,6 +88,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        this.imageinfo = null;
     }
 
     public Event(String title,
@@ -114,6 +115,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        this.imageinfo = null;
     }
 
     public Event(
@@ -143,6 +145,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.imageinfo = null;
     }
 
     public Event(
@@ -173,6 +176,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.imageinfo = null;
     }
 
     /**
@@ -205,7 +209,13 @@ public class Event {
         }
     }
 
+    public ImageMetadata getImageInfo(){
+        return this.imageinfo ;
+    }
 
+    public void setImageInfo( ImageMetadata imageInfo){
+        this.imageinfo = imageInfo;
+    }
 
     public String getTitle(){ return title; }
     public void setTitle(String title) { this.title = title; }

@@ -32,7 +32,6 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
-        // Use DateTimeInstance to show both date and time
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
 
         if (event.getDate_open() != null) {
@@ -70,22 +69,6 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         if (event.getPrice() != null) {
             priceEditText.setText(String.format("%.2f", event.getPrice()));
         }
-    }
-
-    @Override
-    protected void pushEventToDatabase(Database db, Event event) {
-        db.updateEvent(event).addOnSuccessListener(success -> {
-            if (success) {
-                Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
-                // Navigate back to the event list
-                NavController navController = NavHostFragment.findNavController(this);
-                navController.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
-            } else {
-                Toast.makeText(getContext(), "Failed to publish event.", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        });
     }
 
     @Override
