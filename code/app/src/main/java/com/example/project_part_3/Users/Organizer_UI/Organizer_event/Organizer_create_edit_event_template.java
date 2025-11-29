@@ -309,8 +309,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
 
     }
 
-
-
     protected void CreateOrUpdateEvent(Database db, String imageUrl, Integer capacity, Float price) {
         if (selectedEvent != null) {
             selectedEvent.setTitle(title);

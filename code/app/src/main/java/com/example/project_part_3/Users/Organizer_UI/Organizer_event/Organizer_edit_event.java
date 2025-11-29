@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -68,6 +69,16 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
         if (event.getPrice() != null) {
             priceEditText.setText(String.format("%.2f", event.getPrice()));
+        }
+
+        if (event.getPosterImageUrl() != null) {
+            imageURL = event.getPosterImageUrl();
+            EventImageView.setVisibility(View.VISIBLE);
+            Glide.with(requireContext())
+                    .load(event.getPosterImageUrl())
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(EventImageView);
         }
     }
 
