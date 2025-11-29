@@ -2,14 +2,18 @@ package com.example.project_part_3.Users.Entrant_UI.Entrant_profile;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +28,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
 
-public class Entrant_profile_view extends Fragment {
+import java.util.ArrayList;
+
+public class Entrant_profile_view extends Fragment{
+
+    ArrayList<String> interests = new ArrayList<>();
+    ArrayAdapter<String> adapter;
 
     @Nullable
     @Override
@@ -39,11 +48,42 @@ public class Entrant_profile_view extends Fragment {
 
         //get password
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        String updateInterestEmail = prefs.getString("username", "");
 
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
         db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
             profileName.setText("Profile: " + user.getName());
+        });
+
+       //add interest
+        ListView listOfInterests = view.findViewById(R.id.InterestView);
+        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1,interests);
+        listOfInterests.setAdapter(adapter);
+
+        db.getInterests(updateInterestEmail)
+                .addOnSuccessListener(list -> {
+                    // Clear and refill local list
+                    interests.clear();
+                    interests.addAll(list);
+                    adapter.notifyDataSetChanged();
+                });
+
+        Button addInterest = view.findViewById(R.id.Add_interest);
+        addInterest.setOnClickListener(v ->  {
+            InterestDialog((input)->{
+                if (input == null || input.isEmpty()) return;
+                String username = prefs.getString("username", "");
+                db.addInterest(username, input)
+                        .addOnSuccessListener(result -> {
+                            Toast.makeText(getActivity(), "Interest added!", Toast.LENGTH_SHORT).show();
+                            interests.add(input);
+                            adapter.notifyDataSetChanged();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(getActivity(), "Failed to add interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+            });
         });
 
         //reset password here
@@ -142,6 +182,26 @@ public class Entrant_profile_view extends Fragment {
             });
         });
 
+        listOfInterests.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                InterestDialog((input)->{//new dialog for later
+                    if (input == null || input.isEmpty()) return;
+                    String username = prefs.getString("username", "");
+                    db.deleteInterest(username, input)
+                            .addOnSuccessListener(result -> {
+                                Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
+                                interests.remove(position);
+                                adapter.notifyDataSetChanged();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(getActivity(), "Failed to delete interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                });
+            }
+        });
+
     }
 
     private void InputDialog(InputDialogCallback callback){
@@ -158,6 +218,25 @@ public class Entrant_profile_view extends Fragment {
                     String oldtext = old.getText().toString().trim();
                     String newtext = _new.getText().toString().trim();
                     callback.onInputSubmitted(oldtext,newtext);
+                })
+                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                .create();
+
+        dialog.show();
+    }
+
+    private void InterestDialog(InterestDialogCallback callback){
+        LayoutInflater inflator = LayoutInflater.from(requireContext());
+        View dialogView = inflator.inflate(R.layout.interest_add, null);
+
+        EditText interest = dialogView.findViewById(R.id.interest_add_text);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Enter Interest")
+                .setView(dialogView) // attach your custom layout
+                .setPositiveButton("OK", (d, which) -> {
+                    String input = interest.getText().toString().trim();
+                    callback.onInputSubmitted(input);
                 })
                 .setNegativeButton("Cancel", (d, which) -> d.dismiss())
                 .create();

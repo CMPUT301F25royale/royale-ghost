@@ -81,15 +81,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/Specialties"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:id="@+id/Interests"
+        android:layout_width="213dp"
+        android:layout_height="49dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="10dp"
+        android:text="Interests:"
         android:textSize="30dp"
-        android:text="Specialties:"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profile_delete" />
 
@@ -127,10 +125,20 @@
         app:layout_constraintTop_toBottomOf="@+id/Change_Name" />
 
     <ListView
+        android:id="@+id/InterestView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Specialties"
+        app:layout_constraintTop_toBottomOf="@+id/Interests"
         tools:layout_editor_absoluteX="-1dp" />
+
+    <Button
+        android:id="@+id/Add_interest"
+        android:layout_width="151dp"
+        android:layout_height="50dp"
+        android:text="Add Interest"
+        app:layout_constraintBottom_toTopOf="@+id/InterestView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/profile_photo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
