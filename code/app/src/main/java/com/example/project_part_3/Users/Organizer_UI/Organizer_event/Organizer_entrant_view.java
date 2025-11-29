@@ -83,18 +83,6 @@ public class Organizer_entrant_view extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setUpData(view);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getView() != null) {
-            setUpData(getView());
-        }
-    }
-
-    private void setUpData(View view) {
 
         model = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
         db = new Database(FirebaseFirestore.getInstance());
@@ -117,6 +105,7 @@ public class Organizer_entrant_view extends Fragment {
             }
         });
     }
+
     /**
      * Fetches all entrants for the event and populates the masterList.
      */
@@ -295,11 +284,5 @@ public class Organizer_entrant_view extends Fragment {
             return "\"" + escaped + "\"";
         }
         return data;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        model.setSelectedEvent(null);
     }
 }
