@@ -18,9 +18,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Database_functions.UserDatabase;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
+import com.google.firebase.Firebase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Admin_profile_info extends Fragment {
 
@@ -62,6 +65,9 @@ public class Admin_profile_info extends Fragment {
 
         Button deleteButton = view.findViewById(R.id.button);
         deleteButton.setOnClickListener(v -> handleDelete());
+
+        Button deletePhotoButton = view.findViewById(R.id.delete_photo_button);
+        deletePhotoButton.setOnClickListener(v -> handleDeletePhoto());
 
         adminprofilemodel.getUserProfiles().observe(getViewLifecycleOwner(), users -> {
             if (users == null || userEmail == null) return;
@@ -123,6 +129,24 @@ public class Admin_profile_info extends Fragment {
                 Log.e("Admin_profile_info", "Failed to delete user: " + errorMessage);
                 Toast.makeText(getContext(), "Failed to delete user.", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void handleDeletePhoto() {
+        if (currentUser == null || currentUser.getImageInfo() == null || currentUser.getImageInfo().getUrl() == null) {
+            Toast.makeText(getContext(), "Cannot delete photo: data is missing.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Database db = new Database(FirebaseFirestore.getInstance());
+        db.deleteImage(currentUser.getEmail(), null, "profile_pic").addOnSuccessListener(aVoid -> {
+            currentUser.setImageInfo(null);
+            currentUser.setProfilePicUrl(null);
+            Toast.makeText(getContext(), "Profile photo deleted successfully.", Toast.LENGTH_SHORT).show();
+            profilePhoto.setImageResource(R.drawable.ic_person); // set back to default
+        }).addOnFailureListener(e -> {
+            Log.e("Admin_profile_info", "Failed to delete profile photo: " + e.getMessage());
+            Toast.makeText(getContext(), "Failed to delete profile photo.", Toast.LENGTH_SHORT).show();
         });
     }
 }

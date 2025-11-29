@@ -47,15 +47,23 @@
 
     <Button
         android:id="@+id/button"
-        android:layout_margin="24sp"
+        android:layout_margin="16sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/black"
-        android:text="@string/delete" />
+        android:text="@string/delete_user" />
+
+    <Button
+        android:id="@+id/delete_photo_button"
+        android:layout_margin="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/black"
+        android:text="Delete Photo" />
 
     <Button
         android:id="@+id/button2"
-        android:layout_margin="24sp"
+        android:layout_margin="16sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/black"
