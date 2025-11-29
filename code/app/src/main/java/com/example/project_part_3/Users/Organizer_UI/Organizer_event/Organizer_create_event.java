@@ -39,7 +39,4 @@ public class Organizer_create_event extends Organizer_create_edit_event_template
             navBack.navigate(R.id.create_to_event);
         });
     }
-
-    @Override
-    protected void
 }
