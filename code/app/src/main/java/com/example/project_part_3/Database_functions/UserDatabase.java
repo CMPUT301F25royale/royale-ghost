@@ -97,7 +97,7 @@ public class UserDatabase {
      */
     public void deleteUser(String email, OnUserDeleteListener listener) {
         db.deleteUser(email).addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult()) {
+            if (task.isSuccessful()) {
                 listener.onSuccess();
             } else {
                 String errorMessage = (task.getException() != null) ? task.getException().getMessage() : "Deletion failed.";

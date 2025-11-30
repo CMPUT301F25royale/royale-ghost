@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,28 +17,30 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Switch;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
-import com.example.project_part_3.MainActivity;
-import com.example.project_part_3.Users.Organizer;
+import com.example.project_part_3.Users.Entrant;
+import com.google.firebase.Firebase;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
-
-import com.example.project_part_3.R;
-
 import java.util.ArrayList;
+import com.example.project_part_3.R;
+import com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view;
+
 
 /**
  * Fragment responsible for displaying the currently logged-in entrant's profile.
  */
-public class Entrant_profile_view extends Fragment{
+public class Entrant_profile_view extends Organizer_profile_view {
 
     ArrayList<String> interests = new ArrayList<>();
     ArrayAdapter<String> adapter;
@@ -56,9 +57,9 @@ public class Entrant_profile_view extends Fragment{
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        db = new Database(FirebaseFirestore.getInstance());
 
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         String updateInterestEmail = prefs.getString("username", "");
@@ -196,10 +197,16 @@ public class Entrant_profile_view extends Fragment{
 
                 // Kill this activity so organizer UI (bottom view) is gone
                 requireActivity().finish();
+        SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
+        // local default = true if we don't have anything stored yet
+        boolean localPref = prefs.getBoolean("receiveNotifications", true);
+        notificationsSwitch.setChecked(localPref);
+        notificationsSwitch.setEnabled(false); // disable until we finish syncing so we dont get that stupid toggle behavior
 
 
-            });
-        });
+        // unhide the interests list
+        TextView interestsTitle = view.findViewById(R.id.Interests);
+        interestsTitle.setVisibility(View.VISIBLE);
 
         listOfInterests.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
@@ -220,22 +227,44 @@ public class Entrant_profile_view extends Fragment{
         });
 
     }
+        ListView interestsListView = view.findViewById(R.id.InterestsListView);
+        interestsListView.setVisibility(View.VISIBLE);
 
-    private void loadProfileImage() {
-        if (username != null && !username.isEmpty()) {
-            db.fetchUser(username).addOnSuccessListener(user -> {
-                if (user != null && user.getProfilePicUrl() != null) {
-                    Glide.with(requireContext())
-                            .load(user.getProfilePicUrl())
-                            .placeholder(android.R.drawable.sym_def_app_icon)
-                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
-                            .dontAnimate()
-                            .into(profileImageView);
-                }
-            }).addOnFailureListener(e -> {
-                Log.e("EntrantProfile", "Failed to load profile image.", e);
-            });
+        // ... get interests and do stuff
+
+
+        // Notifications
+        if (username == null || username.isEmpty()) {
+            notificationsSwitch.setEnabled(false);
+        } else {
+            FirebaseFirestore ff = FirebaseFirestore.getInstance();
+            ff.collection("users")
+                    .document(username)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        Boolean remotePref = doc.getBoolean("receiveNotifications");
+                        boolean remoteValue = (remotePref == null) ? true : remotePref;
+
+                        // Only update UI & local if remote differs
+                        if (remoteValue != localPref) {
+                            notificationsSwitch.setChecked(remoteValue);
+
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putBoolean("receiveNotifications", remoteValue);
+                            editor.apply();
+                        }
+
+                        // Attach listener after initial state is correct
+                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
+
+                        notificationsSwitch.setEnabled(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
+                        notificationsSwitch.setEnabled(true);
+                    });
         }
+
     }
 
     private void InputDialog(InputDialogCallback callback){
@@ -295,34 +324,30 @@ public class Entrant_profile_view extends Fragment{
         changeImageButton.setOnClickListener(v -> {
             galleryLauncher.launch("image/*");
             dialog.dismiss();
+    private void attachNotificationListener(SwitchCompat notificationsSwitch,
+                                            FirebaseFirestore ff,
+                                            String username,
+                                            SharedPreferences prefs) {
+        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Update Firestore
+            ff.collection("users")
+                    .document(username)
+                    .update("receiveNotifications", isChecked)
+                    .addOnSuccessListener(unused -> {
+                        // Also update local SharedPreferences so next load is instant
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("receiveNotifications", isChecked);
+                        editor.apply();
+                    })
+                    .addOnFailureListener(e -> {
+                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
+                        android.widget.Toast.makeText(getContext(),
+                                "Failed to update notification setting",
+                                android.widget.Toast.LENGTH_SHORT).show();
+                        // revert UI if update failed
+                        buttonView.setChecked(!isChecked);
+                    });
         });
-
-        dialog.show();
     }
-
-    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    ImageUri = uri;
-                    uploadProfilePicture();
-                }
-            });
-    private void uploadProfilePicture() {
-        if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.toString();
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if (user != null) {
-                        user.setProfilePicUrl(imageUrl);
-                        db.setUser(user);
-                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
-                    }
-                });
-            }).addOnFailureListener(e -> {
-            });
-        }
-    }
-
 }
 

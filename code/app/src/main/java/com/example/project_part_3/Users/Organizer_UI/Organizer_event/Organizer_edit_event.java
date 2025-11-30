@@ -10,13 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 /**
  * Concrete fragment for editing an existing event in the Organizer UI.
@@ -26,6 +26,14 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
     protected void populateFields(Event event) {
+        // set up delete button
+        Button deleteEventButton = getView().findViewById(R.id.organizer_delete_event_button);
+        deleteEventButton.setVisibility(View.VISIBLE);
+        deleteEventButton.setOnClickListener(l -> {
+            handleEventDelete(event);
+        });
+
+
         // if views weren't found, don't try to set them
         if (titleEditText == null || event == null || getView() == null) return;
 
@@ -36,7 +44,6 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
-        // Use DateTimeInstance to show both date and time
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
 
         if (event.getDate_open() != null) {
@@ -74,21 +81,28 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         if (event.getPrice() != null) {
             priceEditText.setText(String.format("%.2f", event.getPrice()));
         }
+
+        if (event.getPosterImageUrl() != null) {
+            imageURL = event.getPosterImageUrl();
+            EventImageView.setVisibility(View.VISIBLE);
+            Glide.with(requireContext())
+                    .load(event.getPosterImageUrl())
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(EventImageView);
+        }
     }
 
-    @Override
-    protected void pushEventToDatabase(Database db, Event event) {
-        db.updateEvent(event).addOnSuccessListener(success -> {
+    private void handleEventDelete(Event event) {
+        Database db = new Database(FirebaseFirestore.getInstance());
+        db.deleteEvent(event).addOnSuccessListener(success -> {
             if (success) {
-                Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
-                // Navigate back to the event list
-                NavController navController = NavHostFragment.findNavController(this);
-                navController.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
+                Toast.makeText(getContext(), "Event deleted successfully!", Toast.LENGTH_SHORT).show();
+                NavController navBack = NavHostFragment.findNavController(this);
+                navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
             } else {
-                Toast.makeText(getContext(), "Failed to publish event.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Failed to delete event.", Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
     }
 

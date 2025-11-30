@@ -1,10 +1,13 @@
 package com.example.project_part_3.Users;
 
 import java.io.Serializable;
+
+import com.example.project_part_3.Image.ImageMetadata;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,6 +25,7 @@ public class User implements Serializable {
     private String phone; // optional
     private String userType;
     private String profilePicUrl;
+    private ImageMetadata imageInfo;
     private HashSet<String> deviceIDs;
 
 
@@ -36,6 +40,7 @@ public class User implements Serializable {
         this.email = email;
         this.phone = phone;
         this.profilePicUrl = null;
+        this.imageInfo = null;
     }
 
     public User(String name, String password, String email) {
@@ -44,6 +49,7 @@ public class User implements Serializable {
         this.email = email;
         this.phone = null;
         this.profilePicUrl = null;
+        this.imageInfo = null;
     }
 
     public User(String janeSmith, String mail, String number, String password456, String organizer) {
@@ -53,11 +59,20 @@ public class User implements Serializable {
         this.phone = number;
         this.userType = organizer;
         this.profilePicUrl = null;
+        this.imageInfo = null;
     }
 
     public String getName() {
         return name;
     }
+    public ImageMetadata getImageInfo() {
+        return imageInfo;
+    }
+
+    public void setImageInfo(ImageMetadata imageInfo) {
+        this.imageInfo = imageInfo;
+    }
+
 
     public String getPassword() {
         return password;

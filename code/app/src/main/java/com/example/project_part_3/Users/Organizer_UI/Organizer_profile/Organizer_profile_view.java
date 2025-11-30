@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +21,6 @@ import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.Users.Organizer;
-import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,9 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.R;
 
@@ -38,15 +35,21 @@ import com.example.project_part_3.R;
  * Fragment that displays a profile for an organizer.
  */
 public class Organizer_profile_view extends Fragment {
-    private Database db;
-    private String username;
-    private ImageView OrganizerProfileImageView;
-    private Uri ImageUri;
+    protected Database db;
+    protected String username;
+    protected ImageView profileImageView;
+    protected Uri ImageUri;
+    protected SharedPreferences prefs;
+
+    // Interface for the input dialog
+    protected interface InputDialogCallback {
+        void onInputSubmitted(String oldValue, String newValue);
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.organizer_profile, container, false);
+        return inflater.inflate(R.layout.entrant_profile, container, false);
     }
 
     @Override
@@ -54,121 +57,155 @@ public class Organizer_profile_view extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
 
-        //get password
-        SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+        // Setup Shared Prefs
+        prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");
 
-        OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
-        loadProfileImage();
-
-        OrganizerProfileImageView.setOnClickListener(v -> showImagePopup());
-
-        // change text at top so that it displays the user's name
+        // Setup Name Title
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
-            profileName.setText("Profile: " + user.getName());
+        db.fetchUser(username).addOnSuccessListener(user -> {
+            if (user != null) {
+                profileName.setText("Profile: " + user.getName());
+            }
         });
 
-        //reset password here
-        Button passwordReset = view.findViewById(R.id.Pass_Reset);
-        passwordReset.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getPassword().equals(old)){
-                        user.setPassword(_new);
-                        db.setUser(user);
-                    }else{
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                //change for shared prefs
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("password", _new);
-                editor.apply();
-            });
-        });
-
-        Button nameRest = view.findViewById(R.id.name_change);
-        nameRest.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getName().equals(old)){
-                        user.setName(_new);
-                        db.setUser(user);
-                    }else{
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            });
-        });
-
-        //reset phone
-        Button phone = view.findViewById(R.id.number_Change);
-        phone.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if(user.getPhone().equals(old)){
-                        user.setPhone(_new);
-                        db.setUser(user);
-                    }else{
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            });
-        });
-
-        //reset email
-        Button emailReset = view.findViewById(R.id.change_email);
-        emailReset.setOnClickListener(v -> {
-            InputDialog((old,_new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user->{
-                    String name = user.getName();
-                    String password = user.getPassword();
-                    String number = user.getPhone();
-                    db.deleteUser(username);
-                    Organizer new_user = new Organizer(name,password,_new,number);
-                    db.addUser(new_user);
-
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("username", _new);
-                    editor.apply();
-                });
-            });
-        });
-
-        //delete user
-        Button delete = view.findViewById(R.id.delete_user_button);
-        delete.setOnClickListener(v -> {
-            String username = prefs.getString("username", "");
-            db.fetchUser(username).addOnSuccessListener(user -> {
-                db.deleteUser(username);
-
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.clear();
-                editor.apply();
-                Toast.makeText(getActivity(), "Have a nice day!", Toast.LENGTH_LONG).show();
-
-                Intent intent = new Intent(requireActivity(), MainActivity.class); //prep MainActivity
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//Start with a fresh instance and be ready to clear this one
-                startActivity(intent);
-
-                // Kill this activity so organizer UI (bottom view) is gone
-                requireActivity().finish();
+        // Setup Image
+        profileImageView = view.findViewById(R.id.profile_photo);
+        loadProfileImage();
+        profileImageView.setOnClickListener(v -> showImagePopup());
 
 
-            });
-        });
-
+        setupButtons(view, profileName);
     }
 
+    
     /**
-     * Loads the profile image for the organizer.
+     * Sets up all standard profile buttons.
      */
+    protected void setupButtons(View view, TextView profileNameLabel) {
+        // Reset Password
+        Button passwordReset = view.findViewById(R.id.Pass_Reset);
+        if (passwordReset != null) {
+            passwordReset.setOnClickListener(v -> {
+                InputDialog((old, _new) -> {
+                    db.fetchUser(username).addOnSuccessListener(user -> {
+                        if (user.getPassword().equals(old)) {
+                            user.setPassword(_new);
+                            db.setUser(user);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("password", _new);
+                            editor.apply();
+                            Toast.makeText(getActivity(), "Password updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Incorrect old password", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Change Name
+        Button nameReset = view.findViewById(R.id.name_change);
+        if (nameReset != null) {
+            nameReset.setOnClickListener(v -> {
+                InputDialog((old, _new) -> {
+                    db.fetchUser(username).addOnSuccessListener(user -> {
+                        if (user.getName().equals(old)) {
+                            user.setName(_new);
+                            db.setUser(user);
+                            profileNameLabel.setText("Profile: " + _new);
+                            Toast.makeText(getActivity(), "Name updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Incorrect old name", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Change Phone
+        Button phone = view.findViewById(R.id.number_Change);
+        if (phone != null) {
+            phone.setOnClickListener(v -> {
+                InputDialog((old, _new) -> {
+                    db.fetchUser(username).addOnSuccessListener(user -> {
+                        if (user.getPhone().equals(old)) {
+                            user.setPhone(_new);
+                            db.setUser(user);
+                            Toast.makeText(getActivity(), "Phone updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Incorrect old number", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Change Email
+        Button emailReset = view.findViewById(R.id.change_email);
+        if (emailReset != null) {
+            emailReset.setOnClickListener(v -> {
+                InputDialog((old, _new) -> {
+                    db.fetchUser(username).addOnSuccessListener(user -> {
+                        // In a real app, you might want to re-authenticate before deleting/re-creating
+                        String name = user.getName();
+                        String password = user.getPassword();
+                        String number = user.getPhone();
+
+                        // Delete old document and create new one
+                        db.deleteUser(username);
+                        Organizer new_user = new Organizer(name, password, _new, number);
+                        // Copy profile pic URL if needed
+                        if (user.getProfilePicUrl() != null) new_user.setProfilePicUrl(user.getProfilePicUrl());
+
+                        db.addUser(new_user);
+
+                        // Update local tracking
+                        username = _new;
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("username", _new);
+                        editor.apply();
+                        Toast.makeText(getActivity(), "Email updated", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            });
+        }
+
+        // Delete Account
+        Button delete = view.findViewById(R.id.delete_user_button);
+        if (delete != null) {
+            delete.setOnClickListener(v -> {
+                db.deleteUser(username);
+                logoutUser();
+                Toast.makeText(getActivity(), "Account deleted. Have a nice day!", Toast.LENGTH_LONG).show();
+            });
+        }
+
+        // Logout
+        Button logout = view.findViewById(R.id.entrant_logout_button);
+        if (logout != null) {
+            logout.setOnClickListener(v -> logoutUser());
+        }
+    }
+
+    protected void logoutUser() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(requireActivity(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        requireActivity().finish();
+    }
+
+    protected void loadProfileImage() {
+        
+    /**    
+    * Loads the profile image for the organizer.
+    */
     private void loadProfileImage() {
+        
         if (username != null && !username.isEmpty()) {
             db.fetchUser(username).addOnSuccessListener(user -> {
                 if (user != null && user.getProfilePicUrl() != null) {
@@ -177,10 +214,10 @@ public class Organizer_profile_view extends Fragment {
                             .placeholder(android.R.drawable.sym_def_app_icon)
                             .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                             .dontAnimate()
-                            .into(OrganizerProfileImageView);
+                            .into(profileImageView);
                 }
             }).addOnFailureListener(e -> {
-                Log.e("EntrantProfile", "Failed to load profile image.", e);
+                Log.e("Profile", "Failed to load profile image.", e);
             });
         }
     }
@@ -191,20 +228,20 @@ public class Organizer_profile_view extends Fragment {
      *
      * @param callback Callback interface for handling input submission.
      */
-    private void InputDialog(InputDialogCallback callback){
+    private void InputDialog(InputDialogCallback callback) {
         LayoutInflater inflator = LayoutInflater.from(requireContext());
-        View dialogView = inflator.inflate(R.layout.profile_popup,null);
+        View dialogView = inflator.inflate(R.layout.profile_popup, null);
 
         EditText old = dialogView.findViewById(R.id.oldpass);
         EditText _new = dialogView.findViewById(R.id.newpass);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Enter Old value and New Value")
-                .setView(dialogView) // attach your custom layout
+                .setView(dialogView)
                 .setPositiveButton("OK", (d, which) -> {
                     String oldtext = old.getText().toString().trim();
                     String newtext = _new.getText().toString().trim();
-                    callback.onInputSubmitted(oldtext,newtext);
+                    callback.onInputSubmitted(oldtext, newtext);
                 })
                 .setNegativeButton("Cancel", (d, which) -> d.dismiss())
                 .create();
@@ -215,7 +252,7 @@ public class Organizer_profile_view extends Fragment {
     /**
      * Function to display an image popup.
      */
-    private void showImagePopup() {
+    protected void showImagePopup() {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.image_popup, null);
 
@@ -226,9 +263,11 @@ public class Organizer_profile_view extends Fragment {
                 .setView(dialogView)
                 .create();
 
-        Glide.with(requireContext())
-                .load(OrganizerProfileImageView.getDrawable())
-                .into(popupImagePreview);
+        if (profileImageView.getDrawable() != null) {
+            Glide.with(requireContext())
+                    .load(profileImageView.getDrawable())
+                    .into(popupImagePreview);
+        }
 
         changeImageButton.setOnClickListener(v -> {
             galleryLauncher.launch("image/*");
@@ -242,7 +281,7 @@ public class Organizer_profile_view extends Fragment {
      * ActivityResultLauncher used to open the device's gallery and allow
      * the user to pick an image.
      */
-    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
+    protected final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri != null) {
@@ -254,20 +293,20 @@ public class Organizer_profile_view extends Fragment {
     /**
      * Uploads the selected image to Firebase Storage and updates the organizer's profile picture.
      */
-    private void uploadProfilePicture() {
+    protected void uploadProfilePicture() {
         if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.toString();
+            String desc = "profile_pic_" + username;
+            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(downloadUrl -> {
+                String imageUrl = downloadUrl.getUrl();
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
                         user.setProfilePicUrl(imageUrl);
                         db.setUser(user);
-                        Glide.with(requireContext()).load(imageUrl).into(OrganizerProfileImageView);
+                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
+                        Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
                     }
                 });
-            }).addOnFailureListener(e -> {
             });
         }
     }
 }
-

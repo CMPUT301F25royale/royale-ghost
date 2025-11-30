@@ -10,7 +10,8 @@ import androidx.lifecycle.ViewModel;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.ImageMetadata;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class Admin_search_model extends ViewModel {
 
     // LiveData for the individual data sources
     private final LiveData<List<Event>> allEvents;
-    private final LiveData<List<Image_holder>> allImages;
+    private final LiveData<List<ImageMetadata>> allImages;
 
     // MediatorLiveData to combine all data sources into a single list
     private final MediatorLiveData<List<Object>> combinedData = new MediatorLiveData<>();
@@ -47,7 +48,7 @@ public class Admin_search_model extends ViewModel {
 
     private void combineAllData() {
         List<Event> events = allEvents.getValue();
-        List<Image_holder> images = allImages.getValue();
+        List<ImageMetadata> images = allImages.getValue();
 
         ArrayList<Object> combinedList = new ArrayList<>();
         if (events != null) {
@@ -67,7 +68,7 @@ public class Admin_search_model extends ViewModel {
         eventDb.deleteEvent(event, listener);
     }
 
-    public void deleteImage(Image_holder image) {
+    public void deleteImage(ImageMetadata image) {
         imageDb.removeImage(image);
     }
 

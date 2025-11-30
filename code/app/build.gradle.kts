@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

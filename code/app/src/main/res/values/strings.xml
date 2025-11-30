@@ -2,7 +2,7 @@
     <string name="app_name">RoyaleEventApp</string>
     <string name="login_welcome">Login</string>
     <string name="signup_welcome">Sign up</string>
-    <string name="Welcome_text">Welcome! Please login or sign up if you already have an account</string>
+    <string name="Welcome_text">Please login, or sign up if you already have an account</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="name_sign_up">Name</string>
     <string name="password_sign_up">Password</string>
@@ -20,6 +20,12 @@
     <string name="enter_your_name">Enter your name...</string>
     <string name="enter_your_password">Enter your password...</string>
     <string name="save_to_photos">Save to photos</string>
-    <string name="back">back</string>
+    <string name="back">Back</string>
     <string name="qr_code">QR Code</string>
+    <string name="export_as_csv">Export as CSV</string>
+    <string name="show_cancelled_entrants">Show cancelled entrants</string>
+    <string name="show_chosen_entrants">Show chosen entrants</string>
+    <string name="delete">Delete</string>
+    <string name="user_profiles">User Profiles:</string>
+    <string name="delete_user">Delete User</string>
 </resources>

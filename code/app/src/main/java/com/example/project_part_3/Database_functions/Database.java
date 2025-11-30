@@ -1,18 +1,18 @@
 package com.example.project_part_3.Database_functions;
+import static java.util.UUID.randomUUID;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-
+import androidx.annotation.Nullable;
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Image.ImageMetadata;
 import com.example.project_part_3.Users.Admin;
 import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -20,14 +20,16 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 /**
  * The Database class provides methods for interacting with the Firebase Firestore database. Most
@@ -57,6 +59,8 @@ public class Database {
     private final FirebaseStorage storage;
     private static final String USERS_COLLECTION = "users";
     private static final String EVENTS_SUBCOLLECTION = "organized_events";
+
+
 
     public Database(FirebaseFirestore db) {
         this.db = db;
@@ -310,42 +314,70 @@ public class Database {
      * @param email The email of the user to delete.
      * @return A task that completes when the user is deleted.
      */
-    public Task<Boolean> deleteUser(String email) {
+    public Task<Void> deleteUser(String email) {
         DocumentReference userDocRef = db.collection(USERS_COLLECTION).document(email);
-        return db.runTransaction(transaction -> {
-                    DocumentSnapshot userSnapshot = transaction.get(userDocRef);
-                    User user = userSnapshot.toObject(User.class);
-
-                    if (user != null && "Organizer".equals(user.getUserType())) {
-                        CollectionReference eventsCollection = userDocRef.collection(EVENTS_SUBCOLLECTION);
-                        QuerySnapshot eventsSnapshot = null;
-                        try {
-                            eventsSnapshot = Tasks.await(eventsCollection.get());
-                        } catch (ExecutionException e) {
-                            throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        for (DocumentSnapshot eventDoc : eventsSnapshot.getDocuments()) {
-                            transaction.delete(eventDoc.getReference());
+        return userDocRef.get().continueWithTask(userTask -> {
+            if (!userTask.isSuccessful() || !userTask.getResult().exists()) {
+                return Tasks.forResult(null);
+            }
+            WriteBatch batch = db.batch();
+            batch.delete(userDocRef);
+            ImageMetadata profilePicMeta = userTask.getResult().get("imageInfo", ImageMetadata.class);
+            if (profilePicMeta != null && profilePicMeta.getUrl() != null) {
+                try {
+                    storage.getReferenceFromUrl(profilePicMeta.getUrl()).delete();
+                } catch (Exception e) {
+                    Log.w("DeleteUser", "Could not delete profile pic from storage.", e);
+                }
+            }
+            User user = userTask.getResult().toObject(User.class);
+            if (user != null && "Organizer".equals(user.getUserType())) {
+                return getEventsByOrganizer(email).continueWithTask(eventsTask -> {
+                    if (eventsTask.isSuccessful()) {
+                        for (Event event : eventsTask.getResult()) {
+                            DocumentReference eventRef = db.collection(USERS_COLLECTION)
+                                    .document(email)
+                                    .collection(EVENTS_SUBCOLLECTION)
+                                    .document(event.getId());
+                            batch.delete(eventRef);
+                            if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
+                                try {
+                                    storage.getReferenceFromUrl(event.getImageInfo().getUrl()).delete();
+                                } catch (Exception e) {
+                                    Log.w("DeleteUser", "Could not delete event poster from storage.", e);
+                                }
+                            }
                         }
                     }
-                    transaction.delete(userDocRef);
-                    return true;
-                }).addOnSuccessListener(success -> Log.d("deleteUser", "User and associated events deleted successfully"))
-                .addOnFailureListener(e -> Log.e("deleteUser", "Failed to delete user", e));
+                    return batch.commit();
+                });
+            }
+            return batch.commit();
+        });
     }
-
     /** Delete an event from the database.
      *
      * @param event The event to delete.
      * @return A task that completes when the event is deleted.
      */
     public Task<Boolean> deleteEvent(Event event) {
+        String eventId = event.getId();
+        String organizerId = event.getOrganizerId();
 
-        DocumentReference docRef = db.collection(USERS_COLLECTION).document(event.getOrganizerId())
-                .collection(EVENTS_SUBCOLLECTION).document(event.getId());
-        return docRef.delete().continueWith(Task::isSuccessful);
+        if (eventId == null || organizerId == null) {            return Tasks.forResult(false);
+        }
+
+        return deleteImage(organizerId, eventId, "event_poster").continueWithTask(imageDeleteTask -> {
+            if (!imageDeleteTask.isSuccessful()) {
+                Log.e("DeleteEvent", "Failed to delete event poster, but proceeding with event deletion.", imageDeleteTask.getException());
+            }
+
+            DocumentReference eventDocRef = db.collection(USERS_COLLECTION)
+                    .document(organizerId)
+                    .collection(EVENTS_SUBCOLLECTION)
+                    .document(eventId);
+            return eventDocRef.delete().continueWith(Task::isSuccessful);
+        });
     }
 
     /**
@@ -492,8 +524,12 @@ public class Database {
                 .onSuccessTask(ref -> ref.get())
                 .continueWith(task -> {
                     if (!task.isSuccessful() || task.getResult() == null) return false;
-                    List<String> waitlist = (List<String>) task.getResult().get("waitlistUserIds");
-                    return waitlist != null && waitlist.contains(userEmail);
+                    Object waitlistObj = task.getResult().get("waitlistUserIds");
+                    if (waitlistObj instanceof List) {
+                        List<?> waitlist = (List<?>) waitlistObj;
+                        return waitlist.contains(userEmail);
+                    }
+                    return false;
                 });
     }
 
@@ -518,8 +554,15 @@ public class Database {
                     }
                     DocumentSnapshot snap = querySnapshots.getDocuments().get(0);
                     if(snap.contains("eventsAppliedFor")){
-                        List<String> events = (List<String>) snap.get("eventsAppliedFor");
-                        if(events != null) {
+                        Object eventsObj = snap.get("eventsAppliedFor");
+                        if(eventsObj instanceof List) {
+                            List<?> rawList = (List<?>) eventsObj;
+                            List<String> events = new ArrayList<>();
+                            for (Object item : rawList) {
+                                if (item instanceof String) {
+                                    events.add((String) item);
+                                }
+                            }
                             return events;
                         }
                     }
@@ -570,19 +613,17 @@ public class Database {
         }
 
         return Tasks.whenAllSuccess(tasks).continueWith(task -> {
-            List<Object> results = task.getResult();
             List<Entrant> entrants = new ArrayList<>();
-
-            for (Object result : results) {
-                if (result instanceof Entrant) {
-                    Entrant entrant = (Entrant) result;
-
-                    if (entrant.getUserType().equals("Entrant")) {
-                        entrants.add(entrant);
+            if (task.isSuccessful() && task.getResult() != null) {
+                for (Object result : task.getResult()) {
+                    if (result instanceof Entrant) {
+                        Entrant entrant = (Entrant) result;
+                        if (entrant.getUserType().equals("Entrant")) {
+                            entrants.add(entrant);
+                        }
                     }
                 }
             }
-
             return entrants;
         });
     }
@@ -595,10 +636,12 @@ public class Database {
      */
 
     public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
-        ArrayList<String> entrantIDs = new ArrayList<>(event.getWaitlistUserIds());
+        ArrayList<String> entrantIDs = new ArrayList<>();
+        if (event.getWaitlistUserIds() != null) {
+            entrantIDs.addAll(event.getWaitlistUserIds());
+        }
 
-
-        if (entrantIDs == null || entrantIDs.isEmpty()) {
+        if (entrantIDs.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
         }
 
@@ -609,13 +652,14 @@ public class Database {
         }
 
         return Tasks.whenAllSuccess(tasks).continueWith(task -> {
-            List<Object> results = task.getResult();
             List<Entrant> entrants = new ArrayList<>();
-            for (Object result : results) {
-                if (result instanceof Entrant) {
-                    Entrant entrant = (Entrant) result;
-                    if (entrant.getUserType().equals("Entrant")) {
-                        entrants.add(entrant);
+            if (task.isSuccessful() && task.getResult() != null) {
+                for (Object result : task.getResult()) {
+                    if (result instanceof Entrant) {
+                        Entrant entrant = (Entrant) result;
+                        if (entrant.getUserType().equals("Entrant")) {
+                            entrants.add(entrant);
+                        }
                     }
                 }
             }
@@ -635,6 +679,8 @@ public class Database {
         return updateEvent(event);
     }
 
+    //TODO: Change Params 
+
     /**
      * Upload an image to Firebase Storage.
      *
@@ -642,16 +688,37 @@ public class Database {
      * @param folderPath The path to the folder to upload the image to.
      * @return A task that completes when the image is uploaded.
      */
-    public Task<Uri> uploadImage(@NonNull Uri imageUri, @NonNull String folderPath) {
-        String fileName = "IMG_" + System.currentTimeMillis() + ".jpg";
-        StorageReference storageRef = storage.getReference().child(folderPath + "/" + fileName);
+    public Task<ImageMetadata> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String ownerId, @Nullable String eventId) {
 
-        UploadTask uploadTask = storageRef.putFile(imageUri);
-        return uploadTask.continueWithTask(task -> {
-            if (!task.isSuccessful()) {
-               throw task.getException();
+        return deleteImage(ownerId, eventId, imageType).continueWithTask(deleteTask -> {
+            if (!deleteTask.isSuccessful()) {
+                Log.e("UploadImage", "Failed to delete previous image, but proceeding with upload.", deleteTask.getException());
             }
-            return storageRef.getDownloadUrl();
+
+            String imagePath = imageType + "/" + randomUUID().toString() + ".jpg";
+            StorageReference storageRef = storage.getReference().child(imagePath);
+            UploadTask uploadTask = storageRef.putFile(imageUri);
+
+            return uploadTask.continueWithTask(task -> {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                return storageRef.getDownloadUrl();
+            }).continueWithTask(uriTask -> {
+                if (!uriTask.isSuccessful()) {
+                    throw uriTask.getException();
+                }
+                String downloadUrl = uriTask.getResult().toString();
+                ImageMetadata metadata = new ImageMetadata(downloadUrl, imageType, description, ownerId);
+
+                return updateImageMetadataInDocument(metadata, ownerId, eventId, imageType)
+                        .continueWith(updateTask -> {
+                            if (!updateTask.isSuccessful()) {
+                                throw updateTask.getException();
+                            }
+                            return metadata;
+                        });
+            });
         });
     }
 
@@ -664,6 +731,116 @@ public class Database {
     public Task<Void> deleteImageByUrl(@NonNull String imageUrl) {
         StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
         return photoRef.delete();
+    private Task<Void> updateImageMetadataInDocument(ImageMetadata metadata, String ownerId, @Nullable String eventId, String imageType) {
+        DocumentReference docRef;
+        String urlField, infoField;
+
+        if ("profile_pic".equals(imageType)) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId);
+            urlField = "profilePicUrl";
+            infoField = "imageInfo";
+        } else if ("event_poster".equals(imageType) && eventId != null) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId).collection(EVENTS_SUBCOLLECTION).document(eventId);
+            urlField = "posterImageUrl";
+            infoField = "imageInfo";
+        } else {
+            return Tasks.forException(new IllegalArgumentException("Invalid image type or missing eventId for poster."));
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(urlField, metadata != null ? metadata.getUrl() : null);
+        updates.put(infoField, metadata);
+
+        return docRef.update(updates);
+    }
+
+    public Task<Void> deleteImage(@NonNull String ownerId, @Nullable String eventId, @NonNull String imageType) {
+        DocumentReference docRef;
+        if ("profile_pic".equals(imageType)) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId);
+        } else if ("event_poster".equals(imageType) && eventId != null) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId).collection(EVENTS_SUBCOLLECTION).document(eventId);
+        } else {
+            return Tasks.forException(new IllegalArgumentException("Invalid image type or missing eventId."));
+        }
+
+        return docRef.get().continueWithTask(task -> {
+            if (!task.isSuccessful() || !task.getResult().exists()) {
+                Log.w("DeleteImage", "Document not found. Nothing to delete.");
+                return Tasks.forResult(null);
+            }
+
+            ImageMetadata metadata = task.getResult().get("imageInfo", ImageMetadata.class);
+            Task<Void> storageDeleteTask = Tasks.forResult(null);
+
+            if (metadata != null && metadata.getUrl() != null && !metadata.getUrl().isEmpty()) {
+                try {
+                    StorageReference storageRef = storage.getReferenceFromUrl(metadata.getUrl());
+                    storageDeleteTask = storageRef.delete();
+                } catch (IllegalArgumentException e) {
+                    Log.w("DeleteImage", "URL in metadata was not a valid storage URL: " + metadata.getUrl());
+                }
+            }
+
+            Task<Void> firestoreUpdateTask = updateImageMetadataInDocument(null, ownerId, eventId, imageType);
+
+            return Tasks.whenAll(storageDeleteTask, firestoreUpdateTask);
+        });
+    }
+
+    public Task<ImageMetadata> fetchImage(@NonNull String ownerId, @Nullable String eventId, @NonNull String imageType) {
+        DocumentReference docRef;
+        if ("profile_pic".equals(imageType)) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId);
+        } else if ("event_poster".equals(imageType) && eventId != null) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId).collection(EVENTS_SUBCOLLECTION).document(eventId);
+        } else {
+            return Tasks.forException(new IllegalArgumentException("Invalid type or missing ID."));
+        }
+
+        return docRef.get().continueWith(task -> {
+            if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                return task.getResult().get("imageInfo", ImageMetadata.class);
+            }
+            return null;
+        });
+    }
+
+    public Task<Void> updateImage(@NonNull String newDescription, @NonNull String ownerId, @Nullable String eventId, @NonNull String imageType) {
+        DocumentReference docRef;
+        if ("profile_pic".equals(imageType)) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId);
+        } else if ("event_poster".equals(imageType) && eventId != null) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId).collection(EVENTS_SUBCOLLECTION).document(eventId);
+        } else {
+            return Tasks.forException(new IllegalArgumentException("Invalid type or missing ID."));
+        }
+        return docRef.update("imageInfo.description", newDescription);
+    }
+
+    public ListenerRegistration listenToImageChanges(@NonNull String ownerId, @Nullable String eventId, @NonNull String imageType, @NonNull EventListener<ImageMetadata> listener) {
+        DocumentReference docRef;
+        if ("profile_pic".equals(imageType)) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId);
+        } else if ("event_poster".equals(imageType) && eventId != null) {
+            docRef = db.collection(USERS_COLLECTION).document(ownerId).collection(EVENTS_SUBCOLLECTION).document(eventId);
+        } else {
+            throw new IllegalArgumentException("Invalid type or missing ID for listener.");
+        }
+
+        return docRef.addSnapshotListener((snapshot, e) -> {
+            if (e != null) {
+                Log.w("ListenToImage", "Listen failed.", e);
+                listener.onEvent(null, e);
+                return;
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                ImageMetadata metadata = snapshot.get("imageInfo", ImageMetadata.class);
+                listener.onEvent(metadata, null);
+            } else {
+                listener.onEvent(null, null);
+            }
+        });
     }
 }
-

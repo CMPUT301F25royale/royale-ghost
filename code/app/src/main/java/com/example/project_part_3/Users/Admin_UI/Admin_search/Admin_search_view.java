@@ -2,6 +2,7 @@
 
 package com.example.project_part_3.Users.Admin_UI.Admin_search;
 
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.ImageMetadata;
 import com.example.project_part_3.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -104,8 +105,8 @@ public class Admin_search_view extends Fragment {
                 else if (event.getOrganizerId() != null && event.getOrganizerId().toLowerCase().contains(query)) {
                     filteredResults.add(event);
                 }
-            } else if (item instanceof Image_holder) {
-                Image_holder image = (Image_holder) item;
+            } else if (item instanceof ImageMetadata) {
+                ImageMetadata image = (ImageMetadata) item;
                 if (image.getDescription() != null && image.getDescription().toLowerCase().contains(query)) {
                     filteredResults.add(image);
                 }
