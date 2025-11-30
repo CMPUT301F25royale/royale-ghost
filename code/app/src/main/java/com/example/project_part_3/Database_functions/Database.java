@@ -24,6 +24,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -89,6 +90,48 @@ public class Database {
                         .continueWith(setTask -> setTask.isSuccessful());
             }
         });
+    }
+
+    public Task<Boolean> addInterest(String email, String newInterest) {
+        return db.collection(USERS_COLLECTION)
+                .document(email)
+                .update("interests", FieldValue.arrayUnion(newInterest))
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    return true;
+                });
+    }
+
+    public Task<ArrayList<String>> getInterests(String email) {
+        return db.collection(USERS_COLLECTION)
+                .document(email)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    List<String> interests = (List<String>) task.getResult().get("interests");
+
+                    if (interests == null) {
+                        return new ArrayList<>();    // Field not yet created → return empty list
+                    }
+
+                    return new ArrayList<>(interests);  // Return copy as ArrayList
+                });
+    }
+
+    public Task<Boolean> deleteInterest (String email, String oldInterest) {
+        return db.collection(USERS_COLLECTION)
+                .document(email)
+                .update("interests", FieldValue.arrayRemove(oldInterest))
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    return true;
+                });
     }
 
     public Task<User> checkUser(String email, String password) {

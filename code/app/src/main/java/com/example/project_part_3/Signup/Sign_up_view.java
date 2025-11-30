@@ -24,6 +24,7 @@ import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.R;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Sign_up_view extends Fragment {
@@ -79,6 +80,7 @@ public class Sign_up_view extends Fragment {
             String password = Objects.requireNonNull(passwordText.getText()).toString();
             String email = Objects.requireNonNull(emailText.getText()).toString();
             String phone = phoneText.getText().toString();
+            ArrayList<String> interest = new ArrayList<>();
 
             SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
@@ -91,7 +93,7 @@ public class Sign_up_view extends Fragment {
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
                 return;
             }
-            sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
+            sign_up_model = new Sign_up_model(name, password, email, phone, interest, selectedOption);
             sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
                 if (wasAdded) {
                     Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
