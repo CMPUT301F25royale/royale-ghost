@@ -123,6 +123,15 @@ public class Event {
         this.imageInfo = null;
     }
 
+    public void resetLotteryState() {
+        waitlistUserIds = new ArrayList<>();
+        selectedUserIds = new ArrayList<>();
+        alternatesUserIds = new ArrayList<>();
+        confirmedUserIds = new ArrayList<>();
+        declinedUserIds = new ArrayList<>();
+        lotteryDone = false;
+    }
+
     public Event(
                  String organizerId,
                  String title,
