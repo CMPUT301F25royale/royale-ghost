@@ -66,9 +66,9 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
 
         h.title.setText(e.getTitle() != null ? e.getTitle() : "—");
 
-        if (e.getPosterImageUrl() != null && !e.getPosterImageUrl().isEmpty()) {
+        if (e.getImageInfo() != null && e.getImageInfo().getUrl() != null) {
             Glide.with(ctx)
-                    .load(e.getPosterImageUrl())
+                    .load(e.getImageInfo().getUrl())
                     .placeholder(android.R.drawable.sym_def_app_icon)
                     .error(android.R.drawable.sym_def_app_icon)
                     .into(h.img);

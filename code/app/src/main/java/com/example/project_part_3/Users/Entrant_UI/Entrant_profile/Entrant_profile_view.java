@@ -53,6 +53,7 @@ public class Entrant_profile_view extends Fragment {
         username = prefs.getString("username", "");
 
         profileImageView = view.findViewById(R.id.profile_photo);
+
         loadProfileImage();
 
         profileImageView.setOnClickListener(v -> showImagePopup());

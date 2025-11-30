@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -96,8 +97,8 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));
 
         // Poster
-        if (event.getPoster() != null) {
-            poster.setImageBitmap(event.getPoster());
+        if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
+            Glide.with(this).load(event.getImageInfo().getUrl()).into(poster);
         } else {
             poster.setImageResource(android.R.drawable.ic_menu_report_image);
         }
