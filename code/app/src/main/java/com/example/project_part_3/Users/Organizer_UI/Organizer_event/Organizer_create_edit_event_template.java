@@ -23,6 +23,7 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
@@ -30,7 +31,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.widget.Switch;
+
+
 public abstract class Organizer_create_edit_event_template extends Fragment {
+    protected Switch geolocationSwitch;
 
     protected Date registrationOpenDate;
     protected Date registrationCloseDate;
@@ -97,6 +102,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         closeDateButton = view.findViewById(R.id.create_event_registration_close_button);
         startDateButton = view.findViewById(R.id.create_event_date_time_start_button);
         endDateButton = view.findViewById(R.id.create_event_date_time_end_button);
+        geolocationSwitch = view.findViewById(R.id.create_event_geolocation_switch);
+
     }
 
     protected void setupNavigation(@NonNull View view) {
@@ -212,6 +219,9 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         String capacityStr = capacityEditText.getText().toString().trim();
         String priceStr = priceEditText.getText().toString().trim();
 
+        boolean geolocationEnabled =
+                geolocationSwitch != null && geolocationSwitch.isChecked();
+
         // must fill in only mandatory fields
         if (title.isEmpty() || description.isEmpty() || location.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -273,6 +283,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             newEvent.setDate_close(registrationCloseDate);
             newEvent.setEventStartAt(eventStartDate);
             newEvent.setEventEndAt(eventEndDate);
+            newEvent.setGeolocationEnabled(geolocationEnabled);
+
         } else {
             // else, create a new event
             newEvent = new Event(
@@ -287,9 +299,11 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     eventStartDate.getTime(),
                     eventEndDate.getTime(),
                     capacity, // optional, may be null
-                    price // optional, may be null
+                    price, // optional, may be null
+                    geolocationEnabled
             );
         }
+        android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
 
         pushEventToDatabase(db, newEvent);
     }
@@ -335,6 +349,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
     protected abstract void pushEventToDatabase(Database db, Event event);
 
     protected void populateFields(Event event) {
-        // Hook to populate fields with event data (implemented in subclasses)
+
     }
+
+
 }

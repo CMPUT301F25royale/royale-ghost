@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Event {
 
+    private Boolean geolocationEnabled;
+
     private String id;
     private String title;
     private String description;
@@ -99,7 +101,8 @@ public class Event {
                  Organizer organizer,
                  String location,
                  Integer capacity,
-                 Bitmap poster) {
+                 Bitmap poster
+                 ) {
         this();
         this.time = time;
         this.title = title;
@@ -114,6 +117,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+
     }
 
     public Event(
@@ -128,7 +132,8 @@ public class Event {
                  Long eventStartAtMs,
                  Long eventEndAtMs,
                  Integer capacity,
-                 Float price) {
+                 Float price,
+                 Boolean geolocationEnabled) {
         this();
         this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
         this.organizerId = organizerId;
@@ -143,6 +148,8 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.geolocationEnabled = geolocationEnabled;
+
     }
 
     public Event(
@@ -158,7 +165,8 @@ public class Event {
             Long eventStartAtMs,
             Long eventEndAtMs,
             Integer capacity,
-            Float price) {
+            Float price,
+            Boolean geolocationEnabled) {
         this();
         this.id = eventId;
         this.organizerId = organizerId;
@@ -173,6 +181,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.geolocationEnabled = geolocationEnabled;
     }
 
     /**
@@ -369,6 +378,13 @@ public class Event {
 
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
+    }
+    public Boolean getGeolocationEnabled() {
+        return geolocationEnabled != null && geolocationEnabled;
+    }
+
+    public void setGeolocationEnabled(Boolean geolocationEnabled) {
+        this.geolocationEnabled = geolocationEnabled;
     }
 }
 

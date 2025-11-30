@@ -22,7 +22,19 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.location.Location;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import android.content.pm.PackageManager;
+
 public class entrant_event_detail_activity extends AppCompatActivity {
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int REQ_LOCATION = 1001;
+    private Event currentEvent;
+    private String currentViewerEmail;
 
     private ImageView poster;
     private TextView title, organizer, locationName, locationAddress, regWindow, startEnd, price, description;
@@ -35,6 +47,8 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.entrant_event_detail);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         MaterialToolbar tb = findViewById(R.id.toolbar);
         tb.setNavigationOnClickListener(v -> finish());
