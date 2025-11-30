@@ -29,11 +29,16 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+
+import android.widget.Switch;
+
 
 /**
  * Abstract base fragment for creating or editing events in the Organizer UI.
@@ -42,6 +47,7 @@ import java.util.Date;
  * and interaction with a shared {@link OrganizerSharedViewModel}
  */
 public abstract class Organizer_create_edit_event_template extends Fragment {
+    protected Switch geolocationSwitch;
 
     protected Date registrationOpenDate;
     protected Date registrationCloseDate;
@@ -169,6 +175,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         endDateButton = view.findViewById(R.id.create_event_date_time_end_button);
         imagebutton = view.findViewById(R.id.create_event_poster_button);
         EventImageView = view.findViewById(R.id.eventImage);
+        geolocationSwitch = view.findViewById(R.id.create_event_geolocation_switch);
+
     }
 
     protected void setupNavigation(@NonNull View view) {
@@ -229,6 +237,10 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         priceStr = priceEditText.getText().toString().trim();
 
         // --- Validation Steps ---
+        boolean geolocationEnabled =
+                geolocationSwitch != null && geolocationSwitch.isChecked();
+
+        // must fill in only mandatory fields
         if (title.isEmpty() || description.isEmpty() || location.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
@@ -288,6 +300,21 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     .addOnFailureListener(e -> {
                         Toast.makeText(getContext(), "Failed to upload poster: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
+        // if selectedEvent is null, it's a new event (pass null ID), else modify the existing event
+        Event newEvent;
+        if (selectedEvent != null) {
+            newEvent = selectedEvent;
+            newEvent.setTitle(title);
+            newEvent.setDescription(description);
+            newEvent.setLocation(location);
+            newEvent.setCapacity(capacity);
+            newEvent.setPrice(price);
+            newEvent.setDate_open(registrationOpenDate);
+            newEvent.setDate_close(registrationCloseDate);
+            newEvent.setEventStartAt(eventStartDate);
+            newEvent.setEventEndAt(eventEndDate);
+            newEvent.setGeolocationEnabled(geolocationEnabled);
+
         } else {
             // CASE: No new image (Create or Edit)
             String existingImageUrl = (selectedEvent != null) ? selectedEvent.getPosterImageUrl() : null;
@@ -368,8 +395,12 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     registrationCloseDate.getTime(),
                     eventStartDate.getTime(),
                     eventEndDate.getTime(),
-                    capacity,
-                    price);
+                    capacity, // optional, may be null
+                    price, // optional, may be null
+                    geolocationEnabled
+            );
+        }
+        android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
 
             pushEventToDatabase(db, newEvent, true);
         }
@@ -453,5 +484,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
      * @param event The event to populate fields with.
      */
     protected void populateFields(Event event) {
+
     }
+
+
 }
