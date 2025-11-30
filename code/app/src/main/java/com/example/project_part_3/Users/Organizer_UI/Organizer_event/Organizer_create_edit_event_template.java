@@ -29,6 +29,7 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -47,7 +48,7 @@ import android.widget.Switch;
  * and interaction with a shared {@link OrganizerSharedViewModel}
  */
 public abstract class Organizer_create_edit_event_template extends Fragment {
-    protected Switch geolocationSwitch;
+    protected MaterialSwitch geolocationSwitch;
 
     protected Date registrationOpenDate;
     protected Date registrationCloseDate;
