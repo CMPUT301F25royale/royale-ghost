@@ -2,7 +2,7 @@
 
     <item
         android:id="@+id/entrant_profile_view"
-        android:icon="@drawable/ic_profile"
+        android:icon="@drawable/ic_home"
         android:title="Profile" />
 
     <item
