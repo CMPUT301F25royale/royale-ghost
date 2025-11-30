@@ -40,6 +40,8 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
+
+        // Use DateTimeInstance to show both date and time
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
 
         if (event.getDate_open() != null) {
@@ -86,6 +88,9 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_foreground)
                     .into(EventImageView);
+        }
+        if (geolocationSwitch != null) {
+            geolocationSwitch.setChecked(event.getGeolocationEnabled());
         }
     }
 

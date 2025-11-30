@@ -20,6 +20,7 @@ identityJvm = "202411.1"
 firebaseMessaging = "25.0.1"
 firebaseAuth = "24.0.1"
 firebaseStorage = "22.0.1"
+playServicesLocation = "21.3.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -45,6 +46,7 @@ identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 # Optional:
 # camerax-video     = { group = "androidx.camera", name = "camera-video",     version.ref = "camerax" }
 # camerax-extensions= { group = "androidx.camera", name = "camera-extensions",version.ref = "camerax" }
