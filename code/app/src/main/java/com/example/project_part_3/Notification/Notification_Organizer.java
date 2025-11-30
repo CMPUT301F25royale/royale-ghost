@@ -5,19 +5,19 @@ import com.example.project_part_3.Users.Organizer;
 import java.sql.Timestamp;
 
 public class Notification_Organizer {
-    private String title;
+    private String type;
     private Organizer organizer;
     private String message;
     private Timestamp time_sent;
 
-    public Notification_Organizer(String title, Organizer organizer, String message, Timestamp time_sent) {
-        this.title = title;
+    public Notification_Organizer(String type, Organizer organizer, String message, Timestamp time_sent) {
+        this.type = type;
         this.organizer = organizer;
         this.message = message;
         this.time_sent = time_sent;
     }
     public String getTitle() {
-        return title;
+        return type;
     }
     public Organizer getOrganizer() {
         return organizer;

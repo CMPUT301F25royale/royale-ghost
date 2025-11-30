@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -74,11 +75,9 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
 
             holder.eventRegistrationStatus.setText(event.registrationStatus());
 
-            if (event.getCapacity() == null || event.getCapacity() == 0) {
-                holder.eventCapacity.setText("Capacity: None");
-            } else {
-                holder.eventCapacity.setText(String.valueOf("Capacity: " + event.getCapacity()));
-            }
+            // Build event capacity and attendees string
+            String eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+            holder.eventCapacity.setText(eventCapacityAndAttendees);
 
             holder.editEventButton.setOnClickListener(v -> {
                 if (listener != null) listener.onEditClick(event);
@@ -93,6 +92,21 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
         return view;
     }
 
+    private String buildEntrantAndCapacityString(int numEntrants, @Nullable Integer capacity) {
+        String s = "Entrants: ";
+
+        s += Integer.toString(numEntrants);
+
+        s += " | Capacity: ";
+
+        if (capacity == null) {
+            s += "None";
+        } else {
+            s += Integer.toString(capacity);
+        }
+
+        return s;
+    }
     public static class ViewHolder {
         TextView eventName;
         TextView eventLocation;

@@ -1,4 +1,5 @@
 package com.example.project_part_3.Database_functions;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,10 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,11 +53,13 @@ import java.util.concurrent.ExecutionException;
  */
 public class Database {
     private final FirebaseFirestore db;
+    private final FirebaseStorage storage;
     private static final String USERS_COLLECTION = "users";
     private static final String EVENTS_SUBCOLLECTION = "organized_events";
 
     public Database(FirebaseFirestore db) {
         this.db = db;
+        this.storage = FirebaseStorage.getInstance();
     }
 
     public ListenerRegistration listenForUsers(EventListener<QuerySnapshot> listener) {
@@ -358,6 +365,7 @@ public class Database {
 
     // TODO: Wire this to fire when user clicks cancel button on the "events youve signed up for" tab
     public Task<Void> removeUserFromWaitlist(@NonNull String eventId, @NonNull String userEmail) {
+        removeEventFromUser(userEmail, eventId);
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update("waitlistUserIds", FieldValue.arrayRemove(userEmail)));
     }
@@ -372,10 +380,41 @@ public class Database {
                 });
     }
 
+    public Task<List<String>> getEventsUserSelected(@NonNull String userId) {
+        return db.collection(USERS_COLLECTION).whereEqualTo("email", userId)
+                .limit(1)
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    QuerySnapshot querySnapshots = task.getResult();
+                    if (querySnapshots == null || querySnapshots.isEmpty()) {
+                        Log.w("getEventsUserSelected", "User with ID " + userId + " not found");
+                        return new ArrayList<String>();
+                    }
+                    DocumentSnapshot snap = querySnapshots.getDocuments().get(0);
+                    if(snap.contains("eventsAppliedFor")){
+                        List<String> events = (List<String>) snap.get("eventsAppliedFor");
+                        if(events != null) {
+                            return events;
+                        }
+                    }
+                    return new ArrayList<String>();
+                });
+    }
+
+    public Task<Void> addEventToUser(@NonNull String userId, @NonNull String eventId) {
+        return db.collection(USERS_COLLECTION).document(userId)
+                .update("eventsAppliedFor", FieldValue.arrayUnion(eventId));
+    }
+
+    public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
+        return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
+    }
     public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = event.getAttendant_list();
 
-        // return empty list if no entrants
         if (entrantIDs == null || entrantIDs.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
         }
@@ -392,7 +431,6 @@ public class Database {
 
             for (Object result : results) {
                 if (result instanceof Entrant) {
-                    // Cast the result to Entrant
                     Entrant entrant = (Entrant) result;
 
                     if (entrant.getUserType().equals("Entrant")) {
@@ -400,7 +438,7 @@ public class Database {
                     }
                 }
             }
-            // Return the list of entrants
+
             return entrants;
         });
     }
@@ -408,7 +446,7 @@ public class Database {
     public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = new ArrayList<>(event.getWaitlistUserIds());
 
-        // return empty list if no entrants
+
         if (entrantIDs == null || entrantIDs.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
         }
@@ -422,18 +460,14 @@ public class Database {
         return Tasks.whenAllSuccess(tasks).continueWith(task -> {
             List<Object> results = task.getResult();
             List<Entrant> entrants = new ArrayList<>();
-
             for (Object result : results) {
                 if (result instanceof Entrant) {
-                    // Cast the result to Entrant
                     Entrant entrant = (Entrant) result;
-
                     if (entrant.getUserType().equals("Entrant")) {
                         entrants.add(entrant);
                     }
                 }
             }
-            // Return the list of entrants
             return entrants;
         });
     }
@@ -442,4 +476,23 @@ public class Database {
         event.declineAttendant(entrant.getEmail());
         return updateEvent(event);
     }
+
+    public Task<Uri> uploadImage(@NonNull Uri imageUri, @NonNull String folderPath) {
+        String fileName = "IMG_" + System.currentTimeMillis() + ".jpg";
+        StorageReference storageRef = storage.getReference().child(folderPath + "/" + fileName);
+
+        UploadTask uploadTask = storageRef.putFile(imageUri);
+        return uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+               throw task.getException();
+            }
+            return storageRef.getDownloadUrl();
+        });
+    }
+
+    public Task<Void> deleteImageByUrl(@NonNull String imageUrl) {
+        StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
+        return photoRef.delete();
+    }
 }
+
