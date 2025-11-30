@@ -123,4 +123,14 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
             navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
         });
     }
+
+    //TODO: KANAJENIJNFI
+    /**
+     * @param db    The database to push to
+     * @param event The event to push
+     */
+    @Override
+    protected void pushEventToDatabase(Database db, Event event) {
+
+    }
 }

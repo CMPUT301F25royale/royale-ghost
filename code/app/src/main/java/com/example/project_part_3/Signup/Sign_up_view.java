@@ -143,6 +143,8 @@ public class Sign_up_view extends Fragment {
         String password = Objects.requireNonNull(passwordText.getText()).toString();
         String email = Objects.requireNonNull(emailText.getText()).toString();
         String phone = phoneText.getText().toString();
+        ArrayList<String> interest = new ArrayList<>();
+
 
         if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
             Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -150,7 +152,7 @@ public class Sign_up_view extends Fragment {
             return;
         }
 
-        sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
+        sign_up_model = new Sign_up_model(name, password, email, phone,interest, selectedOption);
         sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
             if (wasAdded) {
                 Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();

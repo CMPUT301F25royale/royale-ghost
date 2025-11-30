@@ -199,12 +199,11 @@ public class Organizer_profile_view extends Fragment {
         requireActivity().finish();
     }
 
-    protected void loadProfileImage() {
         
     /**    
     * Loads the profile image for the organizer.
     */
-    private void loadProfileImage() {
+    protected void loadProfileImage() {
         
         if (username != null && !username.isEmpty()) {
             db.fetchUser(username).addOnSuccessListener(user -> {
