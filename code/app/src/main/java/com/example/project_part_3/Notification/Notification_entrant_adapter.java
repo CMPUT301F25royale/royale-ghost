@@ -49,6 +49,7 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                         @Nullable View convertView,
                         @NonNull ViewGroup parent) {
 
+        // 1. Declare holder locally so it's specific to this row execution
         ViewHolder holder;
 
         if (convertView == null) {
@@ -83,11 +84,15 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                 holder.date.setText("");
             }
 
-            if (notif.isRead()) {
+            if (notif.isRead() || !notif.getType().equals("lottery_won")) {
+                // HIDE BUTTONS
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
+
+                // HIDE OVERLAY (Always hide it here to clean up recycled views)
                 holder.overlay.setVisibility(View.GONE);
             } else {
+                // SHOW BUTTONS & OVERLAY (It is unread AND lottery_won)
                 holder.acceptButton.setVisibility(View.VISIBLE);
                 holder.declineButton.setVisibility(View.VISIBLE);
                 holder.overlay.setVisibility(View.VISIBLE);
