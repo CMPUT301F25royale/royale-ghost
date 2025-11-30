@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Users.Entrant;
+import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import android.widget.ListView;
@@ -60,7 +61,8 @@ public class Entrant_profile_view extends Organizer_profile_view {
         if (username == null || username.isEmpty()) {
             notificationsSwitch.setEnabled(false);
         } else {
-            db.db.collection("users")
+            FirebaseFirestore ff = FirebaseFirestore.getInstance();
+            ff.collection("users")
                     .document(username)
                     .get()
                     .addOnSuccessListener(doc -> {

@@ -99,7 +99,7 @@
         android:text="Logout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/number_Change"
-        app:layout_constraintTop_toBottomOf="@+id/Pass_Reset" />
+        app:layout_constraintTop_toBottomOf="@+id/entrant_notifications_switch" />
 
     <TextView
         android:id="@+id/Interests"
@@ -147,18 +147,19 @@
         app:layout_constraintStart_toStartOf="@+id/Change_Name"
         app:layout_constraintTop_toBottomOf="@+id/Change_Name" />
 
-    <androidx.appcompat.widget.SwitchCompat
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/entrant_notifications_switch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="Receive notifications"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="200dp"
+        android:checked="true"
+        android:text="Notifications:"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/number_Change" />
+        app:layout_constraintStart_toStartOf="@+id/Pass_Reset"
+        app:layout_constraintTop_toBottomOf="@+id/Pass_Reset"
+        app:trackTint="@color/switch_track_selector" />
 
     <ListView
         android:id="@+id/InterestsListView"
