@@ -32,6 +32,7 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
+
         // Use DateTimeInstance to show both date and time
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
 
@@ -69,6 +70,10 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
         if (event.getPrice() != null) {
             priceEditText.setText(String.format("%.2f", event.getPrice()));
+        }
+
+        if (geolocationSwitch != null) {
+            geolocationSwitch.setChecked(event.getGeolocationEnabled());
         }
     }
 
