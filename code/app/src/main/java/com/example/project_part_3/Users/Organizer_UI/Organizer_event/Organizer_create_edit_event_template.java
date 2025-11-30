@@ -300,6 +300,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     .addOnFailureListener(e -> {
                         Toast.makeText(getContext(), "Failed to upload poster: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
+        }
         // if selectedEvent is null, it's a new event (pass null ID), else modify the existing event
         Event newEvent;
         if (selectedEvent != null) {
@@ -340,7 +341,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                 eventStartDate.getTime(),
                 eventEndDate.getTime(),
                 capacity,
-                price);
+                price,
+                true);
 
         // 2. Save Event to create Document
         db.addEvent(newEvent).addOnSuccessListener(success -> {
@@ -397,9 +399,9 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     eventEndDate.getTime(),
                     capacity, // optional, may be null
                     price, // optional, may be null
-                    geolocationEnabled
+                    true // geolocation
             );
-        }
+
         android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
 
             pushEventToDatabase(db, newEvent, true);

@@ -419,7 +419,8 @@ public class Event {
         confirmedUserIds = new ArrayList<>();
         declinedUserIds = new ArrayList<>();
         lotteryDone = false;
-        
+
+    }
     public Boolean getGeolocationEnabled() {
         return geolocationEnabled != null && geolocationEnabled;
     }

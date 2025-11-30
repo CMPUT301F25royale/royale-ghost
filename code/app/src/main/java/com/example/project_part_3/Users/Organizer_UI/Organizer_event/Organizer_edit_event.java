@@ -92,12 +92,12 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_foreground)
                     .into(EventImageView);
-                    
-        if (geolocationSwitch != null) {
-            geolocationSwitch.setChecked(event.getGeolocationEnabled());
+
+            if (geolocationSwitch != null) {
+                geolocationSwitch.setChecked(event.getGeolocationEnabled());
+            }
         }
     }
-
     private void handleEventDelete(Event event) {
         Database db = new Database(FirebaseFirestore.getInstance());
         db.deleteEvent(event).addOnSuccessListener(success -> {
