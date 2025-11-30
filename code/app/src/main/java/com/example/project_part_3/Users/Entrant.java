@@ -3,6 +3,10 @@ package com.example.project_part_3.Users;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an Entrant user in the system who can apply for events and view
+ * their lottery results.
+ */
 public class Entrant extends User {
     List<String> eventsAppliedFor;
 

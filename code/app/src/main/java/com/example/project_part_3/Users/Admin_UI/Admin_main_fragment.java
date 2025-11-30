@@ -13,6 +13,9 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * The fragment for the admin main page which displays the admin bottom navigation bar.
+ */
 public class Admin_main_fragment extends Fragment {
 
     @Nullable

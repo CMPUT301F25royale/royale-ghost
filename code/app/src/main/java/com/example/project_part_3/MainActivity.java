@@ -9,6 +9,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+/**
+ * The main activity for the application.
+ * This activity handles the root layout setup, applies window insets
+ * to properly handle system bars (status bar, navigation bar),
+ * and provides navigation based on the user type (Organizer, Entrant, Admin)
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override

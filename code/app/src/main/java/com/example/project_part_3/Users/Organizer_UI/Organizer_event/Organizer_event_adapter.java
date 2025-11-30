@@ -23,6 +23,11 @@ import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+/**
+ * Adapter for displaying a list of events in the Organizer UI.
+ * Each list item displays event details including title, location, start date, registration status,
+ * capacity, and buttons for editing, viewing entrants, and showing QR code.
+ */
 public class Organizer_event_adapter extends ArrayAdapter<Event> {
     private final int resourceLayout;
 

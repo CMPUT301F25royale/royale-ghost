@@ -28,6 +28,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment responsible for displaying the list of notifications associated with the currently logged-in
+ * entrant user.
+ */
 public class Entrant_notifications_fragment extends Fragment {
 
     private static final String TAG = "EntrantNotifications";

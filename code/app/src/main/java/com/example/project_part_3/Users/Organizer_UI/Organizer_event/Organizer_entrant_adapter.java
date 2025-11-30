@@ -20,6 +20,9 @@ import com.example.project_part_3.Users.Entrant;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter for displaying a list of entrants for a specific event in the Organizer UI.
+ */
 public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String>> {
 
     private final int resourceLayout;
@@ -106,6 +109,11 @@ public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String
         return view;
     }
 
+    /**
+     * Updates the color of the status TextView based on the provided status.
+     * @param statusView The TextView to update.
+     * @param status The status to check.
+     */
     private void updateStatusColor(TextView statusView, String status) {
         Context context = getContext();
         statusView.setText(status);

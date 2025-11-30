@@ -34,6 +34,9 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.R;
 
+/**
+ * Fragment that displays a profile for an organizer.
+ */
 public class Organizer_profile_view extends Fragment {
     private Database db;
     private String username;
@@ -162,6 +165,9 @@ public class Organizer_profile_view extends Fragment {
 
     }
 
+    /**
+     * Loads the profile image for the organizer.
+     */
     private void loadProfileImage() {
         if (username != null && !username.isEmpty()) {
             db.fetchUser(username).addOnSuccessListener(user -> {
@@ -179,6 +185,12 @@ public class Organizer_profile_view extends Fragment {
         }
     }
 
+    /**
+     * Displays a custom input dialog with two EditText fields for entering
+     * an old value and a new value.
+     *
+     * @param callback Callback interface for handling input submission.
+     */
     private void InputDialog(InputDialogCallback callback){
         LayoutInflater inflator = LayoutInflater.from(requireContext());
         View dialogView = inflator.inflate(R.layout.profile_popup,null);
@@ -200,6 +212,9 @@ public class Organizer_profile_view extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Function to display an image popup.
+     */
     private void showImagePopup() {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.image_popup, null);
@@ -223,6 +238,10 @@ public class Organizer_profile_view extends Fragment {
         dialog.show();
     }
 
+    /**
+     * ActivityResultLauncher used to open the device's gallery and allow
+     * the user to pick an image.
+     */
     private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
@@ -231,6 +250,10 @@ public class Organizer_profile_view extends Fragment {
                     uploadProfilePicture();
                 }
             });
+
+    /**
+     * Uploads the selected image to Firebase Storage and updates the organizer's profile picture.
+     */
     private void uploadProfilePicture() {
         if (ImageUri != null) {
             db.uploadImage(ImageUri, "profile_pictures").addOnSuccessListener(downloadUrl -> {

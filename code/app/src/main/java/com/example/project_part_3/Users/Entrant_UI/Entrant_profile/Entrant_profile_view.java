@@ -30,6 +30,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
 
+/**
+ * Fragment responsible for displaying the currently logged-in entrant's profile.
+ */
 public class Entrant_profile_view extends Fragment {
     private Database db;
     private String username;

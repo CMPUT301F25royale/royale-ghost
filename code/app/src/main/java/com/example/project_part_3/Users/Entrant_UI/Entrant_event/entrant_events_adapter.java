@@ -21,10 +21,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * RecyclerView adapter used to display a list of events in the entrant UI.
+ *
+ */
 public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_adapter.VH> {
 
     public enum Mode { MY_EVENTS, SEARCH } // Modes to determine which UI elements to show
-
 
     private final List<Event> items = new ArrayList<>();
     private final String currentUserEmail;
@@ -131,7 +135,8 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
         notifyDataSetChanged();
     }
 
-    @Override public int getItemCount() {
+    @Override
+    public int getItemCount() {
         return items.size();
     }
 

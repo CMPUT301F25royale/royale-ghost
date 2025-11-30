@@ -21,6 +21,10 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that provides the admin search interface for browsing and filtering all events and
+ * images stored in the system.
+ */
 public class Admin_search_view extends Fragment {
 
     private Admin_search_model viewModel;

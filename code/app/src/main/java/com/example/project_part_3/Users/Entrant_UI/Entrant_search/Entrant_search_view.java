@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Fragment responsible for displaying the search page for entrants.
+ */
 public class Entrant_search_view extends Fragment {
 
     private Entrant_event_model viewModel;

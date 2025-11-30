@@ -22,6 +22,9 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The activity for an entrant to view the details of an event.
+ */
 public class entrant_event_detail_activity extends AppCompatActivity {
 
     private ImageView poster;
@@ -91,6 +94,10 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     }
 
 
+    /**
+     * Binds an event to the UI.
+     * @param event the event to bind to the UI
+     */
     private void bindEventToUI(Event event) {
         title.setText(nonEmpty(event.getTitle(), "—"));
         organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));

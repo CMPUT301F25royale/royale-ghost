@@ -10,7 +10,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import android.util.Log;
 
-
+/**
+ * Represents a user in the system.
+ * Implements serializable to help interface with the database and includes
+ * appropriate getters and setters.
+ */
 public class User implements Serializable {
     private String name;
     private String password;

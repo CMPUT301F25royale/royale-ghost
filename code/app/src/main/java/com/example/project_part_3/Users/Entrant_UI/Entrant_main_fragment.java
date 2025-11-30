@@ -19,6 +19,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * The main fragment for the entrant UI which sets up and
+ * manages the navigation components.
+ */
 public class Entrant_main_fragment extends Fragment {
 
     public Entrant_main_fragment() {

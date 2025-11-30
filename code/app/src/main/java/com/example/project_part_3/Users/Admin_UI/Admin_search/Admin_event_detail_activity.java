@@ -17,6 +17,9 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The activity for an admin to view the details of an event.
+ */
 public class Admin_event_detail_activity extends AppCompatActivity {
 
     // No direct database access needed here anymore

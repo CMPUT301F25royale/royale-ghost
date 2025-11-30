@@ -27,6 +27,10 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import java.io.OutputStream;
 
+/**
+ * Fragment that displays a QR code for a selected event.
+ * The QR code can be viewed and saved to the user's photo gallery.
+ */
 public class Organizer_event_qrcode_view extends Fragment {
     private ImageButton backButton;
     private Button saveButton;
@@ -65,6 +69,10 @@ public class Organizer_event_qrcode_view extends Fragment {
         });
     }
 
+    /**
+     * Sets up the back button in the view.
+     * @param view The view to set up the back button on.
+     */
     public void setUpBackButton(View view) {
         backButton = view.findViewById(R.id.event_qr_code_back_button);
         if (backButton != null) {
@@ -75,6 +83,12 @@ public class Organizer_event_qrcode_view extends Fragment {
         }
     }
 
+    /**
+     * Generates and displays a QR code for the given event.
+     * @param view The view to display the QR code in.
+     * @param eventID The ID of the event to generate the QR code for.
+     * @return The generated QR code as a Bitmap, or null if an error occurred.
+     */
     public Bitmap displayQRCode(View view, String eventID) {
         qrCodeView = view.findViewById(R.id.event_qr_code_view);
         try {
@@ -89,6 +103,12 @@ public class Organizer_event_qrcode_view extends Fragment {
         return null;
     }
 
+    /**
+     * Sets up the save button to save the QR code to the user's photo gallery.
+     * @param view The view to set up the save button on.
+     * @param qrCodeBitmap The QR code to save.
+     * @param eventID The ID of the event the QR code is for.
+     */
     public void setUpSaveButton(View view, Bitmap qrCodeBitmap, String eventID) {
         saveButton = view.findViewById(R.id.organizer_qrcode_save_to_photos_button);
 
@@ -106,6 +126,11 @@ public class Organizer_event_qrcode_view extends Fragment {
         saveButton.setOnClickListener(v -> saveImageToGallery(qrCodeBitmap, eventID));
     }
 
+    /**
+     * Saves the given QR code to the user's photo gallery.
+     * @param bitmap The QR code to save.
+     * @param eventID The ID of the event the QR code is for.
+     */
     private void saveImageToGallery(Bitmap bitmap, String eventID) {
         String fileName = "event_" + eventID + "_qr_code";
 

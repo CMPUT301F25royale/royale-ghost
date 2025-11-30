@@ -30,6 +30,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Abstract base fragment for creating or editing events in the Organizer UI.
+ * This class handles the common functionality needed to create or edit events,
+ * including initialization of UI elements, date/time selection, validation,
+ * and interaction with a shared {@link OrganizerSharedViewModel}
+ */
 public abstract class Organizer_create_edit_event_template extends Fragment {
 
     protected Date registrationOpenDate;
@@ -332,9 +338,18 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         });
     }
 
+    /**
+     * Pushes an event to the database
+     * Implemented in subclasses
+     * @param db The database to push to
+     * @param event The event to push
+     */
     protected abstract void pushEventToDatabase(Database db, Event event);
 
+    /**
+     * Hook to populate fields with event data (implemented in subclasses)
+     * @param event The event to populate fields with.
+     */
     protected void populateFields(Event event) {
-        // Hook to populate fields with event data (implemented in subclasses)
     }
 }

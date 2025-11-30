@@ -14,6 +14,13 @@ import com.example.project_part_3.Image.Image_holder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ViewModel responsible for managing and combining data used in the Admin Search UI.
+ * This ViewModel retrieves all events and images from their respective databases and combines it into
+ * a single stream containing a combined list of both data types. It uses
+ * The class also provides helper methods for deleting events and images, and ensures
+ * proper cleanup of database listeners when the ViewModel is cleared.
+ */
 public class Admin_search_model extends ViewModel {
 
     private final EventDatabase eventDb;

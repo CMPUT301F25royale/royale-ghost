@@ -26,6 +26,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment that displays a list of entrants for a selected event in the Organizer UI.
+ * Each entrant's name, email, and status is displayed as well as a decline button if applicable
+ */
 public class Organizer_entrant_view extends Fragment {
     OrganizerSharedViewModel model;
     Database db;

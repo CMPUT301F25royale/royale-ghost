@@ -27,6 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment that displays a list of events created by the organizer.
+ */
 public class Organizer_event_view extends Fragment {
     ListView eventList;
     Organizer_event_adapter adapter;

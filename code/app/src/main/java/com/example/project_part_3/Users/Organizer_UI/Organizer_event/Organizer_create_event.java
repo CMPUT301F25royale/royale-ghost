@@ -29,6 +29,10 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Concrete fragment for creating a new event in the Organizer UI.
+ * Extends the {@link Organizer_create_edit_event_template} to handle event creation for organizers
+ */
 public class Organizer_create_event extends Organizer_create_edit_event_template {
 
 

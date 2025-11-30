@@ -18,6 +18,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+/**
+ * Concrete fragment for editing an existing event in the Organizer UI.
+ * Extends the {@link Organizer_create_edit_event_template} to handle event editing for organizers
+ */
 public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override

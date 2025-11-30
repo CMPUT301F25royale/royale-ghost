@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Fragment responsible for displaying the list of events associated with the currently logged-in
+ * entrant user.
+ */
 public class Entrant_event_view extends Fragment {
 
     private Entrant_event_model viewModel;
@@ -67,6 +71,14 @@ public class Entrant_event_view extends Fragment {
         return root;
     }
 
+    /**
+     * Filters for events that involve a specific user and returns the
+     * events as a list
+     *
+     * @param all list of all events to filter from
+     * @param email email of the user to filter for
+     * @return list of events that involve the user
+     */
     private List<Event> filterForUser(List<Event> all, String email) {
         if (all == null || email == null || email.isEmpty()) return new ArrayList<>();
         return all.stream().filter(e -> {
