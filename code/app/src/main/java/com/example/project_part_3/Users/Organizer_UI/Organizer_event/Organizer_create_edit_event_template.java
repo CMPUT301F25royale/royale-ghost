@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -222,7 +224,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         capacityStr = capacityEditText.getText().toString().trim();
         priceStr = priceEditText.getText().toString().trim();
 
-        // --- Validation Steps ---
+        // must fill in only mandatory fields
         if (title.isEmpty() || description.isEmpty() || location.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
@@ -266,133 +268,93 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             }
         }
 
-        if (selectedEvent == null && ImageUri != null) {
-            // CASE: Creating NEW event with Image
-            createEventFirstThenUpload(db, capacity, price);
-        } else if (ImageUri != null) {
-            // CASE: Editing EXISTING event with New Image
-            String imageType = "event_poster";
-            Integer finalCapacity = capacity;
-            Float finalPrice = price;
-
-            db.uploadImage(ImageUri, imageType, description, organizerEmail, selectedEvent.getId())
-                    .addOnSuccessListener(imageMetadata -> {
-                        CreateOrUpdateEvent(db, imageMetadata.getUrl(), finalCapacity, finalPrice);
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Failed to upload poster: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-        } else {
-            // CASE: No new image (Create or Edit)
-            String existingImageUrl = (selectedEvent != null) ? selectedEvent.getPosterImageUrl() : null;
-            CreateOrUpdateEvent(db, existingImageUrl, capacity, price);
-        }
-    }
-
-    /**
-     * Helper to Create Event -> then Upload Image -> then Update Event URL.
-     * Prevents NOT_FOUND error on database trigger.
-     */
-    protected void createEventFirstThenUpload(Database db, Integer capacity, Float price) {
-        // 1. Create Event Object (No URL yet)
-        Event newEvent = new Event(
-                organizerEmail,
-                title,
-                description,
-                location,
-                location,
-                null, // No URL yet
-                registrationOpenDate.getTime(),
-                registrationCloseDate.getTime(),
-                eventStartDate.getTime(),
-                eventEndDate.getTime(),
-                capacity,
-                price);
-
-        // 2. Save Event to create Document
-        db.addEvent(newEvent).addOnSuccessListener(success -> {
-            if (success) {
-                // 3. Document exists! Now we upload the image using the new ID.
-                // Assuming newEvent.getId() is populated by addEvent or constructor.
-                db.uploadImage(ImageUri, "event_poster", description, organizerEmail, newEvent.getId())
-                        .addOnSuccessListener(meta -> {
-                            // 4. Update Event with URL
-                            newEvent.setPosterImageUrl(meta.getUrl());
-                            db.updateEvent(newEvent).addOnSuccessListener(s -> {
-                                Toast.makeText(getContext(), "Event created!", Toast.LENGTH_SHORT).show();
-                                navigateBack();
-                            });
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Event created, but image upload failed.", Toast.LENGTH_LONG).show();
-                            navigateBack();
-                        });
-            } else {
-                Toast.makeText(getContext(), "Failed to create event.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    protected void CreateOrUpdateEvent(Database db, String imageUrl, Integer capacity, Float price) {
         if (selectedEvent != null) {
-            // --- UPDATE EXISTING ---
-            selectedEvent.setTitle(title);
-            selectedEvent.setDescription(description);
-            selectedEvent.setLocation(location);
-            selectedEvent.setCapacity(capacity);
-            selectedEvent.setPrice(price);
-            selectedEvent.setDate_open(registrationOpenDate);
-            selectedEvent.setDate_close(registrationCloseDate);
-            selectedEvent.setEventStartAt(eventStartDate);
-            selectedEvent.setEventEndAt(eventEndDate);
-            selectedEvent.setPosterImageUrl(imageUrl);
-
-            pushEventToDatabase(db, selectedEvent, false);
-
-        } else {
-            // --- CREATE NEW (No Image Case) ---
+            if (ImageUri != null) {
+                Integer finalCapacity = capacity;
+                Float finalPrice = price;
+                db.uploadImage(ImageUri, "event_poster", description, organizerEmail, selectedEvent.getId())
+                        .addOnSuccessListener(imageMetadata -> {
+                            updateExistingEvent(db, imageMetadata, finalCapacity, finalPrice);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            } else {
+                updateExistingEvent(db, selectedEvent.getImageInfo(), capacity, price);
+            }
+        }
+        else{
             Event newEvent = new Event(
                     organizerEmail,
                     title,
                     description,
                     location,
                     location,
-                    imageUrl,
+                    null,
                     registrationOpenDate.getTime(),
                     registrationCloseDate.getTime(),
                     eventStartDate.getTime(),
                     eventEndDate.getTime(),
                     capacity,
-                    price);
-
-            pushEventToDatabase(db, newEvent, true);
+                    price
+            );
+            createNewEvent(db,newEvent, ImageUri);
         }
+
     }
 
-    protected void pushEventToDatabase(Database db, Event event, boolean isNewEvent) {
-        if (isNewEvent) {
-            db.addEvent(event).addOnSuccessListener(success -> {
-                if (success) {
+    private void updateExistingEvent(Database db, Image_datamap imageInfo, Integer capacity, Float price) {
+        selectedEvent.setTitle(title);
+        selectedEvent.setDescription(description);
+        selectedEvent.setLocation(location);
+        selectedEvent.setCapacity(capacity);
+        selectedEvent.setPrice(price);
+        selectedEvent.setDate_open(registrationOpenDate);
+        selectedEvent.setDate_close(registrationCloseDate);
+        selectedEvent.setEventStartAt(eventStartDate);
+        selectedEvent.setEventEndAt(eventEndDate);
+        if (imageInfo != null) {
+            selectedEvent.setImageInfo(imageInfo);
+            selectedEvent.setPosterImageUrl(imageInfo.getUrl());
+        }
+
+        db.updateEvent(selectedEvent).addOnSuccessListener(success -> {
+            if (success) {
+                Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
+                navigateBack();
+            } else {
+                Toast.makeText(getContext(), "Failed to update event.", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("UpdateEventFailure", "The updateEvent task failed.", e);
+            Toast.makeText(getContext(), "Error updating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void createNewEvent(Database db,Event newEvent , Uri ImageUri) {
+        db.addEvent(newEvent).addOnSuccessListener(success -> {
+            if (success) {
+                if (ImageUri != null) {
+                    Log.d("CreateEvent", "Event document created. Now uploading image for event ID: " + newEvent.getId());
+                    db.uploadImage(ImageUri, "event_poster", description, organizerEmail, newEvent.getId())
+                            .addOnSuccessListener(imageMetadata -> {
+                                Toast.makeText(getContext(), "Event and poster created successfully!", Toast.LENGTH_SHORT).show();
+                                navigateBack();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("CreateEvent", "Event created, but image upload failed.", e);
+                                Toast.makeText(getContext(), "Event created, but poster upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                navigateBack(); // Navigate back anyway
+                            });
+                } else {
                     Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_SHORT).show();
                     navigateBack();
-                } else {
-                    Toast.makeText(getContext(), "Failed to create event.", Toast.LENGTH_SHORT).show();
                 }
-            }).addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Error creating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            });
-        } else {
-            db.updateEvent(event).addOnSuccessListener(success -> {
-                if (success) {
-                    Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
-                    navigateBack();
-                } else {
-                    Toast.makeText(getContext(), "Failed to update event.", Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "Error updating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            });
-        }
+            } else {
+                Toast.makeText(getContext(), "Failed to create event. A user or event might already exist.", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("CreateEvent", "Initial event creation failed.", e);
+            Toast.makeText(getContext(), "Error creating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        });
     }
 
     private void navigateBack() {

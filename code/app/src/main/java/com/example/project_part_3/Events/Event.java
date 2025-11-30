@@ -2,7 +2,7 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Image.ImageMetadata;
+import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
@@ -12,7 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +38,7 @@ public class Event {
     private Long lastLotteryTs;
 
     private Boolean lotteryDone;
-    private ImageMetadata imageinfo;
+    private Image_datamap imageInfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -59,7 +61,7 @@ public class Event {
         this.declinedUserIds = new ArrayList<>();
         this.alternatesUserIds = new ArrayList<>();
         this.attendant_list = new ArrayList<>();
-        this.imageinfo = null;
+        this.imageInfo = null;
         this.attendees = 0;
     }
 
@@ -89,7 +91,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
-        this.imageinfo = null;
+        this.imageInfo = null;
         resetLotteryState();
     }
 
@@ -118,7 +120,7 @@ public class Event {
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
         resetLotteryState();
-        this.imageinfo = null;
+        this.imageInfo = null;
     }
 
     public Event(
@@ -148,7 +150,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
-        this.imageinfo = null;
+        this.imageInfo = null;
         resetLotteryState();
 
     }
@@ -181,7 +183,7 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
-        this.imageinfo = null;
+        this.imageInfo = null;
         resetLotteryState();
 
     }
@@ -216,12 +218,12 @@ public class Event {
         }
     }
 
-    public ImageMetadata getImageInfo(){
-        return this.imageinfo ;
+    public Image_datamap getImageInfo(){
+        return this.imageInfo;
     }
 
-    public void setImageInfo( ImageMetadata imageInfo){
-        this.imageinfo = imageInfo;
+    public void setImageInfo( Image_datamap imageInfo){
+        this.imageInfo = imageInfo;
     }
 
     public String getTitle(){ return title; }
@@ -398,6 +400,33 @@ public class Event {
         confirmedUserIds = new ArrayList<>();
         declinedUserIds = new ArrayList<>();
         lotteryDone = false;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("title", title);
+        map.put("description", description);
+        map.put("organizerId", organizerId);
+        map.put("location", location);
+        map.put("locationName", locationName);
+        map.put("posterImageUrl", posterImageUrl);
+        map.put("date_open", date_open);
+        map.put("date_close", date_close);
+        map.put("eventStartAt", eventStartAt);
+        map.put("eventEndAt", eventEndAt);
+        map.put("price", price);
+        map.put("capacity", capacity);
+        map.put("seed", seed);
+        map.put("lastLotteryTs", lastLotteryTs);
+        map.put("imageInfo", imageInfo);
+        map.put("waitlistUserIds", waitlistUserIds);
+        map.put("selectedUserIds", selectedUserIds);
+        map.put("confirmedUserIds", confirmedUserIds);
+        map.put("declinedUserIds", declinedUserIds);
+        map.put("alternatesUserIds", alternatesUserIds);
+        map.put("attendant_list", attendant_list);
+        return map;
     }
 }
 

@@ -1,6 +1,12 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_profile;
 
+import static java.security.AccessController.getContext;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,17 +14,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
+import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.Users.Entrant;
+import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
@@ -28,6 +40,11 @@ import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view;
 
 public class Entrant_profile_view extends Organizer_profile_view {
+    private Database db;
+    private String username;
+    private ImageView profileImageView;
+    private Uri ImageUri;
+    private String name;
 
     @Nullable
     @Override
@@ -39,6 +56,8 @@ public class Entrant_profile_view extends Organizer_profile_view {
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        db = new Database(FirebaseFirestore.getInstance());
 
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");
@@ -135,36 +154,27 @@ public class Entrant_profile_view extends Organizer_profile_view {
             String username = prefs.getString("username", "");
             db.fetchUser(username).addOnSuccessListener(user -> {
                 db.deleteUser(username);
-
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.clear();
                 editor.apply();
                 Toast.makeText(getActivity(), "Have a nice day!", Toast.LENGTH_LONG).show();
 
-                Intent intent = new Intent(requireActivity(), MainActivity.class); //prep MainActivity
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//Start with a fresh instance and be ready to clear this one
+                Intent intent = new Intent(requireActivity(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-
-                // Kill this activity so organizer UI (bottom view) is gone
                 requireActivity().finish();
+            });
+        });
+
         SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
-        // local default = true if we don't have anything stored yet
         boolean localPref = prefs.getBoolean("receiveNotifications", true);
         notificationsSwitch.setChecked(localPref);
-        notificationsSwitch.setEnabled(false); // disable until we finish syncing so we dont get that stupid toggle behavior
-
-
-        // unhide the interests list
+        notificationsSwitch.setEnabled(false);
         TextView interestsTitle = view.findViewById(R.id.Interests);
         interestsTitle.setVisibility(View.VISIBLE);
-
         ListView interestsListView = view.findViewById(R.id.InterestsListView);
         interestsListView.setVisibility(View.VISIBLE);
 
-        // ... get interests and do stuff
-
-
-        // Notifications
         if (username == null || username.isEmpty()) {
             notificationsSwitch.setEnabled(false);
         } else {
@@ -184,8 +194,6 @@ public class Entrant_profile_view extends Organizer_profile_view {
                             editor.putBoolean("receiveNotifications", remoteValue);
                             editor.apply();
                         }
-
-                        // Attach listener after initial state is correct
                         attachNotificationListener(notificationsSwitch, ff, username, prefs);
 
                         notificationsSwitch.setEnabled(true);
@@ -195,13 +203,9 @@ public class Entrant_profile_view extends Organizer_profile_view {
                         notificationsSwitch.setEnabled(true);
                     });
         }
-
     }
 
-    private void attachNotificationListener(SwitchCompat notificationsSwitch,
-                                            FirebaseFirestore ff,
-                                            String username,
-                                            SharedPreferences prefs) {
+    private void attachNotificationListener (SwitchCompat notificationsSwitch, FirebaseFirestore ff, String username, SharedPreferences prefs){
         notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Update Firestore
             ff.collection("users")
@@ -217,11 +221,104 @@ public class Entrant_profile_view extends Organizer_profile_view {
                         android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
                         android.widget.Toast.makeText(getContext(),
                                 "Failed to update notification setting",
-                                android.widget.Toast.LENGTH_SHORT).show();
-                        // revert UI if update failed
-                        buttonView.setChecked(!isChecked);
-                    });
+                                android.widget.Toast.LENGTH_SHORT).show();// revert UI if update failed
+                                buttonView.setChecked(!isChecked);
+                            });
+                });
+    }
+
+    public void loadProfileImage() {
+        if (username != null && !username.isEmpty()) {
+            db.fetchUser(username).addOnSuccessListener(user -> {
+                if (user != null && user.getProfilePicUrl() != null) {
+                    Glide.with(requireContext())
+                            .load(user.getProfilePicUrl())
+                            .placeholder(android.R.drawable.sym_def_app_icon)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                            .dontAnimate()
+                            .into(profileImageView);
+                }
+            }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to load profile image.", e);
+            });
+        }
+    }
+
+    public void InputDialog(InputDialogCallback callback) {
+        LayoutInflater inflator = LayoutInflater.from(requireContext());
+        View dialogView = inflator.inflate(R.layout.profile_popup, null);
+
+        EditText old = dialogView.findViewById(R.id.oldpass);
+        EditText _new = dialogView.findViewById(R.id.newpass);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Enter Old value and New Value")
+                .setView(dialogView) // attach your custom layout
+                .setPositiveButton("OK", (d, which) -> {
+                    String oldtext = old.getText().toString().trim();
+                    String newtext = _new.getText().toString().trim();
+                    callback.onInputSubmitted(oldtext, newtext);
+                })
+                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                .create();
+
+        dialog.show();
+    }
+
+    public void showImagePopup() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.image_popup, null);
+
+        ImageView popupImagePreview = dialogView.findViewById(R.id.popup_image_preview);
+        Button changeImageButton = dialogView.findViewById(R.id.popup_change_image_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        Glide.with(requireContext())
+                .load(profileImageView.getDrawable())
+                .into(popupImagePreview);
+
+        changeImageButton.setOnClickListener(v -> {
+            galleryLauncher.launch("image/*");
+            dialog.dismiss();
         });
+
+        dialog.show();
+    }
+
+    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    ImageUri = uri;
+                    uploadProfilePicture();
+                }
+            });
+
+    public void uploadProfilePicture() {
+        String desc = "profile picture" + username;
+        if (ImageUri != null) {
+            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
+                if (getContext() == null) return;
+                db.fetchUser(username).addOnSuccessListener(user -> {
+                    if (user != null) {
+                        String imageUrl = ImageMetadata.getUrl();
+                        user.setImageInfo(ImageMetadata);
+                        user.setProfilePicUrl(imageUrl);
+
+                        db.setUser(user);
+                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
+                    }
+                }).addOnFailureListener(e -> {
+                    Log.e("EntrantProfile", "Failed to load profile image.", e);
+                });
+            }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to upload profile image.", e);
+            });
+        }
+
     }
 }
 

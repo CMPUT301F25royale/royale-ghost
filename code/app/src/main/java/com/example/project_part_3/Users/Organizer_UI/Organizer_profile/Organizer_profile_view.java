@@ -32,11 +32,11 @@ import androidx.fragment.app.Fragment;
 import com.example.project_part_3.R;
 
 public class Organizer_profile_view extends Fragment {
-    protected Database db;
-    protected String username;
-    protected ImageView profileImageView;
-    protected Uri ImageUri;
-    protected SharedPreferences prefs;
+    private Database db;
+    private String username;
+    private ImageView OrganizerProfileImageView;
+    private Uri ImageUri;
+    private SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -54,25 +54,115 @@ public class Organizer_profile_view extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
 
-        // Setup Shared Prefs
+        //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");
 
-        // Setup Name Title
+        OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
+        loadProfileImage();
+
+        OrganizerProfileImageView.setOnClickListener(v -> showImagePopup());
+
+        // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(username).addOnSuccessListener(user -> {
-            if (user != null) {
-                profileName.setText("Profile: " + user.getName());
-            }
+        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+            profileName.setText("Profile: " + user.getName());
         });
 
-        // Setup Image
-        profileImageView = view.findViewById(R.id.profile_photo);
-        loadProfileImage();
-        profileImageView.setOnClickListener(v -> showImagePopup());
+        //reset password here
+        Button passwordReset = view.findViewById(R.id.Pass_Reset);
+        passwordReset.setOnClickListener(v -> {
+            InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
+                db.fetchUser(username).addOnSuccessListener(user -> {
+                    if(user.getPassword().equals(old)){
+                        user.setPassword(_new);
+                        db.setUser(user);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                //change for shared prefs
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("password", _new);
+                editor.apply();
+            });
+        });
+
+        Button nameRest = view.findViewById(R.id.name_change);
+        nameRest.setOnClickListener(v -> {
+            InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
+                db.fetchUser(username).addOnSuccessListener(user -> {
+                    if(user.getName().equals(old)){
+                        user.setName(_new);
+                        db.setUser(user);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        });
+
+        //reset phone
+        Button phone = view.findViewById(R.id.number_Change);
+        phone.setOnClickListener(v -> {
+            InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
+                db.fetchUser(username).addOnSuccessListener(user -> {
+                    if(user.getPhone().equals(old)){
+                        user.setPhone(_new);
+                        db.setUser(user);
+                    }else{
+                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        });
+
+        //reset email
+        Button emailReset = view.findViewById(R.id.change_email);
+        emailReset.setOnClickListener(v -> {
+            InputDialog((old,_new) -> {
+                String username = prefs.getString("username", "");
+                db.fetchUser(username).addOnSuccessListener(user->{
+                    String name = user.getName();
+                    String password = user.getPassword();
+                    String number = user.getPhone();
+                    db.deleteUser(username);
+                    Organizer new_user = new Organizer(name,password,_new,number);
+                    db.addUser(new_user);
+
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("username", _new);
+                    editor.apply();
+                });
+            });
+        });
+
+        //delete user
+        Button delete = view.findViewById(R.id.delete_user_button);
+        delete.setOnClickListener(v -> {
+            String username = prefs.getString("username", "");
+            db.fetchUser(username).addOnSuccessListener(user -> {
+                db.deleteUser(username);
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.apply();
+                Toast.makeText(getActivity(), "Have a nice day!", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(requireActivity(), MainActivity.class); //prep MainActivity
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//Start with a fresh instance and be ready to clear this one
+                startActivity(intent);
+
+                // Kill this activity so organizer UI (bottom view) is gone
+                requireActivity().finish();
 
 
-        setupButtons(view, profileName);
+            });
+        });
+
     }
 
     /**
@@ -204,7 +294,7 @@ public class Organizer_profile_view extends Fragment {
                             .placeholder(android.R.drawable.sym_def_app_icon)
                             .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                             .dontAnimate()
-                            .into(profileImageView);
+                            .into(OrganizerProfileImageView);
                 }
             }).addOnFailureListener(e -> {
                 Log.e("Profile", "Failed to load profile image.", e);
@@ -233,7 +323,7 @@ public class Organizer_profile_view extends Fragment {
         dialog.show();
     }
 
-    protected void showImagePopup() {
+    private void showImagePopup() {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.image_popup, null);
 
@@ -244,11 +334,9 @@ public class Organizer_profile_view extends Fragment {
                 .setView(dialogView)
                 .create();
 
-        if (profileImageView.getDrawable() != null) {
-            Glide.with(requireContext())
-                    .load(profileImageView.getDrawable())
-                    .into(popupImagePreview);
-        }
+        Glide.with(requireContext())
+                .load(OrganizerProfileImageView.getDrawable())
+                .into(popupImagePreview);
 
         changeImageButton.setOnClickListener(v -> {
             galleryLauncher.launch("image/*");
@@ -267,19 +355,25 @@ public class Organizer_profile_view extends Fragment {
                 }
             });
 
-    protected void uploadProfilePicture() {
+    private void uploadProfilePicture() {
+        String desc = "profile picture" + username;
         if (ImageUri != null) {
-            String desc = "profile_pic_" + username;
-            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.getUrl();
+            db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
+                if(getContext() == null) return;
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
+                        String imageUrl = ImageMetadata.getUrl();
+                        user.setImageInfo(ImageMetadata);
                         user.setProfilePicUrl(imageUrl);
+
                         db.setUser(user);
-                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
-                        Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
+                        Glide.with(requireContext()).load(imageUrl).into(OrganizerProfileImageView);
                     }
+                }).addOnFailureListener(e -> {
+                    Log.e("EntrantProfile", "Failed to load profile image.", e);
                 });
+            }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to upload profile image.", e);
             });
         }
     }
