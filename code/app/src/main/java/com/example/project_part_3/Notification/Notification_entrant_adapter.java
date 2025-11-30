@@ -48,17 +48,15 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
     public View getView(int position,
                         @Nullable View convertView,
                         @NonNull ViewGroup parent) {
+
         ViewHolder holder;
 
         if (convertView == null) {
             convertView = inflater.inflate(ITEM_LAYOUT, parent, false);
             holder = new ViewHolder();
 
-            // display fields
             holder.bell = convertView.findViewById(R.id.organizer_notification_bell);
             holder.overlay = convertView.findViewById(R.id.organizer_notification_overlay);
-
-            // text fields
             holder.name = convertView.findViewById(R.id.organizer_notifications_organizer_name);
             holder.date = convertView.findViewById(R.id.organizer_notifications_date_sent);
             holder.eventTitle = convertView.findViewById(R.id.organizer_notification_event_title);
@@ -74,53 +72,34 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
         Notification_Entrant notif = getItem(position);
 
         if (notif != null) {
-            holder.eventTitle.setText(
-                    notif.getEventTitle() != null ? notif.getEventTitle() : "Event update"
-            );
-
-            holder.name.setText(
-                    notif.getType() != null ? notif.getType() : ""
-            );
-
-            holder.message.setText(
-                    notif.getMessage() != null ? notif.getMessage() : ""
-            );
+            holder.eventTitle.setText(notif.getEventTitle() != null ? notif.getEventTitle() : "Event update");
+            holder.name.setText(notif.getType() != null ? notif.getType() : "");
+            holder.message.setText(notif.getMessage() != null ? notif.getMessage() : "");
 
             Timestamp ts = notif.getTime_sent();
             if (ts != null) {
-                Date d = ts.toDate();
-                holder.date.setText(dateFormat.format(d));
+                holder.date.setText(dateFormat.format(ts.toDate()));
             } else {
                 holder.date.setText("");
             }
 
-            //if (notif.isSeen()) {
+            if (notif.isRead()) {
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
                 holder.overlay.setVisibility(View.GONE);
-            //}
+            } else {
+                holder.acceptButton.setVisibility(View.VISIBLE);
+                holder.declineButton.setVisibility(View.VISIBLE);
+                holder.overlay.setVisibility(View.VISIBLE);
 
-            holder.acceptButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAcceptButtonClick(getItem(position));
+                holder.acceptButton.setOnClickListener(v -> {
+                    if (listener != null) listener.onAcceptButtonClick(notif);
+                });
 
-                    holder.acceptButton.setVisibility(View.GONE);
-                    holder.declineButton.setVisibility(View.GONE);
-                    holder.overlay.setVisibility(View.GONE);
-                    //notif.setSeen(true);
-                }
-            });
-
-            holder.declineButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onDeclineButtonClick(getItem(position));
-
-                    holder.acceptButton.setVisibility(View.GONE);
-                    holder.declineButton.setVisibility(View.GONE);
-                    holder.overlay.setVisibility(View.GONE);
-                    //notif.setSeen(true);
-                }
-            });
+                holder.declineButton.setOnClickListener(v -> {
+                    if (listener != null) listener.onDeclineButtonClick(notif);
+                });
+            }
         }
 
         return convertView;
@@ -133,8 +112,6 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
         TextView date;
         TextView eventTitle;
         TextView message;
-
-        // Buttons
         Button acceptButton;
         Button declineButton;
     }

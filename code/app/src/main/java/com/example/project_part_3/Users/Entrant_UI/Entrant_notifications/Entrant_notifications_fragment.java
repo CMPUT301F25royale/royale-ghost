@@ -39,6 +39,99 @@ public class Entrant_notifications_fragment extends Fragment {
     private FirebaseFirestore db;
     private String currentUserEmail;
 
+    private class OnNotificationClickListener implements Notification_entrant_adapter.OnNotificationClickListener {
+        @Override
+        public void onAcceptButtonClick(Notification_Entrant notif) {
+            if (notif.getEventId() == null) {
+                Toast.makeText(getContext(), "Error: Notification missing Event ID", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(getContext(), "Processing acceptance...", Toast.LENGTH_SHORT).show();
+
+            Database myDatabase = new Database(db);
+
+            myDatabase.fetchEvent(notif.getEventId())
+                    .addOnSuccessListener(event -> {
+                        if (event != null) {
+                            String emailToAccept = currentUserEmail;
+                            myDatabase.acceptEntrant(event, emailToAccept).addOnSuccessListener(success -> {
+                                if (success) {
+                                    // Update UI locally
+                                    notif.setRead(true);
+                                    adapter.notifyDataSetChanged();
+                                    // Update Database
+                                    updateNotification(db, notif);
+                                    Toast.makeText(getContext(), "You have accepted your invitation!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getContext(), "Failed to accept invitation", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(getContext(), "Write Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Event no longer exists", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error fetching event", e);
+                        Toast.makeText(getContext(), "Connection Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+
+        @Override
+        public void onDeclineButtonClick(Notification_Entrant notif) {
+            if (notif.getEventId() == null) {
+                Toast.makeText(getContext(), "Error: Notification missing Event ID", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Toast.makeText(getContext(), "Processing decline...", Toast.LENGTH_SHORT).show();
+
+            Database myDatabase = new Database(db);
+
+            myDatabase.fetchEvent(notif.getEventId())
+                    .addOnSuccessListener(event -> {
+                        if (event != null) {
+                            String emailToDecline = currentUserEmail;
+                            myDatabase.declineEntrant(event, emailToDecline).addOnSuccessListener(success -> {
+                                if (success) {
+                                    // Update UI locally
+                                    notif.setRead(true);
+                                    adapter.notifyDataSetChanged();
+                                    // Update Database
+                                    updateNotification(db, notif);
+                                    Toast.makeText(getContext(), "You have declined your invitation!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getContext(), "Failed to decline invitation", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(getContext(), "Write Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Event no longer exists", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error fetching event", e);
+                        Toast.makeText(getContext(), "Connection Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void updateNotification(FirebaseFirestore db, Notification_Entrant notif) {
+        if (notif.getId() == null) {
+            Log.e(TAG, "Cannot update notification read status: Document ID is null");
+            return;
+        }
+
+        db.collection("users").document(currentUserEmail)
+                .collection("notifications")
+                .document(notif.getId())
+                .update("read", true)
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to mark notification as read", e));
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -98,12 +191,17 @@ public class Entrant_notifications_fragment extends Fragment {
 
                             String eventId = doc.getString("eventId");
 
+                            boolean isRead = doc.getBoolean("read") != null && doc.getBoolean("read");
+
                             Timestamp ts = doc.getTimestamp("createdAt");
 
                             Notification_Entrant n = new Notification_Entrant(title, null, message, ts);
 
+                            n.setId(doc.getId());
+
                             n.setEventId(eventId);
                             n.setEntrantEmail(email);
+                            n.setRead(isRead);
 
                             notifications.add(n);
                         }
@@ -111,72 +209,5 @@ public class Entrant_notifications_fragment extends Fragment {
                         adapter.notifyDataSetChanged();
                     }
                 });
-    }
-
-    private class OnNotificationClickListener implements Notification_entrant_adapter.OnNotificationClickListener {
-        @Override
-        public void onAcceptButtonClick(Notification_Entrant notif) {
-            if (notif.getEventId() == null) {
-                Toast.makeText(getContext(), "Error: Notification missing Event ID", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Database myDatabase = new Database(db);
-
-            myDatabase.fetchEvent(notif.getEventId())
-                    .addOnSuccessListener(event -> {
-                        if (event != null) {
-                            String emailToAccept = currentUserEmail;
-                            myDatabase.acceptEntrant(event, emailToAccept).addOnSuccessListener(success -> {
-                                if (success) {
-                                    Toast.makeText(getContext(), "You have accepted your invitation!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getContext(), "Failed to accept invitation", Toast.LENGTH_SHORT).show();
-                                }
-                            }).addOnFailureListener(e -> {
-                                // Catch write errors
-                                Toast.makeText(getContext(), "Write Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        } else {
-                            Toast.makeText(getContext(), "Event no longer exists", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error fetching event", e);
-                        Toast.makeText(getContext(), "Connection Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        }
-
-        @Override
-        public void onDeclineButtonClick(Notification_Entrant notif) {
-            if (notif.getEventId() == null) {
-                Toast.makeText(getContext(), "Error: Notification missing Event ID", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Database myDatabase = new Database(db);
-
-            myDatabase.fetchEvent(notif.getEventId())
-                    .addOnSuccessListener(event -> {
-                        if (event != null) {
-                            String emailToDecline = currentUserEmail;
-                            myDatabase.declineEntrant(event, emailToDecline).addOnSuccessListener(success -> {
-                                if (success) {
-                                    Toast.makeText(getContext(), "You have declined your invitation!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getContext(), "Failed to decline invitation", Toast.LENGTH_SHORT).show();
-                                }
-                            }).addOnFailureListener(e -> {
-                                Toast.makeText(getContext(), "Write Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-                        } else {
-                            Toast.makeText(getContext(), "Event no longer exists", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error fetching event", e);
-                        Toast.makeText(getContext(), "Connection Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        }
     }
 }
