@@ -47,8 +47,6 @@ public class Entrant_notifications_fragment extends Fragment {
                 return;
             }
 
-            Toast.makeText(getContext(), "Processing acceptance...", Toast.LENGTH_SHORT).show();
-
             Database myDatabase = new Database(db);
 
             myDatabase.fetchEvent(notif.getEventId())
@@ -85,8 +83,6 @@ public class Entrant_notifications_fragment extends Fragment {
                 Toast.makeText(getContext(), "Error: Notification missing Event ID", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            Toast.makeText(getContext(), "Processing decline...", Toast.LENGTH_SHORT).show();
 
             Database myDatabase = new Database(db);
 
