@@ -598,10 +598,26 @@ public class Database {
         });
     }
 
+    public Task<Boolean> acceptEntrant(Event event, Entrant entrant) {
+        event.acceptAttendant(entrant.getEmail());
+        return updateEvent(event);
+    }
+
+    public Task<Boolean> acceptEntrant(Event event, String entrantEmail) {
+        event.acceptAttendant(entrantEmail);
+        return updateEvent(event);
+    }
+
     public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
         event.declineAttendant(entrant.getEmail());
         return updateEvent(event);
     }
+    public Task<Boolean> declineEntrant(Event event, String entrantEmail) {
+        event.declineAttendant(entrantEmail);
+        return updateEvent(event);
+    }
+
+
 
     public Task<ImageMetadata> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String ownerId, @Nullable String eventId) {
 

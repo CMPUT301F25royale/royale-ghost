@@ -387,6 +387,11 @@ public class Event {
         return String.format("Open (closes within %d hours)", hours + 1);
     }
 
+
+    public void acceptAttendant(String email) {
+        confirmedUserIds.add(email);
+    }
+
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
     }

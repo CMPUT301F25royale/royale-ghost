@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,13 +25,22 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
 
     private final LayoutInflater inflater;
     private final SimpleDateFormat dateFormat =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     private static final int ITEM_LAYOUT = R.layout.organizer_notifications_element;
+
+    private OnNotificationClickListener listener;
+
+    public interface OnNotificationClickListener {
+        void onAcceptButtonClick(Notification_Entrant notif);
+        void onDeclineButtonClick(Notification_Entrant notif);
+    }
+
     public Notification_entrant_adapter(@NonNull Context context,
-                                      @NonNull List<Notification_Entrant> notifications) {
+                                        @NonNull List<Notification_Entrant> notifications, OnNotificationClickListener listener) {
         super(context, 0, notifications);
         inflater = LayoutInflater.from(context);
+        this.listener = listener;
     }
 
     @NonNull
@@ -42,17 +53,26 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
         if (convertView == null) {
             convertView = inflater.inflate(ITEM_LAYOUT, parent, false);
             holder = new ViewHolder();
+
+            // display fields
             holder.bell = convertView.findViewById(R.id.organizer_notification_bell);
+            holder.overlay = convertView.findViewById(R.id.organizer_notification_overlay);
+
+            // text fields
             holder.name = convertView.findViewById(R.id.organizer_notifications_organizer_name);
             holder.date = convertView.findViewById(R.id.organizer_notifications_date_sent);
             holder.eventTitle = convertView.findViewById(R.id.organizer_notification_event_title);
             holder.message = convertView.findViewById(R.id.organizer_notifications_event_message);
+            holder.acceptButton = convertView.findViewById(R.id.organizer_notification_accept_button);
+            holder.declineButton = convertView.findViewById(R.id.organizer_notification_decline_button);
+
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         Notification_Entrant notif = getItem(position);
+
         if (notif != null) {
             holder.eventTitle.setText(
                     notif.getEventTitle() != null ? notif.getEventTitle() : "Event update"
@@ -74,9 +94,32 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                 holder.date.setText("");
             }
 
-        // Should add this if specification requires it
-            holder.bell.setOnClickListener(v -> {
-                // TODO: navigate to event screen using notif.getEventId()
+            //if (notif.isSeen()) {
+                holder.acceptButton.setVisibility(View.GONE);
+                holder.declineButton.setVisibility(View.GONE);
+                holder.overlay.setVisibility(View.GONE);
+            //}
+
+            holder.acceptButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onAcceptButtonClick(getItem(position));
+
+                    holder.acceptButton.setVisibility(View.GONE);
+                    holder.declineButton.setVisibility(View.GONE);
+                    holder.overlay.setVisibility(View.GONE);
+                    //notif.setSeen(true);
+                }
+            });
+
+            holder.declineButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeclineButtonClick(getItem(position));
+
+                    holder.acceptButton.setVisibility(View.GONE);
+                    holder.declineButton.setVisibility(View.GONE);
+                    holder.overlay.setVisibility(View.GONE);
+                    //notif.setSeen(true);
+                }
             });
         }
 
@@ -85,9 +128,18 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
 
     private static class ViewHolder {
         ImageButton bell;
+        ImageView overlay;
         TextView name;
         TextView date;
         TextView eventTitle;
         TextView message;
+
+        // Buttons
+        Button acceptButton;
+        Button declineButton;
+    }
+
+    public void setOnNotificationClickListener(OnNotificationClickListener listener) {
+        this.listener = listener;
     }
 }
