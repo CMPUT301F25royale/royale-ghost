@@ -186,10 +186,9 @@ public class Entrant_profile_view extends Fragment{
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                InterestDialog((input)->{//new dialog for later
-                    if (input == null || input.isEmpty()) return;
                     String username = prefs.getString("username", "");
-                    db.deleteInterest(username, input)
+                    String choice = adapter.getItem(position);
+                    db.deleteInterest(username, choice)
                             .addOnSuccessListener(result -> {
                                 Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
                                 interests.remove(position);
@@ -198,7 +197,6 @@ public class Entrant_profile_view extends Fragment{
                             .addOnFailureListener(e -> {
                                 Toast.makeText(getActivity(), "Failed to delete interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
-                });
             }
         });
 
