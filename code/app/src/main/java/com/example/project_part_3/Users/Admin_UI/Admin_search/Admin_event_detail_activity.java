@@ -142,9 +142,9 @@ public class Admin_event_detail_activity extends AppCompatActivity {
 
         waitlist.setText(String.valueOf(sizeSafe(event.getWaitlistUserIds())));
         // These fields are not in your Event class, but this shows how to handle them if added
-        // selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
-        // declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
-        // alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
+        selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
+        declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
+        alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
 
         description.setText(nonEmpty(event.getDescription(), "—"));
     }

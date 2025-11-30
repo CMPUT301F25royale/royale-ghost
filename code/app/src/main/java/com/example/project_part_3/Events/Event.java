@@ -2,7 +2,7 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Image.ImageMetadata;
 import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
@@ -12,9 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +35,8 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
-    private Image_datamap imageinfo;
+    private Boolean lotteryDone;
+    private ImageMetadata imageinfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -91,6 +90,7 @@ public class Event {
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
         this.imageinfo = null;
+        resetLotteryState();
     }
 
     public Event(String title,
@@ -117,6 +117,7 @@ public class Event {
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        resetLotteryState();
         this.imageinfo = null;
     }
 
@@ -148,6 +149,8 @@ public class Event {
         this.capacity = capacity;
         this.price = price;
         this.imageinfo = null;
+        resetLotteryState();
+
     }
 
     public Event(
@@ -179,6 +182,8 @@ public class Event {
         this.capacity = capacity;
         this.price = price;
         this.imageinfo = null;
+        resetLotteryState();
+
     }
 
     /**
@@ -211,11 +216,11 @@ public class Event {
         }
     }
 
-    public Image_datamap getImageInfo(){
+    public ImageMetadata getImageInfo(){
         return this.imageinfo ;
     }
 
-    public void setImageInfo( Image_datamap imageInfo){
+    public void setImageInfo( ImageMetadata imageInfo){
         this.imageinfo = imageInfo;
     }
 
@@ -239,6 +244,9 @@ public class Event {
 
     public Integer getCapacity(){ return capacity; }
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public Boolean getLotteryDone() { return lotteryDone; }
+    public void setLotteryDone(Boolean lotteryDone) { this.lotteryDone = lotteryDone; }
 
     public String getId() { return id; }
     public void setId(String eventId) { this.id = eventId; }
@@ -383,31 +391,13 @@ public class Event {
         declinedUserIds.add(email);
     }
 
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("title", title);
-        map.put("description", description);
-        map.put("organizerId", organizerId);
-        map.put("location", location);
-        map.put("locationName", locationName);
-        map.put("posterImageUrl", posterImageUrl);
-        map.put("date_open", date_open);
-        map.put("date_close", date_close);
-        map.put("eventStartAt", eventStartAt);
-        map.put("eventEndAt", eventEndAt);
-        map.put("price", price);
-        map.put("capacity", capacity);
-        map.put("seed", seed);
-        map.put("lastLotteryTs", lastLotteryTs);
-        map.put("imageinfo", imageinfo);
-        map.put("waitlistUserIds", waitlistUserIds);
-        map.put("selectedUserIds", selectedUserIds);
-        map.put("confirmedUserIds", confirmedUserIds);
-        map.put("declinedUserIds", declinedUserIds);
-        map.put("alternatesUserIds", alternatesUserIds);
-        map.put("attendant_list", attendant_list);
-        return map;
+    public void resetLotteryState() {
+        waitlistUserIds = new ArrayList<>();
+        selectedUserIds = new ArrayList<>();
+        alternatesUserIds = new ArrayList<>();
+        confirmedUserIds = new ArrayList<>();
+        declinedUserIds = new ArrayList<>();
+        lotteryDone = false;
     }
 }
 

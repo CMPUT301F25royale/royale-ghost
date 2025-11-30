@@ -67,6 +67,9 @@
         <action
             android:id="@+id/action_organizerEventsFragment_to_organizerEntrantViewFragment"
             app:destination="@id/organizer_entrant_view" />
+        <action
+            android:id="@+id/action_organizerEventsFragment_to_organizer_event_qrcode_view"
+            app:destination="@id/organizer_event_qrcode_view" />
     </fragment>
     <fragment
         android:id="@+id/OrganizerEditEventFragment"
@@ -82,6 +85,14 @@
         android:label="Organizer_entrant_view" >
         <action
             android:id="@+id/action_organizer_entrant_view_to_organizerEventsFragment"
+            app:destination="@id/organizerEventsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/organizer_event_qrcode_view"
+        android:name="com.example.project_part_3.Users.Organizer_UI.Organizer_event.Organizer_event_qrcode_view"
+        android:label="Organizer_event_qrcode_view" >
+        <action
+            android:id="@+id/action_organizer_event_qrcode_view_to_organizerEventsFragment"
             app:destination="@id/organizerEventsFragment" />
     </fragment>
 

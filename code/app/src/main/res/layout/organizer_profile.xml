@@ -56,7 +56,8 @@
         android:layout_marginEnd="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:contextClickable="true"
+        android:background="@drawable/ic_profile"/>
 
     <TextView
         android:id="@+id/Change_Name"
@@ -74,14 +75,13 @@
         android:layout_width="180dp"
         android:layout_height="40dp"
         android:layout_marginTop="30dp"
-        android:textSize="26dp"
-        android:text="Profile: Name"
+        android:textSize="26sp"
         app:layout_constraintEnd_toStartOf="@+id/profile_photo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/Specialties"
+        android:id="@+id/Interests"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="10dp"
@@ -130,7 +130,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Specialties"
+        app:layout_constraintTop_toBottomOf="@+id/Interests"
         tools:layout_editor_absoluteX="-1dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

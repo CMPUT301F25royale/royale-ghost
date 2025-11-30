@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Image.ImageMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,26 +21,28 @@ Admin_search_model extends ViewModel {
     private final EventDatabase eventDb;
     private final ImageDatabase imageDb;
 
-
+    // LiveData for the individual data sources
     private final LiveData<List<Event>> allEvents;
-    private final LiveData<List<Image_datamap>> allImages;
+    private final LiveData<List<ImageMetadata>> allImages;
 
+    // MediatorLiveData to combine all data sources into a single list
     private final MediatorLiveData<List<Object>> combinedData = new MediatorLiveData<>();
 
     public Admin_search_model() {
         eventDb = new EventDatabase();
-        imageDb = new ImageDatabase();
+        imageDb = ImageDatabase.getInstance(); // Assuming ImageDatabase is a singleton
 
         allEvents = eventDb.getAllEvents();
-        allImages = imageDb.getAllImages();
+        allImages = imageDb.getAllImagesLiveData(); // Assuming you add this method to ImageDatabase
 
+        // Add sources to the MediatorLiveData
         combinedData.addSource(allEvents, events -> combineAllData());
         combinedData.addSource(allImages, images -> combineAllData());
     }
 
     private void combineAllData() {
         List<Event> events = allEvents.getValue();
-        List<Image_datamap> images = allImages.getValue();
+        List<ImageMetadata> images = allImages.getValue();
 
         ArrayList<Object> combinedList = new ArrayList<>();
         if (events != null) {
@@ -60,15 +62,15 @@ Admin_search_model extends ViewModel {
         eventDb.deleteEvent(event, listener);
     }
 
-    public void deleteImage(Image_datamap image, ImageDatabase.OnImageDeleteListener listener) {
-        imageDb.deleteImage(image, listener);
+    public void deleteImage(ImageMetadata image) {
+        imageDb.removeImage(image);
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
         eventDb.cleanupListeners();
-        imageDb.cleanupListeners();
+        // any cleanup for imageDb if needed
         Log.d("AdminSearchViewModel", "ViewModel cleared and listeners cleaned up.");
     }
 }

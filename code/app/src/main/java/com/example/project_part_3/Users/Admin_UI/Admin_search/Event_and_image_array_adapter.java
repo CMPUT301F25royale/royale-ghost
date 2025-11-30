@@ -16,9 +16,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.EventDatabase;
-import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Image.ImageMetadata;
 import com.example.project_part_3.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             bindEventView(holder, (Event) item);
         } else {
             ImageViewHolder holder = (ImageViewHolder) convertView.getTag();
-            bindImageView(holder, (Image_datamap) item);
+            bindImageView(holder, (ImageMetadata) item);
         }
 
         return convertView;
@@ -145,7 +144,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         });
     }
 
-    private void bindImageView(ImageViewHolder holder, Image_datamap image) {
+    private void bindImageView(ImageViewHolder holder, ImageMetadata image) {
         if (image == null) return;
         holder.description.setText(image.getDescription());
         if (image.getUrl() != null && !image.getUrl().isEmpty()) {
@@ -160,18 +159,9 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         }
 
         holder.deleteButton.setOnClickListener(v -> {
-            viewModel.deleteImage(image, new ImageDatabase.OnImageDeleteListener() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
-                    }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(context, "Failed to delete image: " + errorMessage, Toast.LENGTH_LONG).show();
-                    Log.e("Adapter", "Failed to delete image: " + errorMessage);
-                }
-            });});
+            viewModel.deleteImage(image);
+            Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private static class EventViewHolder {

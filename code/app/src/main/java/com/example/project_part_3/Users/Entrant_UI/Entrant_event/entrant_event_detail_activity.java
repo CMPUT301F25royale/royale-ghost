@@ -97,8 +97,14 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));
 
         // Poster
-        if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
-            Glide.with(this).load(event.getImageInfo().getUrl()).into(poster);
+        String imageUrl = event.getPosterImageUrl();
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .placeholder(android.R.drawable.ic_menu_report_image)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(poster);
         } else {
             poster.setImageResource(android.R.drawable.ic_menu_report_image);
         }

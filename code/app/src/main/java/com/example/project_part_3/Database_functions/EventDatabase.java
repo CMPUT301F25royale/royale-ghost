@@ -38,17 +38,6 @@ public class EventDatabase {
         return instance;
     }
 
-    public interface OnEventUpdateListener {
-        void onSuccess();
-        void onFailure(String errorMessage);
-    }
-
-    public void updateEvent(Event event, OnEventUpdateListener listener) {
-        db.updateEvent(event)
-                .addOnSuccessListener(aVoid -> listener.onSuccess())
-                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
-    }
-
     /**
      * LEGACY METHOD: Synchronously gets an event from the current LiveData value.
      * @param title The title of the event.
@@ -85,7 +74,9 @@ public class EventDatabase {
     }
 
     public EventDatabase() {
+        // Initialize the low-level Database class
         this.db = new Database(FirebaseFirestore.getInstance());
+        // Immediately start listening for changes to all events
         listenForAllEvents();
     }
 
@@ -139,6 +130,7 @@ public class EventDatabase {
     }
 
     public void addEvent(Event event, OnEventAddListener listener) {
+        event.setLotteryDone(false);
         db.addEvent(event).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult()) {
                 listener.onSuccess();

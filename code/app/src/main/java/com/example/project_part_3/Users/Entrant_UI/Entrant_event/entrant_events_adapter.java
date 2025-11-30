@@ -74,7 +74,7 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
                     .into(h.img);
         } else {
             Glide.with(ctx).clear(h.img);
-            h.img.setImageResource(android.R.drawable.sym_def_app_icon);
+            h.img.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
         // View details
