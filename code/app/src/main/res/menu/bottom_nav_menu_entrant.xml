@@ -7,7 +7,7 @@
 
     <item
         android:id="@+id/entrant_main_view"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_profile"
         android:title="Events" />
 
     <item

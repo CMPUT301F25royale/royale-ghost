@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represents an event with associated data. Contains various methods relating to interactions with users
+ */
 public class Event {
 
     private Boolean geolocationEnabled;
@@ -56,6 +59,8 @@ public class Event {
     private ArrayList<String> attendant_list;
     @Exclude
     private Integer attendees;
+
+
     public Event(){
         this.waitlistUserIds = new ArrayList<>();
         this.selectedUserIds = new ArrayList<>();
@@ -197,10 +202,10 @@ public class Event {
 
     /**
      * generate random eventId that is unique
-     * @param organizerId
-     * @param title
-     * @param startTimeMs
-     * @return
+     * @param organizerId The ID of the organizer
+     * @param title The event title
+     * @param startTimeMs The start time of the event
+     * @return The unique event ID
      */
 
     @Exclude
@@ -371,6 +376,11 @@ public class Event {
         return TimeUnit.MILLISECONDS.toHours(diff);
     }
 
+
+    /**
+     *
+     * @return A string representing the registration status of the event.
+     */
     @Exclude
     public String registrationStatus() {
         if (!registrationOpen()) {
@@ -396,10 +406,18 @@ public class Event {
         return String.format("Open (closes within %d hours)", hours + 1);
     }
 
+
+    public void acceptAttendant(String email) {
+        confirmedUserIds.add(email);
+    }
+
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
     }
 
+    /**
+     * Resets the lottery for this event.
+     */
     public void resetLotteryState() {
         waitlistUserIds = new ArrayList<>();
         selectedUserIds = new ArrayList<>();

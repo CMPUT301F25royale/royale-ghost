@@ -12,6 +12,9 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter class for displaying a list of notifications for an organizer.
+ */
 public class Organizer_notification_adapter extends ArrayAdapter<Notification_Organizer> {
     private final int resourceLayout;
     private final ArrayList<Notification_Organizer> organizers;

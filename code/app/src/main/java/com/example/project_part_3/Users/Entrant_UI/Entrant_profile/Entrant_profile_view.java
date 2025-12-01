@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -30,8 +31,6 @@ import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -40,11 +39,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
+import java.util.ArrayList;
+
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view;
 
-import java.util.ArrayList;
 
+/**
+ * Fragment responsible for displaying the currently logged-in entrant's profile.
+ */
 public class Entrant_profile_view extends Fragment{
 
     ArrayList<String> interests = new ArrayList<>();
@@ -85,22 +88,21 @@ public class Entrant_profile_view extends Fragment{
             profileName.setText("Profile: " + user.getName());
         });
 
-       //add interest
-        ListView listOfInterests = view.findViewById(R.id.InterestView);
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1,interests);
+        // add interest
+        ListView listOfInterests = view.findViewById(R.id.InterestsListView);
+        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, interests);
         listOfInterests.setAdapter(adapter);
 
         db.getInterests(updateInterestEmail)
                 .addOnSuccessListener(list -> {
-                    // Clear and refill local list
                     interests.clear();
                     interests.addAll(list);
                     adapter.notifyDataSetChanged();
                 });
 
-        Button addInterest = view.findViewById(R.id.Add_interest);
-        addInterest.setOnClickListener(v ->  {
-            InterestDialog((input)->{
+        Button addInterest = view.findViewById(R.id.Add_interest_button);
+        addInterest.setOnClickListener(v -> {
+            InterestDialog((input) -> {
                 if (input == null || input.isEmpty()) return;
                 String username = prefs.getString("username", "");
                 db.addInterest(username, input)
@@ -115,7 +117,7 @@ public class Entrant_profile_view extends Fragment{
             });
         });
 
-        //reset password here
+        // reset password
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         passwordReset.setOnClickListener(v -> {
             InputDialog((old, _new) -> {
@@ -128,14 +130,13 @@ public class Entrant_profile_view extends Fragment{
                         Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
                     }
                 });
-                //change for shared prefs
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("password", _new);
                 editor.apply();
             });
         });
 
-        //reset Name
+        // reset Name
         Button nameRest = view.findViewById(R.id.name_change);
         nameRest.setOnClickListener(v -> {
             InputDialog((old, _new) -> {
@@ -152,7 +153,7 @@ public class Entrant_profile_view extends Fragment{
             });
         });
 
-        //reset phone
+        // reset phone
         Button phone = view.findViewById(R.id.number_Change);
         phone.setOnClickListener(v -> {
             InputDialog((old, _new) -> {
@@ -168,7 +169,7 @@ public class Entrant_profile_view extends Fragment{
             });
         });
 
-        //reset email
+        // reset email
         Button emailReset = view.findViewById(R.id.change_email);
         emailReset.setOnClickListener(v -> {
             InputDialog((old, _new) -> {
@@ -188,7 +189,7 @@ public class Entrant_profile_view extends Fragment{
             });
         });
 
-        //delete user
+        // delete user
         Button delete = view.findViewById(R.id.delete_user_button);
         delete.setOnClickListener(v -> {
             String username = prefs.getString("username", "");
@@ -202,13 +203,14 @@ public class Entrant_profile_view extends Fragment{
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+
                 requireActivity().finish();
             });
         });
 
         Button logoutButton = view.findViewById(R.id.entrant_logout_button);
-        if (logoutButton != null) {
-            logoutButton.setOnClickListener(v -> {
+            if (logoutButton != null) {
+                logoutButton.setOnClickListener(v -> {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.clear();
                         editor.apply();
@@ -217,22 +219,37 @@ public class Entrant_profile_view extends Fragment{
                         Toast.makeText(getActivity(), "You have been logged out.", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                        startActivity(intent);
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
             });
         }
 
-
         SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
         boolean localPref = prefs.getBoolean("receiveNotifications", true);
         notificationsSwitch.setChecked(localPref);
         notificationsSwitch.setEnabled(false);
+
         TextView interestsTitle = view.findViewById(R.id.Interests);
         interestsTitle.setVisibility(View.VISIBLE);
-        //ListView interestsListView = view.findViewById(R.id.InterestsListView);
-        //interestsListView.setVisibility(View.VISIBLE);
+
+        listOfInterests.setOnItemClickListener((parent, view1, position, id) -> {
+            String username = prefs.getString("username", "");
+            String choice = adapter.getItem(position);
+            db.deleteInterest(username, choice)
+                    .addOnSuccessListener(result -> {
+                        Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
+                        interests.remove(position);
+                        adapter.notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getActivity(), "Failed to delete interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+
+
+        listOfInterests.setVisibility(View.VISIBLE);
 
         if (username == null || username.isEmpty()) {
             notificationsSwitch.setEnabled(false);
@@ -245,7 +262,6 @@ public class Entrant_profile_view extends Fragment{
                         Boolean remotePref = doc.getBoolean("receiveNotifications");
                         boolean remoteValue = (remotePref == null) ? true : remotePref;
 
-                        // Only update UI & local if remote differs
                         if (remoteValue != localPref) {
                             notificationsSwitch.setChecked(remoteValue);
 
@@ -253,8 +269,8 @@ public class Entrant_profile_view extends Fragment{
                             editor.putBoolean("receiveNotifications", remoteValue);
                             editor.apply();
                         }
-                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
 
+                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
                         notificationsSwitch.setEnabled(true);
                     })
                     .addOnFailureListener(e -> {
@@ -330,7 +346,7 @@ public class Entrant_profile_view extends Fragment{
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Enter Old value and New Value")
-                .setView(dialogView) // attach your custom layout
+                .setView(dialogView)
                 .setPositiveButton("OK", (d, which) -> {
                     String oldtext = old.getText().toString().trim();
                     String newtext = _new.getText().toString().trim();
@@ -342,7 +358,7 @@ public class Entrant_profile_view extends Fragment{
         dialog.show();
     }
 
-    private void InterestDialog(InterestDialogCallback callback){
+    private void InterestDialog(InterestDialogCallback callback) {
         LayoutInflater inflator = LayoutInflater.from(requireContext());
         View dialogView = inflator.inflate(R.layout.interest_add, null);
 
@@ -350,7 +366,7 @@ public class Entrant_profile_view extends Fragment{
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Enter Interest")
-                .setView(dialogView) // attach your custom layout
+                .setView(dialogView)
                 .setPositiveButton("OK", (d, which) -> {
                     String input = interest.getText().toString().trim();
                     callback.onInputSubmitted(input);
@@ -360,7 +376,8 @@ public class Entrant_profile_view extends Fragment{
 
         dialog.show();
     }
-    private void showImagePopup() {
+
+    protected void showImagePopup() {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.image_popup, null);
 
@@ -379,9 +396,32 @@ public class Entrant_profile_view extends Fragment{
             galleryLauncher.launch("image/*");
             dialog.dismiss();
         });
-
-        dialog.show();
     }
+
+//    private void attachNotificationListener(SwitchCompat notificationsSwitch,
+//                                            FirebaseFirestore ff,
+//                                            String username,
+//                                            SharedPreferences prefs) {
+//        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            ff.collection("users")
+//                    .document(username)
+//                    .update("receiveNotifications", isChecked)
+//                    .addOnSuccessListener(unused -> {
+//                        SharedPreferences.Editor editor = prefs.edit();
+//                        editor.putBoolean("receiveNotifications", isChecked);
+//                        editor.apply();
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
+//                        Toast.makeText(getContext(),
+//                                "Failed to update notification setting",
+//                                Toast.LENGTH_SHORT).show();
+//                        buttonView.setChecked(!isChecked);
+//                    });
+//        });
+//
+//        dialog.show();
+//    }
 
     private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -415,4 +455,3 @@ public class Entrant_profile_view extends Fragment{
 
     }
 }
-

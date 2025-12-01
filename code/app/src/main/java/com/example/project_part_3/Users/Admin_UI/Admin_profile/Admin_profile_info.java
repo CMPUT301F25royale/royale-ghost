@@ -25,6 +25,10 @@ import com.example.project_part_3.Users.User;
 import com.google.firebase.Firebase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * The fragment that displays profile information about a user to an admin.
+ * It also allows an admin to view and delete profiles of non-admin users.
+ */
 public class Admin_profile_info extends Fragment {
 
     private Admin_profile_model adminprofilemodel;

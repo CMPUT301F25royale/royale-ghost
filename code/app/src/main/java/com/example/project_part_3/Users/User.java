@@ -6,7 +6,11 @@ import com.example.project_part_3.Image.Image_datamap;
 
 import java.util.HashSet;
 
-
+/**
+ * Represents a user in the system.
+ * Implements serializable to help interface with the database and includes
+ * appropriate getters and setters.
+ */
 public class User implements Serializable {
     private String name;
     private String password;

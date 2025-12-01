@@ -11,6 +11,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
 
+/**
+ * Fragment that displays a view for searching for events.
+ */
 public class Organizer_search_event_view extends Fragment {
 
     @Nullable

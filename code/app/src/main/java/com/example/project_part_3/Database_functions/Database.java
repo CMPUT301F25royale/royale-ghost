@@ -627,15 +627,35 @@ public class Database {
                 });
     }
 
+    /**
+     * Adds an event to a user
+     *
+     * @param userId The ID of the user to add the event to.
+     * @param eventId The ID of the event to add to the user.
+     * @return A task that completes when the event is added to the user.
+     */
     public Task<Void> addEventToUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId)
                 .update("eventsAppliedFor", FieldValue.arrayUnion(eventId));
     }
 
+    /**
+     * Remove an event from a user.
+     *
+     * @param userId The ID of the user to remove the event from.
+     * @param eventId The ID of the event to remove from the user.
+     * @return A task that completes when the event is removed from the user.
+     */
     public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
     }
 
+    /**
+     * Get a list of all entrants who have accepted an invitation to a given event.
+     *
+     * @param event The event to get entrants for.
+     * @return A task that contains a list of entrants.
+     */
     public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = event.getAttendant_list();
 
@@ -664,6 +684,13 @@ public class Database {
             return entrants;
         });
     }
+
+    /**
+     * Get a list of all entrants who are on the waitlist for an event.
+     *
+     * @param event The event to get entrants for.
+     * @return A task that contains a list of entrants.
+     */
 
     public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = new ArrayList<>();
@@ -697,10 +724,46 @@ public class Database {
         });
     }
 
+
+    public Task<Boolean> acceptEntrant(Event event, Entrant entrant) {
+        event.acceptAttendant(entrant.getEmail());
+        return updateEvent(event);
+    }
+
+    public Task<Boolean> acceptEntrant(Event event, String entrantEmail) {
+        event.acceptAttendant(entrantEmail);
+        return updateEvent(event);
+    }
+
+    /**
+     * Decline an entrant from an event.
+     *
+     * @param event The event to decline the entrant from.
+     * @param entrant The entrant to decline.
+     * @return A task that completes when the entrant is declined.
+     */
     public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
         event.declineAttendant(entrant.getEmail());
         return updateEvent(event);
     }
+    public Task<Boolean> declineEntrant(Event event, String entrantEmail) {
+        event.declineAttendant(entrantEmail);
+        return updateEvent(event);
+    }
+
+
+    /**
+     * Upload an image to Firebase Storage.
+     *
+     * @param imageUri The URI of the image to upload.
+     * @param imageType The type of the image.
+     * @param description The description of the image.
+     * @param associated_user The ID of the owner of the image.
+     * @param eventId The ID of the event the image is associated with.
+     * @return A task that completes when the image is uploaded.
+     */
+
+
 
     public Task<Image_datamap> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String associated_user, @Nullable String eventId) {
         Task<Void> deleteOldImageTask = deleteOldImageIfExists(this, associated_user, eventId, imageType);
@@ -738,12 +801,24 @@ public class Database {
         });
     }
 
+    /**
+     * Delete an image from Firebase Storage.
+     *
+     * @param imageUrl The URL of the image to delete.
+     * @return A task that completes when the image is deleted.
+     */
+    public Task<Void> deleteImageByUrl(@NonNull String imageUrl) {
+        StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
+        return photoRef.delete();
+    }
+
     private Task<Void> deleteOldImageIfExists(Database db, String ownerId, @Nullable String eventId, String imageType) {
         if ("event_poster".equals(imageType) && eventId == null) {
             return Tasks.forResult(null);
         }
         return db.deleteImage(ownerId, eventId, imageType);
     }
+    
 
     private Task<Void> updateImageMetadataInDocument(Image_datamap metadata, String ownerId, @Nullable String eventId, String imageType) {
         DocumentReference docRef;
@@ -889,6 +964,28 @@ public class Database {
         return Tasks.whenAll(tasks).onSuccessTask(aVoid -> {
             return updateImageMetadataInDocument(null, associatedUser, eventId, imageType);
         });
+    }
+
+    // If user accepted move user from selectedUserIds to confirmedUserIds clean other lists
+    public Task<Void> acceptLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update(
+                        "confirmedUserIds", FieldValue.arrayUnion(userEmail),
+                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
+                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
+                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
+                ));
+    }
+
+    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
+    public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update(
+                        "declinedUserIds", FieldValue.arrayUnion(userEmail),
+                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
+                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
+                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
+                ));
     }
 
 }

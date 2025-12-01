@@ -7,6 +7,9 @@ import android.provider.Settings;
 import android.content.Context;
 
 
+/**
+ * Model which checks if a user exists in the database and if the password is correct.
+ */
 public class Login_model {
     Boolean success;
 
@@ -14,12 +17,7 @@ public class Login_model {
         FirebaseFirestore ff = FirebaseFirestore.getInstance();
         Database db = new Database(ff);
         db.checkUser(email, password).addOnSuccessListener(user -> {
-            if (user != null) {
-                success = true;
-                //user.addDeviceID(getCurrentDeviceID());
-            } else {
-                success = false;
-            }
+            success = user != null;
 
         });
     }
@@ -28,12 +26,4 @@ public class Login_model {
         return success;
     }
 
-    //public User getUser(String name, String password){
-        //return userDatabase.getUser(name, password);
-    //}
-
-    //This probably will be moved in the future
-    //public String getCurrentDeviceID(Context context){
-    //    return  Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-    //}
 }

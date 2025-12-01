@@ -16,6 +16,9 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
+/**
+ * Fragment for admin notifications. Initializes the list of notifications from the database.
+ */
 public class Admin_notification_view extends Fragment {
     ListView notificationList;
     NotificationDatabase notificationDb;

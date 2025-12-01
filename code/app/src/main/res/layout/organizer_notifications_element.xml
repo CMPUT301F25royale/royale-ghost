@@ -6,23 +6,32 @@
 
     <ImageButton
         android:id="@+id/organizer_notification_bell"
-        android:layout_width="60dp"
-        android:layout_height="57dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:padding="10dp"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@android:drawable/ic_popup_reminder" />
+        app:srcCompat="@drawable/ic_notifications" />
+
+    <ImageView
+        android:id="@+id/organizer_notification_overlay"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:src="@android:drawable/ic_notification_overlay"
+        app:layout_constraintEnd_toEndOf="@id/organizer_notification_bell"
+        app:layout_constraintTop_toTopOf="@id/organizer_notification_bell" />
 
     <TextView
         android:id="@+id/organizer_notifications_organizer_name"
-        android:layout_width="152dp"
+        android:layout_width="wrap_content"
         android:layout_height="21dp"
+        android:layout_marginHorizontal="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.153"
         app:layout_constraintStart_toEndOf="@+id/organizer_notification_bell"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
@@ -31,33 +40,58 @@
         android:id="@+id/organizer_notifications_date_sent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.161"
-        app:layout_constraintStart_toEndOf="@+id/organizer_notifications_organizer_name"
+        app:layout_constraintEnd_toStartOf="@+id/organizer_notification_accept_button"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/organizer_notification_event_title"
-        android:layout_width="80dp"
+        android:layout_width="wrap_content"
         android:layout_height="20dp"
+        android:layout_marginHorizontal="6dp"
         app:layout_constraintBottom_toTopOf="@+id/organizer_notifications_event_message"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.114"
         app:layout_constraintStart_toEndOf="@+id/organizer_notification_bell"
         app:layout_constraintTop_toBottomOf="@+id/organizer_notifications_organizer_name"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/organizer_notifications_event_message"
-        android:layout_width="271dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.409"
+        app:layout_constraintEnd_toStartOf="@+id/organizer_notification_decline_button"
         app:layout_constraintStart_toEndOf="@+id/organizer_notification_bell"
-        app:layout_constraintTop_toBottomOf="@+id/organizer_notifications_date_sent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/organizer_notifications_date_sent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/organizer_notification_accept_button"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:background="@drawable/btn_pill_black"
+        android:backgroundTint="@color/black"
+        android:text="Accept"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:layout_margin="10dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/organizer_notification_decline_button"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:background="@drawable/btn_pill_black"
+        android:backgroundTint="@color/my_red"
+        android:text="Decline"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:layout_margin="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

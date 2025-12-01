@@ -16,7 +16,9 @@ import com.example.project_part_3.R;
 
 import java.util.ArrayList;
 
-
+/**
+ * Fragment that displays a list of notifications for an organizer.
+ */
 public class Organizer_notification_view extends Fragment{
 
     ListView notificationList;

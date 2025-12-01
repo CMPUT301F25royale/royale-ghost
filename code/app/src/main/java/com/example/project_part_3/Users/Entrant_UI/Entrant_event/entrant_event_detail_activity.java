@@ -2,6 +2,7 @@ package com.example.project_part_3.Users.Entrant_UI.Entrant_event;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import android.location.Location;
@@ -30,6 +32,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
 import android.content.pm.PackageManager;
 
+/**
+ * The activity for an entrant to view the details of an event.
+ */
 public class entrant_event_detail_activity extends AppCompatActivity {
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -41,6 +46,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     private TextView title, organizer, locationName, locationAddress, regWindow, startEnd, price, description;
     private TextView vCapacity, vConfirmed, vRemaining, vWaitlist, vSelected, vDeclined, vAlternates;
     private MaterialButton joinBtn, closeBtn;
+    private MaterialButton acceptBtn, declineBtn;
 
     private final NumberFormat currencyFmt = NumberFormat.getCurrencyInstance();
 
@@ -72,10 +78,21 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         vAlternates = findViewById(R.id.value_alternates);
         joinBtn = findViewById(R.id.btn_join_lottery);
         closeBtn = findViewById(R.id.btn_close);
+        acceptBtn = findViewById(R.id.btn_accept);
+        declineBtn = findViewById(R.id.btn_decline);
+        ImageButton infoBtn = findViewById(R.id.btn_event_info);
 
         if (closeBtn != null) {
             closeBtn.setOnClickListener(v -> finish());
         }
+
+        infoBtn.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
+                    .setTitle("Event Details")
+                    .setMessage("Lotteries will be auto run when the registration date closes. Upon being selected by the lottery system, you will be prompted to accept or decline your spot. In the case that you are not selected, you may still have a chance to be selected if others decline.")
+                    .setPositiveButton("OK", null)
+                    .show();
+        });
 
         Database db = new Database(FirebaseFirestore.getInstance());
 
@@ -106,6 +123,10 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     }
 
 
+    /**
+     * Binds an event to the UI.
+     * @param event the event to bind to the UI
+     */
     private void bindEventToUI(Event event) {
         title.setText(nonEmpty(event.getTitle(), "—"));
         organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));
@@ -164,50 +185,179 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     }
 
     private void setupJoinButton(Database db, Event event, String viewerUserEmail) {
-        boolean openNow = isRegistrationOpen(event, System.currentTimeMillis());
-        if (!openNow || viewerUserEmail == null || viewerUserEmail.isEmpty()) {
-            joinBtn.setVisibility(android.view.View.GONE);
+        // No user – nothing to interact with
+        if (viewerUserEmail == null || viewerUserEmail.isEmpty()) {
+            joinBtn.setVisibility(View.GONE);
+            if (acceptBtn != null) acceptBtn.setVisibility(View.GONE);
+            if (declineBtn != null) declineBtn.setVisibility(View.GONE);
             return;
         }
 
-        joinBtn.setVisibility(android.view.View.VISIBLE);
-        joinBtn.setEnabled(false);
-        joinBtn.setText("Checking…");
+        long nowMs = System.currentTimeMillis();
+        boolean openNow = isRegistrationOpen(event, nowMs);
 
-        db.isUserOnWaitlistById(event.getId(), viewerUserEmail)
-                .addOnSuccessListener(isOnWaitlist -> {
-                    if (isOnWaitlist) {
-                        joinBtn.setText("Entered");
+        List<String> confirmed = event.getConfirmedUserIds();
+        List<String> declined = event.getDeclinedUserIds();
+        List<String> selected = event.getSelectedUserIds();
+        List<String> alternates = event.getAlternatesUserIds();
+
+        boolean isConfirmed = confirmed != null && confirmed.contains(viewerUserEmail);
+        boolean isDeclined  = declined != null && declined.contains(viewerUserEmail);
+        boolean isSelected  = selected != null && selected.contains(viewerUserEmail);
+        boolean isAlternate = alternates != null && alternates.contains(viewerUserEmail);
+
+        // Hide accept/decline by default
+        acceptBtn.setVisibility(View.GONE);
+        declineBtn.setVisibility(View.GONE);
+
+        if (openNow) {
+            // Registration still open → allow join / "Entered" as before
+            joinBtn.setVisibility(View.VISIBLE);
+            joinBtn.setEnabled(false);
+            joinBtn.setText("Checking…");
+
+            db.isUserOnWaitlistById(event.getId(), viewerUserEmail)
+                    .addOnSuccessListener(isOnWaitlist -> {
+                        if (isOnWaitlist) {
+                            joinBtn.setText("Entered");
+                            joinBtn.setEnabled(false);
+                        } else {
+                            joinBtn.setText("Enter lottery");
+                            joinBtn.setEnabled(true);
+                            joinBtn.setOnClickListener(v -> {
+                                joinBtn.setEnabled(false);
+                                joinBtn.setText("Entering…");
+                                db.addUserToWaitlistById(event.getId(), viewerUserEmail)
+                                        .addOnSuccessListener(ignored -> {
+                                            joinBtn.setText("Entered");
+                                            Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
+                                            List<String> list = event.getWaitlistUserIds();
+                                            int newCount = (list == null ? 0 : list.size()) + 1;
+                                            vWaitlist.setText(String.valueOf(newCount));
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            joinBtn.setText("Enter lottery");
+                                            joinBtn.setEnabled(true);
+                                            Toast.makeText(this, "Failed to join: " +
+                                                    (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                                        });
+                            });
+                        }
+                    })
+                    .addOnFailureListener(e -> joinBtn.setVisibility(View.GONE));
+
+            return;
+        }
+
+        // Registration CLOSED: show status / accept/decline instead of join
+        if (isConfirmed) {
+            joinBtn.setVisibility(View.VISIBLE);
+            joinBtn.setText("You’re confirmed");
+            joinBtn.setEnabled(false);
+            return;
+        }
+
+        if (isDeclined) {
+            joinBtn.setVisibility(View.VISIBLE);
+            joinBtn.setText("You declined");
+            joinBtn.setEnabled(false);
+            return;
+        }
+
+        if (isSelected) {
+            // User won → show Accept / Decline buttons instead of join
+            joinBtn.setVisibility(View.GONE);
+            acceptBtn.setVisibility(View.VISIBLE);
+            declineBtn.setVisibility(View.VISIBLE);
+
+            setupAcceptDeclineHandlers(db, event, viewerUserEmail);
+            return;
+        }
+
+        if (isAlternate) {
+            joinBtn.setVisibility(View.VISIBLE);
+            joinBtn.setText("You are an alternate");
+            joinBtn.setEnabled(false);
+            return;
+        }
+
+        // Not involved with this event
+        joinBtn.setVisibility(View.GONE);
+    }
+
+
+    private void setupAcceptDeclineHandlers(Database db, Event event, String viewerUserEmail) {
+        // Accept
+        acceptBtn.setOnClickListener(v -> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            acceptBtn.setText("Accepting…");
+
+            db.acceptLotterySelection(event.getId(), viewerUserEmail)
+                    .addOnSuccessListener(ignored -> {
+                        Toast.makeText(this, "You’ve confirmed your spot", Toast.LENGTH_SHORT).show();
+
+                        // Update UI: show confirmed status instead
+                        acceptBtn.setVisibility(View.GONE);
+                        declineBtn.setVisibility(View.GONE);
+
+                        joinBtn.setVisibility(View.VISIBLE);
+                        joinBtn.setText("You’re confirmed");
                         joinBtn.setEnabled(false);
 
-                    } else {
-                        joinBtn.setText("Enter lottery");
-                        joinBtn.setEnabled(true);
-                        joinBtn.setOnClickListener(v -> {
-                            joinBtn.setEnabled(false);
-                            joinBtn.setText("Entering…");
-                            db.addUserToWaitlistById(event.getId(), viewerUserEmail)
-                                    .addOnSuccessListener(ignored -> {
-                                        joinBtn.setText("Entered");
-                                        Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
-                                        // Bump the waitlist count on screen... will add checks and such later.
-                                        List<String> list = event.getWaitlistUserIds();
-                                        db.addEventToUser(viewerUserEmail, event.getId());//adds to array holding each event User signed up for
-                                        int newCount = (list == null ? 0 : list.size()) + 1;
-                                        vWaitlist.setText(String.valueOf(newCount));
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        joinBtn.setText("Enter lottery");
-                                        joinBtn.setEnabled(true);
-                                        Toast.makeText(this, "Failed to join: " +
-                                                (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
-                                    });
-                        });
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    joinBtn.setVisibility(android.view.View.GONE);
-                });
+                        // Update counts on screen
+                        try {
+                            int confirmed = Integer.parseInt(vConfirmed.getText().toString());
+                            int selected = Integer.parseInt(vSelected.getText().toString());
+                            int remaining = Integer.parseInt(vRemaining.getText().toString());
+
+                            vConfirmed.setText(String.valueOf(confirmed + 1));
+                            vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
+                            vRemaining.setText(String.valueOf(Math.max(remaining - 1, 0)));
+                        } catch (NumberFormatException ignored2) {}
+                    })
+                    .addOnFailureListener(e -> {
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        acceptBtn.setText("Accept");
+                        Toast.makeText(this, "Failed to accept: " +
+                                (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                    });
+        });
+
+        // Decline
+        declineBtn.setOnClickListener(v -> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            declineBtn.setText("Declining…");
+
+            db.declineLotterySelection(event.getId(), viewerUserEmail)
+                    .addOnSuccessListener(ignored -> {
+                        Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
+
+                        acceptBtn.setVisibility(View.GONE);
+                        declineBtn.setVisibility(View.GONE);
+
+                        joinBtn.setVisibility(View.VISIBLE);
+                        joinBtn.setText("You declined");
+                        joinBtn.setEnabled(false);
+
+                        // Update counts on screen
+                        try {
+                            int declined = Integer.parseInt(vDeclined.getText().toString());
+                            int selected = Integer.parseInt(vSelected.getText().toString());
+                            vDeclined.setText(String.valueOf(declined + 1));
+                            vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
+                        } catch (NumberFormatException ignored2) {}
+                    })
+                    .addOnFailureListener(e -> {
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        declineBtn.setText("Decline");
+                        Toast.makeText(this, "Failed to decline: " +
+                                (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                    });
+        });
     }
 
     private boolean isRegistrationOpen(Event e, long nowMs) {

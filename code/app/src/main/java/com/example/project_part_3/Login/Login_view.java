@@ -24,6 +24,12 @@ import com.example.project_part_3.Database_functions.NotificationMessagingServic
 import com.example.project_part_3.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.example.project_part_3.Database_functions.NotificationMessagingService;
+
+/**
+ * Fragment for logging in. Initializes various buttons and text fields to prompt the
+ * user for their login credentials and handle incorrect logins.
+ */
 
 public class Login_view extends Fragment {
     private TextView name;

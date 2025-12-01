@@ -40,6 +40,10 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Fragment that displays a list of entrants for a selected event in the Organizer UI.
+ * Each entrant's name, email, and status is displayed as well as a decline button if applicable
+ */
 public class Organizer_entrant_view extends Fragment {
 
     private SwitchCompat showChosenEntrantsSwitch;

@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.project_part_3.Events.Event;
 
-
+/**
+ * ViewModel class for sharing data between fragments.
+ */
 public class OrganizerSharedViewModel extends ViewModel {
 
     // Private data that can be changed only within this ViewModel

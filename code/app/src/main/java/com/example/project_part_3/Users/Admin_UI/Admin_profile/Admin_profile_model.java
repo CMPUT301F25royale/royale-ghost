@@ -9,6 +9,9 @@ import com.example.project_part_3.Database_functions.UserDatabase;
 import com.example.project_part_3.Users.User;
 import java.util.List;
 
+/**
+ * The model for the admin profile info which contains the list of users.
+ */
 public class Admin_profile_model extends ViewModel {
 
     private final UserDatabase userDb;

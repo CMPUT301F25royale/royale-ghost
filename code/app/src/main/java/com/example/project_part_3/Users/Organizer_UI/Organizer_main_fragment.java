@@ -23,6 +23,10 @@ import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * The main fragment for the organizer UI. This fragment initializes and
+ * manages various UI elements used by organizers
+ */
 public class Organizer_main_fragment extends Fragment {
     private OrganizerSharedViewModel sharedViewModel;
 

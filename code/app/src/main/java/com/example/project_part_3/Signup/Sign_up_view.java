@@ -27,6 +27,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * Fragment for signing up. Initializes various buttons and text fields to allow the user
+ * to sign up and create a new account as an entrant or an organizer
+ */
 public class Sign_up_view extends Fragment {
     private Button Organizer_button_sign_up;
     private Button Entrant_button_sign_up;
@@ -99,6 +103,18 @@ public class Sign_up_view extends Fragment {
             sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
                 if (wasAdded) {
                     Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
+                    // Grab token now!
+                    FirebaseMessaging.getInstance().getToken()
+                            .addOnCompleteListener(task -> {
+                                if (!task.isSuccessful()) {
+                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                                    return;
+                                }
+                                String token = task.getResult();
+                                if (token != null) {
+                                    NotificationMessagingService.saveTokenForEmail(email, token);
+                                }
+                            });
                     clearForm();
                     Bundle args = new Bundle();
                     args.putString("userEmail", email);
@@ -117,6 +133,8 @@ public class Sign_up_view extends Fragment {
                 Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
             });
+            // Use Handler to allow UI to update text before heavy logic runs
+            new Handler(Looper.getMainLooper()).post(this::performSignUp);
         });
     }
 
@@ -125,6 +143,8 @@ public class Sign_up_view extends Fragment {
         String password = Objects.requireNonNull(passwordText.getText()).toString();
         String email = Objects.requireNonNull(emailText.getText()).toString();
         String phone = phoneText.getText().toString();
+        ArrayList<String> interest = new ArrayList<>();
+
 
         if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
             Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -132,7 +152,7 @@ public class Sign_up_view extends Fragment {
             return;
         }
 
-        sign_up_model = new Sign_up_model(name, password, email, phone, new ArrayList<>(), selectedOption);
+        sign_up_model = new Sign_up_model(name, password, email, phone,interest, selectedOption);
         sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
             if (wasAdded) {
                 Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();

@@ -3,9 +3,14 @@ package com.example.project_part_3.Users;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an Entrant user in the system who can apply for events and view
+ * their lottery results.
+ */
 public class Entrant extends User {
      private List<String> eventsAppliedFor; // the IDs of events the user has applied for
      private ArrayList<String> interests;// the interests of an entrant
+
 
     public Entrant() {
         super();
