@@ -295,7 +295,6 @@ public class Entrant_profile_view extends Fragment{
                             });
             }
         });
-
     }
 
     private void attachNotificationListener (SwitchCompat notificationsSwitch, FirebaseFirestore ff, String username, SharedPreferences prefs){

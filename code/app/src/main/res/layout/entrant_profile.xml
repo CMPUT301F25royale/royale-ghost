@@ -19,7 +19,7 @@
         android:id="@+id/textView5"
         android:layout_width="180dp"
         android:layout_height="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="12dp"
         android:text="Password:"
         app:layout_constraintStart_toStartOf="@+id/PhoneNumber"
         app:layout_constraintTop_toBottomOf="@+id/number_Change" />
@@ -38,9 +38,10 @@
         android:id="@+id/PhoneNumber"
         android:layout_width="180dp"
         android:layout_height="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="12dp"
         android:text="Number:"
         app:layout_constraintEnd_toStartOf="@+id/profile_photo"
+        app:layout_constraintHorizontal_bias="0.509"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/change_email" />
 
@@ -48,10 +49,11 @@
         android:id="@+id/change_Email"
         android:layout_width="180dp"
         android:layout_height="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="12dp"
         android:text="Email:"
         android:textSize="15dp"
         app:layout_constraintEnd_toStartOf="@+id/profile_photo"
+        app:layout_constraintHorizontal_bias="0.509"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_change" />
 
@@ -90,6 +92,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
+
     <Button
         android:id="@+id/entrant_logout_button"
         android:layout_width="151dp"
@@ -99,9 +102,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/number_Change"
         app:layout_constraintTop_toBottomOf="@+id/entrant_notifications_switch"
-        app:layout_constraintVertical_bias="0.2" />
-
-
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/Pass_Reset"
@@ -136,12 +137,13 @@
         android:id="@+id/entrant_notifications_switch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="200dp"
         android:checked="true"
         android:text="Notifications:"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/Pass_Reset"
         app:layout_constraintTop_toBottomOf="@+id/Pass_Reset"
         app:trackTint="@color/switch_track_selector" />
