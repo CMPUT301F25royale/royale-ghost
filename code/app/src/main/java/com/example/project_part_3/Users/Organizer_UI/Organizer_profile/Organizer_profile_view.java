@@ -73,7 +73,7 @@ public class Organizer_profile_view extends Fragment {
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
         db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
-            profileName.setText("Profile: " + user.getName());
+            if(user != null) profileName.setText("Profile: " + user.getName());
         });
 
         //reset password here
