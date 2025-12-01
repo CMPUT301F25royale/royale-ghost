@@ -7,4 +7,4 @@ The product backlog can be seen in [GitHub project](https://github.com/orgs/CMPU
 The story board can be seen below:
 ![storyboard](images/storyboard_royale.png)
 UML at halfway point:
-<img width="796" height="808" alt="Screenshot 2025-11-07 at 4 54 57 PM" src="https://github.com/user-attachments/assets/ea56ebc5-d726-4513-bc17-a12fe7581c44" />
+<img width="3171" height="2024" alt="CMPUT301 projp4 UML drawio" src="https://github.com/user-attachments/assets/7d6d0798-ff6b-40df-9756-0ef46dad78b7" />
