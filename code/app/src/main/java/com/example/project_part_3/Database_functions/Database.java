@@ -7,12 +7,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Notification.Notification_Entrant;
 import com.example.project_part_3.Users.Admin;
 import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -907,5 +909,35 @@ public class Database {
         });
     }
 
+    /**
+     * Send a notification to a list of recipients.
+     *
+     * @param message
+     * @param event
+     * @param recipients
+     * @param type
+     * @return
+     */
+
+    public Task<Void> sendNotification(String message, Event event, List<String> recipients, String type) {
+
+        List<Task<Void>> taskList = new ArrayList<>();
+
+        for (String recipient : recipients) {
+            DocumentReference newDocRef = db.collection(USERS_COLLECTION)
+                    .document(recipient)
+                    .collection("notifications")
+                    .document();
+
+            Notification_Entrant notification = new Notification_Entrant(
+                    "Message", recipient, message, Timestamp.now(), event.getId(), event.getTitle(), type);
+
+            notification.setId(newDocRef.getId());
+
+            taskList.add(newDocRef.set(notification));
+        }
+
+        return Tasks.whenAll(taskList);
+    }
 }
 

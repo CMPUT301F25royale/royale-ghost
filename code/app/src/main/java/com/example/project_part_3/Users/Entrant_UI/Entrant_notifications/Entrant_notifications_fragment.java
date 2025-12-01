@@ -85,6 +85,7 @@ public class Entrant_notifications_fragment extends Fragment {
     }
 
     private void listenForNotifications(@NonNull String email) {
+        // FIX: Ensure you order by "createdAt" since that is your model field
         notificationListener = db.collection("users")
                 .document(email)
                 .collection("notifications")
@@ -102,25 +103,27 @@ public class Entrant_notifications_fragment extends Fragment {
                         notifications.clear();
 
                         for (QueryDocumentSnapshot doc : value) {
-                            String title = doc.getString("title");
+                            String title = doc.getString("eventTitle");
                             if (title == null) title = "Event update";
 
                             String message = doc.getString("message");
                             if (message == null) message = "";
 
                             String eventId = doc.getString("eventId");
+                            String type = doc.getString("type");
 
-                            // Check boolean safely
                             boolean isRead = Boolean.TRUE.equals(doc.getBoolean("read"));
 
                             Timestamp ts = doc.getTimestamp("createdAt");
 
                             Notification_Entrant n = new Notification_Entrant(title, null, message, ts);
 
+                            n.setEventTitle(title);
                             n.setId(doc.getId());
                             n.setEventId(eventId);
-                            n.setEntrantEmail(email);
+                            n.setUserEmail(email);
                             n.setRead(isRead);
+                            if(type != null) n.setType(type);
 
                             notifications.add(n);
                         }
@@ -145,7 +148,9 @@ public class Entrant_notifications_fragment extends Fragment {
             myDatabase.fetchEvent(notif.getEventId())
                     .addOnSuccessListener(event -> {
                         if (event != null) {
-                            String emailToAccept = currentUserEmail;
+                            // FIX: Use getUserEmail()
+                            String emailToAccept = notif.getUserEmail() != null ? notif.getUserEmail() : currentUserEmail;
+
                             myDatabase.acceptEntrant(event, emailToAccept).addOnSuccessListener(success -> {
                                 if (success) {
                                     notif.setRead(true);
@@ -180,7 +185,9 @@ public class Entrant_notifications_fragment extends Fragment {
             myDatabase.fetchEvent(notif.getEventId())
                     .addOnSuccessListener(event -> {
                         if (event != null) {
-                            String emailToDecline = currentUserEmail;
+                            // FIX: Use getUserEmail()
+                            String emailToDecline = notif.getUserEmail() != null ? notif.getUserEmail() : currentUserEmail;
+
                             myDatabase.declineEntrant(event, emailToDecline).addOnSuccessListener(success -> {
                                 if (success) {
                                     notif.setRead(true);

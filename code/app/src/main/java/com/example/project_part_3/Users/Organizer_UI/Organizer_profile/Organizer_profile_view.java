@@ -54,6 +54,15 @@ public class Organizer_profile_view extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
 
+        // Organizers don't have interests
+        ListView interestView = view.findViewById(R.id.InterestView);
+        interestView.setVisibility(View.GONE);
+        TextView interests = view.findViewById(R.id.Interests);
+        interests.setVisibility(View.GONE);
+        Button addInterest = view.findViewById(R.id.Add_interest);
+        addInterest.setVisibility(View.GONE);
+
+
         //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");

@@ -75,6 +75,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
     protected String capacityStr;
     protected String priceStr;
 
+    protected boolean geolocationEnabled;
+
     protected interface DateSelectionCallback {
         void onDateSelected(Date date);
     }
@@ -98,6 +100,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         initializeViews(view);
         setupNavigation(view);
         setupDateButtons(view);
+        setUpGeolocationSwitch();
         setupObservers();
         setupPublishButton(view);
         setupImageUpload(view);
@@ -231,9 +234,8 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         location = locationEditText.getText().toString().trim();
         capacityStr = capacityEditText.getText().toString().trim();
         priceStr = priceEditText.getText().toString().trim();
+        geolocationEnabled = geolocationSwitch.isChecked();
 
-        boolean geolocationEnabled =
-                geolocationSwitch != null && geolocationSwitch.isChecked();
 
         // must fill in only mandatory fields
         if (title.isEmpty() || description.isEmpty() || location.isEmpty()) {
@@ -293,6 +295,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
             selectedEvent.setDate_close(registrationCloseDate);
             selectedEvent.setEventStartAt(eventStartDate);
             selectedEvent.setEventEndAt(eventEndDate);
+            selectedEvent.setGeolocationEnabled(geolocationEnabled);
 
             if (ImageUri != null) {
                 db.uploadImage(ImageUri, "event_poster", description, organizerEmail, selectedEvent.getId())
@@ -303,7 +306,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                         })
                         .addOnFailureListener(e -> Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
 
-            }else{
+            } else {
                 updateExistingEvent(db,selectedEvent,null, finalCapacity, finalPrice);
             }
             } else {
@@ -313,7 +316,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                 }
                 createNewEvent(db, newEvent, ImageUri);
             }
-            android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
         }
 
 
@@ -402,8 +404,18 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         });
     }
 
+    protected void setUpGeolocationSwitch() {
+        if (selectedEvent != null) {
+            geolocationEnabled = selectedEvent.getGeolocationEnabled();
+        }
+
+        geolocationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            geolocationEnabled = isChecked;
+        });
+    }
+
     protected void populateFields(Event event) {
 
     }
 
-    }
+}
