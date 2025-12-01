@@ -295,7 +295,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
 
 
             // accept and decline lottery don't exist in the database?
-            /*db.acceptLotterySelection(event.getId(), viewerUserEmail)
+            db.acceptLotterySelection(event.getId(), viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You’ve confirmed your spot", Toast.LENGTH_SHORT).show();
 
@@ -324,7 +324,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                         acceptBtn.setText("Accept");
                         Toast.makeText(this, "Failed to accept: " +
                                 (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
-                    });*/
+                    });
         });
 
         // Decline
@@ -333,7 +333,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             declineBtn.setEnabled(false);
             declineBtn.setText("Declining…");
                 //accept and decline lottery don't exist in the database?
-                /*db.declineLotterySelection(event.getId(), viewerUserEmail)
+                db.declineLotterySelection(event.getId(), viewerUserEmail)
                         .addOnSuccessListener(ignored -> {
                             Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
@@ -358,7 +358,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                             declineBtn.setText("Decline");
                             Toast.makeText(this, "Failed to decline: " +
                                     (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
-                        });*/
+                        });
         });
     }
 

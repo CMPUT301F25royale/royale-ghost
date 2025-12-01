@@ -109,6 +109,27 @@ public class Database {
         });
     }
 
+    public Task<Void> acceptLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update(
+                        "confirmedUserIds", FieldValue.arrayUnion(userEmail),
+                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
+                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
+                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
+                ));
+    }
+
+    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
+    public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.update(
+                        "declinedUserIds", FieldValue.arrayUnion(userEmail),
+                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
+                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
+                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
+                ));
+    }
+
 
     public Task<Boolean> addInterest(String email, String newInterest) {
         return db.collection(USERS_COLLECTION)
