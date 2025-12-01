@@ -17,7 +17,6 @@ import com.example.project_part_3.R;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,7 +51,6 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                         @Nullable View convertView,
                         @NonNull ViewGroup parent) {
 
-        // 1. Declare holder locally so it's specific to this row execution
         ViewHolder holder;
 
         if (convertView == null) {
@@ -77,36 +75,43 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
 
         if (notif != null) {
             holder.eventTitle.setText(notif.getEventTitle() != null ? notif.getEventTitle() : "Event update");
-            holder.name.setText(notif.getType() != null ? notif.getType() : "");
+            //holder.name.setText("");
             holder.message.setText(notif.getMessage() != null ? notif.getMessage() : "");
 
-            Timestamp ts = notif.getTime_sent();
+            Timestamp ts = notif.getCreatedAt();
             if (ts != null) {
                 holder.date.setText(dateFormat.format(ts.toDate()));
             } else {
                 holder.date.setText("");
             }
 
-            // FIXED LINE: Put the string first to prevent NullPointerException
-            if (notif.isRead() || !"lottery_won".equals(notif.getType())) {
-                // HIDE BUTTONS
+            // Logic to handle visibility
+            if (notif.isRead() || (notif.getType() != null && !notif.getType().equals("lottery_won"))) {
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
-
-                // HIDE OVERLAY
                 holder.overlay.setVisibility(View.GONE);
+
             } else {
-                // SHOW BUTTONS & OVERLAY
                 holder.acceptButton.setVisibility(View.VISIBLE);
                 holder.declineButton.setVisibility(View.VISIBLE);
                 holder.overlay.setVisibility(View.VISIBLE);
 
                 holder.acceptButton.setOnClickListener(v -> {
-                    if (listener != null) listener.onAcceptButtonClick(notif);
+                    if (listener != null) {
+                        listener.onAcceptButtonClick(getItem(position));
+                        holder.acceptButton.setVisibility(View.GONE);
+                        holder.declineButton.setVisibility(View.GONE);
+                        holder.overlay.setVisibility(View.VISIBLE);
+                    }
                 });
 
                 holder.declineButton.setOnClickListener(v -> {
-                    if (listener != null) listener.onDeclineButtonClick(notif);
+                    if (listener != null) {
+                        listener.onDeclineButtonClick(getItem(position));
+                        holder.acceptButton.setVisibility(View.GONE);
+                        holder.declineButton.setVisibility(View.GONE);
+                        holder.overlay.setVisibility(View.VISIBLE);
+                    }
                 });
             }
         }

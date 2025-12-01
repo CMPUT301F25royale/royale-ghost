@@ -36,11 +36,11 @@ import com.example.project_part_3.R;
  * Fragment that displays a profile for an organizer.
  */
 public class Organizer_profile_view extends Fragment {
-    private Database db;
-    private String username;
-    private ImageView OrganizerProfileImageView;
-    private Uri ImageUri;
-    private SharedPreferences prefs;
+    protected Database db;
+    protected String username;
+    protected ImageView OrganizerProfileImageView;
+    protected Uri ImageUri;
+    protected SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -50,13 +50,18 @@ public class Organizer_profile_view extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.entrant_profile, container, false);
+        return inflater.inflate(R.layout.organizer_profile, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
+
+        // Organizers don't have interests
+        Button addInterest = view.findViewById(R.id.Add_interest_button);
+        addInterest.setVisibility(View.GONE);
+
 
         //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);

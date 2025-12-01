@@ -1,17 +1,21 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -24,6 +28,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.Database_functions.Database;
@@ -98,6 +103,9 @@ public class Organizer_entrant_view extends Fragment {
         setUpBackButton(view);
         setUpSwitches();
         setUpExportButton(view);
+        //setUpMapButton(view);
+        setUpNotifyButton(view);
+
 
         adapter = new Organizer_entrant_adapter(getContext(), R.layout.organizer_event_entrant_element, displayList, this::declineEntrant);
         listView.setAdapter(adapter);
@@ -108,6 +116,46 @@ public class Organizer_entrant_view extends Fragment {
                 fetchEntrants(selectedEvent);
             }
         });
+    }
+
+    private void setUpNotifyButton(View view) {
+        Button notifyButton = view.findViewById(R.id.noify_button);
+        notifyButton.setOnClickListener(v -> {
+            if (event == null) return;
+            showNotifyPopup();
+        });
+    }
+
+    private void showNotifyPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Send Notification");
+        builder.setMessage("Enter the message you want to send");
+
+        final EditText input = new EditText(requireContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String message = input.getText().toString();
+
+                ArrayList<String> toSend = new ArrayList<>();
+                for (Pair<Entrant, String> pair : displayList) {
+                    toSend.add(pair.first.getEmail()); // add each email
+                }
+                db.sendNotification(message, event, toSend, "message_from_organizer");
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     /**

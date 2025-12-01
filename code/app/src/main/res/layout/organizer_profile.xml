@@ -142,3 +142,4 @@
         app:layout_constraintStart_toStartOf="@+id/profile_photo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
