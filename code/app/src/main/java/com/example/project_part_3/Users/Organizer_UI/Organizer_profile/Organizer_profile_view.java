@@ -290,6 +290,7 @@ public class Organizer_profile_view extends Fragment {
      * Uploads the selected image to Firebase Storage and updates the organizer's profile picture.
      */
     protected void uploadProfilePicture() {
+        String desc = "profile picture" + username;
         if (ImageUri != null) {
             db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
                 if(getContext() == null) return;

@@ -305,8 +305,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                         Toast.makeText(getContext(), "Failed to upload poster: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
         }
-        // if selectedEvent is null, it's a new event (pass null ID), else modify the existing event
-        Event newEvent;
         if (selectedEvent != null) {
             newEvent = selectedEvent;
             newEvent.setTitle(title);
@@ -374,6 +372,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
 
     protected void CreateOrUpdateEvent(Database db, String imageUrl, Integer capacity, Float price) {
         //update or create event needs different ways to deal with images
+        Event newEvent;
         if (selectedEvent != null) {
             Integer finalCapacity = capacity;
             Float finalPrice = price;
@@ -392,21 +391,20 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                         .addOnSuccessListener(imageMetadata -> {
                             selectedEvent.setImageInfo(imageMetadata);
                             selectedEvent.setPosterImageUrl(imageMetadata.getUrl());
-                            updateExistingEvent(db,selectedEvent,imageMetadata, finalCapacity, finalPrice);
+                            updateExistingEvent(db, selectedEvent, imageMetadata, finalCapacity, finalPrice);
                         })
                         .addOnFailureListener(e -> Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
 
-            }else{
-                updateExistingEvent(db,selectedEvent,null, finalCapacity, finalPrice);
+            } else {
+                updateExistingEvent(db, selectedEvent, null, finalCapacity, finalPrice);
             }
         } else {
-            newEvent = new Event(organizerEmail, title, description, location, location, null, registrationOpenDate.getTime(), registrationCloseDate.getTime(), eventStartDate.getTime(), eventEndDate.getTime(), capacity, price, geolocationEnabled);
-            if (geolocationEnabled) {
-                newEvent.setGeolocationEnabled(true);
-            }
+            newEvent = new Event(organizerEmail, title, description, location, location, null, registrationOpenDate.getTime(), registrationCloseDate.getTime(), eventStartDate.getTime(), eventEndDate.getTime(), capacity, price, true);
             createNewEvent(db, newEvent, ImageUri);
+            //Should potentially be after the bracket
+            android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
         }
-        android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
+
     }
 
 

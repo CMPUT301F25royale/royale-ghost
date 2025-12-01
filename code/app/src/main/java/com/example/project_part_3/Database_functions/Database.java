@@ -758,11 +758,11 @@ public class Database {
      * @param imageUri The URI of the image to upload.
      * @param imageType The type of the image.
      * @param description The description of the image.
-     * @param ownerId The ID of the owner of the image.
+     * @param associated_user The ID of the owner of the image.
      * @param eventId The ID of the event the image is associated with.
      * @return A task that completes when the image is uploaded.
      */
-    public Task<ImageMetadata> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String ownerId, @Nullable String eventId) {
+
 
 
     public Task<Image_datamap> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String associated_user, @Nullable String eventId) {

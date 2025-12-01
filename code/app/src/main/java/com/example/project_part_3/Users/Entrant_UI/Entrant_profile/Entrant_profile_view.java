@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -397,30 +398,30 @@ public class Entrant_profile_view extends Fragment{
         });
     }
 
-    private void attachNotificationListener(SwitchCompat notificationsSwitch,
-                                            FirebaseFirestore ff,
-                                            String username,
-                                            SharedPreferences prefs) {
-        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ff.collection("users")
-                    .document(username)
-                    .update("receiveNotifications", isChecked)
-                    .addOnSuccessListener(unused -> {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("receiveNotifications", isChecked);
-                        editor.apply();
-                    })
-                    .addOnFailureListener(e -> {
-                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
-                        Toast.makeText(getContext(),
-                                "Failed to update notification setting",
-                                Toast.LENGTH_SHORT).show();
-                        buttonView.setChecked(!isChecked);
-                    });
-        });
-
-        dialog.show();
-    }
+//    private void attachNotificationListener(SwitchCompat notificationsSwitch,
+//                                            FirebaseFirestore ff,
+//                                            String username,
+//                                            SharedPreferences prefs) {
+//        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            ff.collection("users")
+//                    .document(username)
+//                    .update("receiveNotifications", isChecked)
+//                    .addOnSuccessListener(unused -> {
+//                        SharedPreferences.Editor editor = prefs.edit();
+//                        editor.putBoolean("receiveNotifications", isChecked);
+//                        editor.apply();
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
+//                        Toast.makeText(getContext(),
+//                                "Failed to update notification setting",
+//                                Toast.LENGTH_SHORT).show();
+//                        buttonView.setChecked(!isChecked);
+//                    });
+//        });
+//
+//        dialog.show();
+//    }
 
     private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
