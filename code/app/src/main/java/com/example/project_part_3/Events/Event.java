@@ -337,6 +337,8 @@ public class Event {
     public int getConfirmedCount() {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
+    // For unit test
+    public void setConfirmedUserIds(List<String> list) { this.confirmedUserIds = (list != null) ? list : new ArrayList<>(); }
 
     public List<String> getConfirmedUserIds() {
         return (confirmedUserIds != null) ? confirmedUserIds : new ArrayList<>();
@@ -460,5 +462,10 @@ public class Event {
     public void setGeolocationEnabled(Boolean geolocationEnabled) {
         this.geolocationEnabled = geolocationEnabled;
     }
+
+    public boolean isFull() {
+        return getRemainingCapacity() <= 0;
+    }
+
 }
 
