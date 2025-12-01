@@ -1,5 +1,6 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
+import android.app.AlertDialog;import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -18,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Concrete fragment for editing an existing event in the Organizer UI.
@@ -26,40 +29,50 @@ import java.util.Calendar;
 public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setupDeleteButton(view);
+    }
+
+    private void setupDeleteButton(@NonNull View view) {
+        Button deleteEventButton = view.findViewById(R.id.organizer_delete_event_button);
+        deleteEventButton.setVisibility(View.GONE);
+    }
+
+    @Override
     protected void populateFields(Event event) {
-        if (titleEditText == null || event == null || getView() == null) return;
+        if (!isAdded() || getView() == null || event == null) {
+            return;
+        }
 
         Button deleteEventButton = getView().findViewById(R.id.organizer_delete_event_button);
-        if (deleteEventButton != null) {
-            deleteEventButton.setVisibility(View.VISIBLE);
-            deleteEventButton.setOnClickListener(l -> handleEventDelete(event));
-        }
+        deleteEventButton.setVisibility(View.VISIBLE);
+        deleteEventButton.setOnClickListener(l -> handleEventDelete(event));
 
         TextView pageName = getView().findViewById(R.id.create_event_title);
-        if (pageName != null) {
-            pageName.setText(String.format("Editing: %s", event.getTitle()));
-        }
+        pageName.setText(String.format("Editing: %s", event.getTitle()));
 
         titleEditText.setText(event.getTitle());
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
+        if (event.getCapacity() != null) {
+            capacityEditText.setText(String.valueOf(event.getCapacity()));
+        }
+        if (event.getPrice() != null) {
+            priceEditText.setText(String.format(Locale.US, "%.2f", event.getPrice()));
+        }
 
-        // Use DateTimeInstance to show both date and time
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a", Locale.getDefault());
 
         if (event.getDate_open() != null) {
             registrationOpenDate = event.getDate_open();
-            if (openDateButton != null) {
-                openDateButton.setText(sdf.format(event.getDate_open()));
-            }
+            openDateButton.setText(sdf.format(registrationOpenDate));
         }
 
         if (event.getDate_close() != null) {
             registrationCloseDate = event.getDate_close();
-            if (closeDateButton != null) {
-                closeDateButton.setText(sdf.format(event.getDate_close()));
-            }
+            closeDateButton.setText(sdf.format(registrationCloseDate));
         }
 
         if (registrationCloseDate != null && registrationCloseDate.before(Calendar.getInstance().getTime())) {
@@ -69,62 +82,52 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
         if (event.getEventStartAt() != null) {
             eventStartDate = event.getEventStartAt();
-            if (startDateButton != null) {
-                startDateButton.setText(sdf.format(event.getEventStartAt()));
-            }
+            startDateButton.setText(sdf.format(eventStartDate));
         }
 
         if (event.getEventEndAt() != null) {
             eventEndDate = event.getEventEndAt();
-            if (endDateButton != null) {
-                endDateButton.setText(sdf.format(event.getEventEndAt()));
-            }
-        }
-
-        if (event.getCapacity() != null) {
-            capacityEditText.setText(String.valueOf(event.getCapacity()));
-        }
-
-        if (event.getPrice() != null) {
-            priceEditText.setText(String.format("%.2f", event.getPrice()));
+            endDateButton.setText(sdf.format(eventEndDate));
         }
 
         if (event.getPosterImageUrl() != null) {
-            imageURL = event.getPosterImageUrl();
-            if (EventImageView != null) {
-                EventImageView.setVisibility(View.VISIBLE);
+            eventImageView.setVisibility(View.VISIBLE);
+            if (isAdded()) {
                 Glide.with(requireContext())
                         .load(event.getPosterImageUrl())
                         .placeholder(R.drawable.ic_launcher_foreground)
                         .error(R.drawable.ic_launcher_foreground)
-                        .into(EventImageView);
+                        .into(eventImageView);
             }
         }
+
+
         if (geolocationSwitch != null) {
             geolocationSwitch.setChecked(event.getGeolocationEnabled());
         }
     }
-    private void handleEventDelete(Event event) {
-        Database db = new Database(FirebaseFirestore.getInstance());
-        db.deleteEvent(event).addOnSuccessListener(success -> {
-            if (success) {
-                Toast.makeText(getContext(), "Event deleted successfully!", Toast.LENGTH_SHORT).show();
-                if (getView() != null) {
-                    NavController navBack = NavHostFragment.findNavController(this);
-                    navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
-                }
-            } else {
-                Toast.makeText(getContext(), "Failed to delete event.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
-    @Override
-    public void setupDateButtons(@NonNull View view) {
-        setupDateTimePicker(openDateButton, date -> registrationOpenDate = date);
-        setupDateTimePicker(closeDateButton, date -> registrationCloseDate = date);
-        setupDateTimePicker(startDateButton, date -> eventStartDate = date);
-        setupDateTimePicker(endDateButton, date -> eventEndDate = date);
+    private void handleEventDelete(Event event) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete Event")
+                .setMessage("Are you sure you want to permanently delete this event?")
+                .setPositiveButton("Yes, Delete", (dialog, which) -> {
+                    Database db = new Database(FirebaseFirestore.getInstance());
+                    db.deleteEvent(event).addOnSuccessListener(success -> {
+                         if (!isAdded()) {
+                            return;
+                        }
+                        if (success) {
+                            Toast.makeText(getContext(), "Event deleted successfully!", Toast.LENGTH_SHORT).show();
+                            NavController navBack = NavHostFragment.findNavController(this);
+                            navBack.popBackStack();
+                        } else {
+                            Toast.makeText(getContext(), "Failed to delete event.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override
@@ -132,19 +135,11 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         ImageButton back = view.findViewById(R.id.organizer_create_edit_event_back);
         if (back != null) {
             back.setOnClickListener(v -> {
-                NavController navBack = NavHostFragment.findNavController(this);
-                navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
+                if (isAdded()) {
+                    NavHostFragment.findNavController(this).popBackStack();
+                }
             });
         }
     }
 
-    //TODO: KANAJENIJNFI
-    /**
-     * @param db    The database to push to
-     * @param event The event to push
-     */
-    @Override
-    protected void pushEventToDatabase(Database db, Event event) {
-
-    }
 }

@@ -64,7 +64,7 @@ public class Organizer_profile_view extends Fragment {
 
         //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        username = prefs.getString("username", "");
+        username = prefs.getString("userEmail", "");
 
         OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
         loadProfileImage();
@@ -72,7 +72,7 @@ public class Organizer_profile_view extends Fragment {
 
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+        db.fetchUser(prefs.getString("userEmail", "")).addOnSuccessListener(user -> {
             profileName.setText("Profile: " + user.getName());
         });
 
@@ -81,7 +81,7 @@ public class Organizer_profile_view extends Fragment {
 
     }
 
-    
+
     /**
      * Sets up all standard profile buttons.
      */
@@ -170,7 +170,7 @@ public class Organizer_profile_view extends Fragment {
                         // Update local tracking
                         username = _new;
                         SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("username", _new);
+                        editor.putString("userEmail", _new);
                         editor.apply();
                         Toast.makeText(getActivity(), "Email updated", Toast.LENGTH_SHORT).show();
                     });
@@ -206,12 +206,12 @@ public class Organizer_profile_view extends Fragment {
         requireActivity().finish();
     }
 
-        
-    /**    
-    * Loads the profile image for the organizer.
-    */
+
+    /**
+     * Loads the profile image for the organizer.
+     */
     protected void loadProfileImage() {
-        
+
         if (username != null && !username.isEmpty()) {
             db.fetchUser(username).addOnSuccessListener(user -> {
                 if (user != null && user.getProfilePicUrl() != null) {

@@ -147,7 +147,6 @@ public class Event {
                  Float price,
                  Boolean geolocationEnabled) {
         this();
-        this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
