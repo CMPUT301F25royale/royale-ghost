@@ -7,12 +7,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Notification.Notification_Entrant;
 import com.example.project_part_3.Users.Admin;
 import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer;
 import com.example.project_part_3.Users.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -966,27 +968,36 @@ public class Database {
         });
     }
 
-    // If user accepted move user from selectedUserIds to confirmedUserIds clean other lists
-    public Task<Void> acceptLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
-        return findEventDocRefById(eventId)
-                .onSuccessTask(ref -> ref.update(
-                        "confirmedUserIds", FieldValue.arrayUnion(userEmail),
-                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
-                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
-                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
-                ));
-    }
+    /**
+     * Send a notification to a list of recipients.
+     *
+     * @param message
+     * @param event
+     * @param recipients
+     * @param type
+     * @return
+     */
 
-    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
-    public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
-        return findEventDocRefById(eventId)
-                .onSuccessTask(ref -> ref.update(
-                        "declinedUserIds", FieldValue.arrayUnion(userEmail),
-                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
-                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
-                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
-                ));
-    }
+    public Task<Void> sendNotification(String message, Event event, List<String> recipients, String type) {
 
+        List<Task<Void>> taskList = new ArrayList<>();
+
+        for (String recipient : recipients) {
+            DocumentReference newDocRef = db.collection(USERS_COLLECTION)
+                    .document(recipient)
+                    .collection("notifications")
+                    .document();
+
+            Notification_Entrant notification = new Notification_Entrant(
+                    "Message", recipient, message, Timestamp.now(), event.getId(), event.getTitle(), type);
+
+            notification.setOrganizerName(event.getOrganizerId()); // TODO: change to name of organizer
+            notification.setId(newDocRef.getId());
+
+            taskList.add(newDocRef.set(notification));
+        }
+
+        return Tasks.whenAll(taskList);
+    }
 }
 

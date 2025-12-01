@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.Users.Organizer;
-import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
+import com.google.firebase.firestore.Exclude;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
