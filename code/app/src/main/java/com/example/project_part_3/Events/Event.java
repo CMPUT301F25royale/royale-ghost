@@ -77,7 +77,8 @@ public class Event {
                  Float price,
                  String location,
                  Integer capacity,
-                 Bitmap poster) {
+                 Image_datamap imageInfo
+                 ) {
         this(); // Calls the default constructor to init lists
         this.time = time;
         this.price = price;
@@ -89,7 +90,6 @@ public class Event {
         if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
-        this.poster = poster;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
@@ -106,7 +106,8 @@ public class Event {
                  Organizer organizer,
                  String location,
                  Integer capacity,
-                 Bitmap poster
+                 String posterImageUrl,
+                 Image_datamap imageInfo
                  ) {
         this();
         this.time = time;
@@ -118,22 +119,12 @@ public class Event {
         if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
-        this.poster = poster;
+        this.posterImageUrl = posterImageUrl;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
         resetLotteryState();
         this.imageInfo = null;
-    }
-
-    public void resetLotteryState() {
-        waitlistUserIds = new ArrayList<>();
-        selectedUserIds = new ArrayList<>();
-        alternatesUserIds = new ArrayList<>();
-        confirmedUserIds = new ArrayList<>();
-        declinedUserIds = new ArrayList<>();
-        lotteryDone = false;
-
     }
 
     public Event(
@@ -201,7 +192,6 @@ public class Event {
         this.price = price;
         this.imageInfo = null;
         resetLotteryState();
-
         this.geolocationEnabled = geolocationEnabled;
     }
 
@@ -444,6 +434,7 @@ public class Event {
         map.put("alternatesUserIds", alternatesUserIds);
         map.put("attendant_list", attendant_list);
         return map;
+    }
     public Boolean getGeolocationEnabled() {
         return geolocationEnabled != null && geolocationEnabled;
     }

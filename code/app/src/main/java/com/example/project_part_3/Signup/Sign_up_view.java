@@ -132,7 +132,7 @@ public class Sign_up_view extends Fragment {
             return;
         }
 
-        sign_up_model = new Sign_up_model(name, password, email, phone, selectedOption);
+        sign_up_model = new Sign_up_model(name, password, email, phone, new ArrayList<>(), selectedOption);
         sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
             if (wasAdded) {
                 Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();

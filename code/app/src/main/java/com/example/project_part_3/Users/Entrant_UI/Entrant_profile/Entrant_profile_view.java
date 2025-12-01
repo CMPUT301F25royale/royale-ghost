@@ -206,14 +206,33 @@ public class Entrant_profile_view extends Fragment{
             });
         });
 
+        Button logoutButton = view.findViewById(R.id.entrant_logout_button);
+        if (logoutButton != null) {
+            logoutButton.setOnClickListener(v -> {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.clear();
+                        editor.apply();
+
+                        // Show a confirmation message
+                        Toast.makeText(getActivity(), "You have been logged out.", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(requireActivity(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
+            });
+        }
+
+
         SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
         boolean localPref = prefs.getBoolean("receiveNotifications", true);
         notificationsSwitch.setChecked(localPref);
         notificationsSwitch.setEnabled(false);
         TextView interestsTitle = view.findViewById(R.id.Interests);
         interestsTitle.setVisibility(View.VISIBLE);
-        ListView interestsListView = view.findViewById(R.id.InterestsListView);
-        interestsListView.setVisibility(View.VISIBLE);
+        //ListView interestsListView = view.findViewById(R.id.InterestsListView);
+        //interestsListView.setVisibility(View.VISIBLE);
 
         if (username == null || username.isEmpty()) {
             notificationsSwitch.setEnabled(false);
@@ -383,7 +402,6 @@ public class Entrant_profile_view extends Fragment{
                         String imageUrl = ImageMetadata.getUrl();
                         user.setImageInfo(ImageMetadata);
                         user.setProfilePicUrl(imageUrl);
-
                         db.setUser(user);
                         Glide.with(requireContext()).load(imageUrl).into(profileImageView);
                     }

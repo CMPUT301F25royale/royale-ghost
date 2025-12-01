@@ -31,6 +31,7 @@ import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -42,7 +43,7 @@ import android.widget.Switch;
 
 
 public abstract class Organizer_create_edit_event_template extends Fragment {
-    protected Switch geolocationSwitch;
+    protected MaterialSwitch geolocationSwitch;
 
     protected Date registrationOpenDate;
     protected Date registrationCloseDate;
@@ -277,60 +278,50 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                 return;
             }
         }
+        Event newEvent = new Event();
 
+        //update or create event needs different ways to deal with images
         if (selectedEvent != null) {
+            Integer finalCapacity = capacity;
+            Float finalPrice = price;
+            selectedEvent.setTitle(title);
+            selectedEvent.setDescription(description);
+            selectedEvent.setLocation(location);
+            selectedEvent.setCapacity(capacity);
+            selectedEvent.setPrice(price);
+            selectedEvent.setDate_open(registrationOpenDate);
+            selectedEvent.setDate_close(registrationCloseDate);
+            selectedEvent.setEventStartAt(eventStartDate);
+            selectedEvent.setEventEndAt(eventEndDate);
+
             if (ImageUri != null) {
-                Integer finalCapacity = capacity;
-                Float finalPrice = price;
                 db.uploadImage(ImageUri, "event_poster", description, organizerEmail, selectedEvent.getId())
                         .addOnSuccessListener(imageMetadata -> {
-                            updateExistingEvent(db, imageMetadata, finalCapacity, finalPrice);
+                            selectedEvent.setImageInfo(imageMetadata);
+                            selectedEvent.setPosterImageUrl(imageMetadata.getUrl());
+                            updateExistingEvent(db,selectedEvent,imageMetadata, finalCapacity, finalPrice);
                         })
                         .addOnFailureListener(e -> Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
-                        updateExistingEvent(db, selectedEvent.getImageInfo(), capacity, price);
-                    }else
-                    
-                    {               
 
-            // else, create a new event
-            newEvent = new Event(
-                    organizerEmail,
-                    title,
-                    description,
-                    location,
-                    location,
-                    null,
-                    registrationOpenDate.getTime(),
-                    registrationCloseDate.getTime(),
-                    eventStartDate.getTime(),
-                    eventEndDate.getTime(),
-                    capacity,
-                    price,
-                    capacity, // optional, may be null
-                    price, // optional, may be null
-                    geolocationEnabled
-            );
-            createNewEvent(db,newEvent, ImageUri);
+            }else{
+                updateExistingEvent(db,selectedEvent,null, finalCapacity, finalPrice);
+            }
+            } else {
+                newEvent = new Event(organizerEmail, title, description, location, location, null, registrationOpenDate.getTime(), registrationCloseDate.getTime(), eventStartDate.getTime(), eventEndDate.getTime(), capacity, price, geolocationEnabled);
+                if (geolocationEnabled) {
+                    newEvent.setGeolocationEnabled(true);
+                }
+                createNewEvent(db, newEvent, ImageUri);
+            }
+            android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
         }
-        android.util.Log.d("GeoDebug", "Saving geolocationEnabled = " + newEvent.getGeolocationEnabled());
 
-    }
 
-    private void updateExistingEvent(Database db, Image_datamap imageInfo, Integer capacity, Float price) {
-        selectedEvent.setTitle(title);
-        selectedEvent.setDescription(description);
-        selectedEvent.setLocation(location);
-        selectedEvent.setCapacity(capacity);
-        selectedEvent.setPrice(price);
-        selectedEvent.setDate_open(registrationOpenDate);
-        selectedEvent.setDate_close(registrationCloseDate);
-        selectedEvent.setEventStartAt(eventStartDate);
-        selectedEvent.setEventEndAt(eventEndDate);
+    private void updateExistingEvent(Database db,Event selectedEvent ,Image_datamap imageInfo, Integer capacity, Float price) {
         if (imageInfo != null) {
             selectedEvent.setImageInfo(imageInfo);
             selectedEvent.setPosterImageUrl(imageInfo.getUrl());
         }
-
         db.updateEvent(selectedEvent).addOnSuccessListener(success -> {
             if (success) {
                 Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
@@ -344,7 +335,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         });
     }
 
-    private void createNewEvent(Database db,Event newEvent , Uri ImageUri) {
+    public void createNewEvent(Database db,Event newEvent , Uri ImageUri) {
         db.addEvent(newEvent).addOnSuccessListener(success -> {
             if (success) {
                 if (ImageUri != null) {
@@ -372,7 +363,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
         });
     }
 
-    private void navigateBack() {
+    public void navigateBack() {
         if (getView() != null) {
             NavHostFragment.findNavController(this).popBackStack();
         }
@@ -415,5 +406,4 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
 
     }
 
-
-}
+    }

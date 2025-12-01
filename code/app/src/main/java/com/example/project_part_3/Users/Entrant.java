@@ -6,7 +6,6 @@ import java.util.List;
 public class Entrant extends User {
      private List<String> eventsAppliedFor; // the IDs of events the user has applied for
      private ArrayList<String> interests;// the interests of an entrant
-     List<String> eventsAppliedFor;
 
     public Entrant() {
         super();

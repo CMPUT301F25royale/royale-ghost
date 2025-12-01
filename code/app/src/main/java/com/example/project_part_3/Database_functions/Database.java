@@ -107,13 +107,7 @@ public class Database {
         });
     }
 
-    /**
-     * Check if a user exists in the database.
-     *
-     * @param email The email of the user to check.
-     * @param password The password of the user to check.
-     * @return A task that completes when the user is checked.
-     */
+
     public Task<Boolean> addInterest(String email, String newInterest) {
         return db.collection(USERS_COLLECTION)
                 .document(email)
@@ -155,6 +149,13 @@ public class Database {
                     return true;
                 });
     }
+    /**
+     * Check if a user exists in the database.
+     *
+     * @param email The email of the user to check.
+     * @param password The password of the user to check.
+     * @return A task that completes when the user is checked.
+     */
 
     public Task<User> checkUser(String email, String password) {
         return fetchUser(email).continueWith(task -> {
