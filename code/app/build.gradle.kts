@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.camera.view)
     implementation(libs.identity.jvm)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
