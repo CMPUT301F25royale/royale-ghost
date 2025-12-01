@@ -17,7 +17,6 @@
     <fragment
         android:id="@+id/entrant_main_view"
         android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_event.Entrant_event_view"
-        android:label="fragment_blank"
         tools:layout="@layout/entrant_main">
         <argument
             android:name="userEmail"
@@ -26,7 +25,6 @@
     <fragment
         android:id="@+id/entrant_search"
         android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_search.Entrant_search_view"
-        android:label="fragment_blank"
         tools:layout="@layout/entrant_search" >
         <argument
             android:name="userEmail"
@@ -35,7 +33,6 @@
     <fragment
         android:id="@+id/entrant_qr"
         android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_qrscan.Entrant_qrscan_view"
-        android:label="fragment_blank"
         tools:layout="@layout/entrant_scan" >
             <argument
                 android:name="userEmail"
@@ -56,7 +53,6 @@
     <fragment
         android:id="@+id/entrant_event_detail"
         android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_event.EntrantEventDetailFragment"
-        android:label="Event details"
         tools:layout="@layout/fragment_entrant_event_detail">
 
         <argument android:name="title" app:argType="string" />
@@ -64,4 +60,8 @@
         <argument android:name="userEmail" app:argType="string" />
         <!-- (optional) userEmail if you want to pass identity here instead of reading a session -->
     </fragment>
+    <fragment
+        android:id="@+id/entrant_notification"
+        android:name="com.example.project_part_3.Users.Entrant_UI.Entrant_Notification.Entrant_notification_view"
+        tools:layout="@layout/entrant_notification"/>
 </navigation>

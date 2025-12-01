@@ -9,6 +9,7 @@
         android:id="@+id/image_general"
         android:layout_width="317dp"
         android:layout_height="152dp"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"

@@ -13,9 +13,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.EventDatabase;
+import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,11 +56,11 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         int viewType = getItemViewType(position);
         Object item = getItem(position);
 
-        if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            if (viewType == TYPE_EVENT) {
-                convertView = inflater.inflate(R.layout.admin_search_element, parent, false);
-                EventViewHolder eventHolder = new EventViewHolder();
+        if (viewType == TYPE_EVENT) {
+            EventViewHolder eventHolder;
+            if (convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(R.layout.admin_search_element, parent, false);
+                eventHolder = new EventViewHolder();
                 eventHolder.eventImage = convertView.findViewById(R.id.image_for_events);
                 eventHolder.eventTitle = convertView.findViewById(R.id.admin_profiles_name);
                 eventHolder.eventLocation = convertView.findViewById(R.id.admin_profiles_email);
@@ -66,14 +69,23 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
                 eventHolder.eventDetail = convertView.findViewById(R.id.admin_search_detail_button);
                 eventHolder.eventDelete = convertView.findViewById(R.id.admin_search_delete_event_button);
                 convertView.setTag(eventHolder);
-            } else { // TYPE_IMAGE
-                convertView = inflater.inflate(R.layout.admin_search_image, parent, false);
-                ImageViewHolder imageHolder = new ImageViewHolder();
-                imageHolder.imageView = convertView.findViewById(R.id.image_general);
-                imageHolder.description = convertView.findViewById(R.id.image_description);
-                imageHolder.deleteButton = convertView.findViewById(R.id.image_delete_button);
-                convertView.setTag(imageHolder);
+            } else { // TYPE_EVENT
+                eventHolder = (EventViewHolder) convertView.getTag();
             }
+            bindEventView(eventHolder, (Event) item);
+        } else{
+            ImageViewHolder imageHolder;
+            if (convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(R.layout.admin_search_element, parent, false);
+                imageHolder = new ImageViewHolder();
+                imageHolder.imageView = convertView.findViewById(R.id.image_for_events);
+                imageHolder.description = convertView.findViewById(R.id.admin_profiles_name);
+                imageHolder.deleteButton = convertView.findViewById(R.id.admin_search_delete_event_button);
+                convertView.setTag(imageHolder);
+            } else { // TYPE_IMAGE
+                imageHolder = (ImageViewHolder) convertView.getTag();
+            }
+            bindImageView(imageHolder, (Image_datamap) item);
         }
 
         if (viewType == TYPE_EVENT) {
@@ -81,7 +93,7 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             bindEventView(holder, (Event) item);
         } else {
             ImageViewHolder holder = (ImageViewHolder) convertView.getTag();
-            bindImageView(holder, (Image_holder) item);
+            bindImageView(holder, (Image_datamap) item);
         }
 
         return convertView;
@@ -89,7 +101,6 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
 
     private void bindEventView(EventViewHolder holder, Event event) {
         if (event == null) return;
-        // UI binding logic remains the same...
         holder.eventTitle.setText(event.getTitle());
         holder.eventLocation.setText(event.getLocation());
 
@@ -99,10 +110,15 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         }
         holder.eventAttendees.setText("Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity());
 
-        if (event.getPoster() != null) {
-            holder.eventImage.setImageBitmap(event.getPoster());
+        if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
+            Glide.with(context)
+                    .load(event.getImageInfo().getUrl())
+                    .placeholder(android.R.drawable.ic_menu_report_image) // Use a consistent placeholder
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(holder.eventImage);
         } else {
-            holder.eventImage.setImageResource(android.R.drawable.ic_menu_myplaces);
+            Glide.with(context).clear(holder.eventImage);
+            holder.eventImage.setImageResource(android.R.drawable.ic_menu_report_image); // Set a default
         }
 
         holder.eventDetail.setOnClickListener(v -> {
@@ -129,15 +145,33 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         });
     }
 
-    private void bindImageView(ImageViewHolder holder, Image_holder image) {
+    private void bindImageView(ImageViewHolder holder, Image_datamap image) {
         if (image == null) return;
-        holder.imageView.setImageBitmap(image.getImage());
         holder.description.setText(image.getDescription());
+        if (image.getUrl() != null && !image.getUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(image.getUrl())
+                    .placeholder(android.R.drawable.ic_menu_report_image)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(holder.imageView);
+        } else {
+            Glide.with(context).clear(holder.imageView);
+            holder.imageView.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
 
         holder.deleteButton.setOnClickListener(v -> {
-            viewModel.deleteImage(image);
-            Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
-        });
+            viewModel.deleteImage(image, new ImageDatabase.OnImageDeleteListener() {
+                @Override
+                public void onSuccess() {
+                    Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Toast.makeText(context, "Failed to delete image: " + errorMessage, Toast.LENGTH_LONG).show();
+                    Log.e("Adapter", "Failed to delete image: " + errorMessage);
+                }
+            });});
     }
 
     private static class EventViewHolder {

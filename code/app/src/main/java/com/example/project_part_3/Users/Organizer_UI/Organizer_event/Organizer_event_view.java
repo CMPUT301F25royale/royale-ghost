@@ -86,7 +86,10 @@ public class Organizer_event_view extends Fragment {
 
                     @Override
                     public void onQrClick(Event event) {
-                        //TODO: implement
+                        model.setSelectedEvent(event);
+
+                        NavController navController = NavHostFragment.findNavController(Organizer_event_view.this);
+                        navController.navigate(R.id.action_organizerEventsFragment_to_organizer_event_qrcode_view);
                     }
                 });
                 eventList.setAdapter(adapter);

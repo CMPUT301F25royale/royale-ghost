@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -115,8 +116,8 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         title.setText(event.getTitle());
         organizer.setText(nonEmpty(event.getOrganizerId(), "—"));
 
-        if (event.getPoster() != null) {
-            poster.setImageBitmap(event.getPoster());
+        if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
+            Glide.with(this).load(event.getImageInfo().getUrl()).into(poster);
         } else {
             poster.setImageResource(android.R.drawable.ic_menu_report_image);
         }
@@ -141,9 +142,9 @@ public class Admin_event_detail_activity extends AppCompatActivity {
 
         waitlist.setText(String.valueOf(sizeSafe(event.getWaitlistUserIds())));
         // These fields are not in your Event class, but this shows how to handle them if added
-        // selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
-        // declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
-        // alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
+        selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
+        declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
+        alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
 
         description.setText(nonEmpty(event.getDescription(), "—"));
     }

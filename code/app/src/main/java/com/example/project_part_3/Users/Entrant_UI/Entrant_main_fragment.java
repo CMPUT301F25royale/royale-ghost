@@ -31,12 +31,8 @@ public class Entrant_main_fragment extends Fragment {
 
         if (getArguments() != null) {
             String email = getArguments().getString("userEmail");
-            if (email != null && !email.isEmpty()) {
-                Toast.makeText(getContext(), "Email Received: " + email, Toast.LENGTH_LONG).show();
-            }
         }
     }
-
 
     @Nullable
     @Override

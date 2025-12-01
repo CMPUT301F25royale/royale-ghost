@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -23,7 +24,19 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.location.Location;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import android.content.pm.PackageManager;
+
 public class entrant_event_detail_activity extends AppCompatActivity {
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int REQ_LOCATION = 1001;
+    private Event currentEvent;
+    private String currentViewerEmail;
 
     private ImageView poster;
     private TextView title, organizer, locationName, locationAddress, regWindow, startEnd, price, description;
@@ -37,6 +50,8 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.entrant_event_detail);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         MaterialToolbar tb = findViewById(R.id.toolbar);
         tb.setNavigationOnClickListener(v -> finish());
@@ -109,8 +124,14 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         organizer.setText(nonEmpty(event.getOrganizerId(), nonEmpty(event.getOrganizerId(), "—")));
 
         // Poster
-        if (event.getPoster() != null) {
-            poster.setImageBitmap(event.getPoster());
+        String imageUrl = event.getPosterImageUrl();
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .placeholder(android.R.drawable.ic_menu_report_image)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .into(poster);
         } else {
             poster.setImageResource(android.R.drawable.ic_menu_report_image);
         }
@@ -330,7 +351,6 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                     });
         });
     }
-
 
     private boolean isRegistrationOpen(Event e, long nowMs) {
         Date o = e.getDate_open(), c = e.getDate_close();

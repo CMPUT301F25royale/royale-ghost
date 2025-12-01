@@ -4,30 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/create_event_back_button_and_title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
         <ImageButton
             android:id="@+id/organizer_create_edit_event_back"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:padding="0dp"
-            android:src="@drawable/back_arrow"
             android:background="@null"
-            android:textSize="14sp"/>
+            android:padding="0dp"
+            android:src="@drawable/back_arrow" />
+
         <TextView
             android:id="@+id/create_event_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:text="Create Event"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_vertical"/>
+            android:textStyle="bold" />
     </LinearLayout>
-
 
     <TextView
         android:id="@+id/create_event_title_text"
@@ -45,18 +48,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:hint="Enter title"
+        app:layout_constraintBaseline_toBaselineOf="@id/create_event_title_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/create_event_title_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_back_button_and_title_container" />
+        app:layout_constraintStart_toEndOf="@+id/create_event_title_text" />
 
     <TextView
         android:id="@+id/create_event_description_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="Description:"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,19 +70,20 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:hint="Enter description"
+        app:layout_constraintBaseline_toBaselineOf="@id/create_event_description_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/create_event_description_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_title_input" />
+        app:layout_constraintStart_toEndOf="@+id/create_event_description_text" />
 
     <TextView
+        android:id="@+id/create_event_capacity_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/create_event_capacity_text"
-        android:text="Capacity: \n(Optional)"
-        android:textStyle="bold"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
+        android:text="Capacity:\n(Optional)"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/create_event_description_input" />
 
@@ -88,107 +92,76 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:hint="Enter capacity"
         android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="@id/create_event_capacity_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/create_event_capacity_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_description_input" />
+        app:layout_constraintTop_toTopOf="@id/create_event_capacity_text" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_marginTop="6dp"
-        android:gravity="bottom"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@+id/create_event_capacity_input">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/create_event_registration_text"
+            android:layout_weight="1"
             android:text="Registration:"
-            android:textStyle="bold"
-            android:layout_marginEnd="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Opens:"/>
-
+            android:textStyle="bold" />
         <Button
             android:id="@+id/create_event_registration_open_button"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="16dp"
-            android:backgroundTint="@color/black"
-            android:padding="0dp"
-            android:textSize="11sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Closes:"/>
-
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:textColor="@color/black"
+            android:text="Opens"/>
         <Button
             android:id="@+id/create_event_registration_close_button"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="16dp"
-            android:backgroundTint="@color/black"
-            android:padding="0dp"
-            android:textSize="11sp"/>
-
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:text="Closes"/>
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/create_event_date_time_container"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="6dp"
-        android:gravity="bottom"
-        app:layout_constraintStart_toStartOf="@id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
         <TextView
-            android:id="@+id/create_event_time_text"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Time:"
-            android:layout_marginEnd="62dp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Starts:" />
-
+            android:layout_weight="1"
+            android:text="Event Time:"
+            android:textStyle="bold" />
         <Button
             android:id="@+id/create_event_date_time_start_button"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="18dp"
-            android:padding="0dp"
-            android:textSize="11sp"
-            android:backgroundTint="@color/black"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="14dp"
-            android:text="Ends:"/>
-
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:text="Starts"
+            android:textColor="@color/black"
+            />
         <Button
             android:id="@+id/create_event_date_time_end_button"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="14dp"
-            android:padding="0dp"
-            android:textSize="11sp"
-            android:backgroundTint="@color/black"/>
-
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:text="Ends"
+            android:textColor="@color/black"
+            />
     </LinearLayout>
 
     <TextView
@@ -206,17 +179,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:hint="Add Address"
+        app:layout_constraintBaseline_toBaselineOf="@id/create_event_location_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/create_event_location_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_date_time_container" />
+        app:layout_constraintStart_toEndOf="@id/create_event_location_text" />
 
     <TextView
         android:id="@+id/create_event_price_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Price:\n (Optional)"
+        android:text="Price:\n(Optional)"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
@@ -225,42 +199,78 @@
         android:id="@+id/create_event_price_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
+        android:layout_marginEnd="16dp"
         android:hint="Add Amount ($)"
         android:inputType="numberDecimal"
+        app:layout_constraintBottom_toBottomOf="@id/create_event_price_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/create_event_price_text"
-        app:layout_constraintTop_toBottomOf="@+id/create_event_location_input" />
+        app:layout_constraintTop_toTopOf="@id/create_event_price_text" />
 
-    <Switch
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/create_event_geolocation_switch"
+        android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Geoloaction"
-        android:layout_margin="16dp"
+        android:checked="true"
+        app:trackTint="@color/switch_track_selector"
+        android:text="Geolocation:"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/create_event_price_text"/>
 
+    <!-- POSTER BUTTON -->
     <Button
+        android:id="@+id/create_event_poster_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/create_event_poster_button"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/black"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:text="Upload Poster Image"
+        android:backgroundTint="@color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/create_event_geolocation_switch"
-        />
+        app:layout_constraintTop_toBottomOf="@id/create_event_geolocation_switch" />
 
     <Button
-        android:layout_width="match_parent"
+        android:id="@+id/organizer_delete_event_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/my_red"
+        android:text="Delete Event"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/create_event_poster_button"
+        app:layout_constraintTop_toTopOf="@+id/create_event_poster_button" />
+
+    <Button
         android:id="@+id/create_event_publish_button"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/black"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:text="Publish"
-        app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/eventImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@+id/create_event_publish_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/create_event_poster_button"
+        tools:srcCompat="@tools:sample/avatars" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

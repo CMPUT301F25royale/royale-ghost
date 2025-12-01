@@ -7,13 +7,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
@@ -58,6 +61,7 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.seeEntrantsButton = view.findViewById(R.id.organizer_event_view_entrants_button);
             holder.editEventButton = view.findViewById(R.id.organizer_event_edit_event_button);
             holder.qrButton = view.findViewById(R.id.organizer_event_qr_button);
+            holder.eventImage = view.findViewById(R.id.organizer_event_image);
             view.setTag(holder);
         } else {
             holder = (Organizer_event_adapter.ViewHolder) view.getTag();
@@ -70,15 +74,27 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.eventLocation.setText(event.getLocation());
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
-
-            holder.eventRegistrationStatus.setText(event.registrationStatus());
+            if(event.getEventStartAt()!= null) {
+                holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
+            }
+            if(event.getEventEndAt()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getEventEndAt()));
+            }
+            if(event.getDate_close()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_close()));
+            }
+            if(event.getDate_open()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_open()));
+            }
 
             if (event.getCapacity() == null || event.getCapacity() == 0) {
                 holder.eventCapacity.setText("Capacity: None");
             } else {
                 holder.eventCapacity.setText(String.valueOf("Capacity: " + event.getCapacity()));
             }
+            // Build event capacity and attendees string
+            String eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+            holder.eventCapacity.setText(eventCapacityAndAttendees);
 
             holder.editEventButton.setOnClickListener(v -> {
                 if (listener != null) listener.onEditClick(event);
@@ -89,11 +105,31 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.qrButton.setOnClickListener(v -> {
                 if (listener != null) listener.onQrClick(event);
             });
+
+            if (event.getPosterImageUrl() != null) {
+                Glide.with(getContext()).load(event.getPosterImageUrl()).into(holder.eventImage);
+            }
         }
         return view;
     }
 
+    private String buildEntrantAndCapacityString(int numEntrants, @Nullable Integer capacity) {
+        String s = "Entrants: ";
+
+        s += Integer.toString(numEntrants);
+
+        s += " | Capacity: ";
+
+        if (capacity == null) {
+            s += "None";
+        } else {
+            s += Integer.toString(capacity);
+        }
+
+        return s;
+    }
     public static class ViewHolder {
+        ImageView eventImage;
         TextView eventName;
         TextView eventLocation;
         TextView eventDate;

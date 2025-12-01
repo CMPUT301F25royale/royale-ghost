@@ -3,6 +3,7 @@ package com.example.project_part_3.Notification;
 import com.google.firebase.Timestamp;
 
 public class Notification_Entrant {
+    private String id;
     private String title;
     private String entrantEmail;
     private String message;
@@ -10,6 +11,8 @@ public class Notification_Entrant {
     private String eventId;
     private String eventTitle;
     private String type; // "lottery_won" or "lottery_not_won"
+    private boolean read;
+
 
     // Required empty constructor for Firestore
     public Notification_Entrant() {}
@@ -28,6 +31,7 @@ public class Notification_Entrant {
         this.eventId = eventId;
         this.eventTitle = eventTitle;
         this.type = type;
+        this.read = false;
     }
 
     // Convenience constructor (matches your current usage)
@@ -36,6 +40,13 @@ public class Notification_Entrant {
                                 String message,
                                 Timestamp time_sent) {
         this(title, entrantEmail, message, time_sent, null, null, null);
+        this.read = false;
+    }
+
+    // ---- Getters ----
+
+    public String getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -66,6 +77,9 @@ public class Notification_Entrant {
         return type;
     }
 
+    public boolean isRead() { return read; }
+
+
     // ---- Setters ----
     public void setTitle(String title) {
         this.title = title;
@@ -93,5 +107,11 @@ public class Notification_Entrant {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setRead(boolean read) { this.read = read; }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

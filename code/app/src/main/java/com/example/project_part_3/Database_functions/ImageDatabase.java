@@ -1,86 +1,100 @@
 package com.example.project_part_3.Database_functions;
 
-import androidx.lifecycle.LiveData;
+import android.net.Uri;
+import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.Image_datamap;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Our Figma wasn't very descriptive but to search images we needed some string tied to Image types
- * And our CRC cards were flawed because we need to relate the concept that Images can be profile pics
- * And posters so deleting elements from the database must delete images from both the events and
- * User profiles. If an Image is of type Profile it must be deleted the moment the User
- * profile is deleted. If an Image is of type Poster it must be deleted the moment the Event
- * is deleted. This class might get retconned but we need to implement the functions within to
- * maintain the UI.
- */
 public class ImageDatabase {
 
-    private static ImageDatabase instance;
-    private ArrayList<Image_holder> database;
+    private final Database db;
+    private final MutableLiveData<List<Image_datamap>> allImages = new MutableLiveData<>();
+    private ListenerRegistration allImagesListener;
+    private ListenerRegistration singleImageListener;
 
-    private final MutableLiveData<List<Image_holder>> allImagesLiveData = new MutableLiveData<>();
-
-    public LiveData<List<Image_holder>> getAllImagesLiveData() {
-        return allImagesLiveData;
+    public interface OnImageUploadListener {
+        void onSuccess(Image_datamap metadata);
+        void onFailure(String errorMessage);
     }
 
-    private ImageDatabase(){
-        database = new ArrayList<>();
-        database.add(new Image_holder(
-                null,
-                "Profile picture of user John Doe",
-                "profile"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Official poster for the Annual Tech Conference 2025",
-                "poster"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Avatar for Jane Smith",
-                "profile"
-        , null));
-        database.add(new Image_holder(
-                null,
-                "Promotional banner for the Summer Music Festival",
-                "poster"
-        , null));
-
+    public interface OnImageDeleteListener {
+        void onSuccess();
+        void onFailure(String errorMessage);
     }
 
-    public static synchronized ImageDatabase getInstance() {
-        if (instance == null) {
-            instance = new ImageDatabase();
+    public ImageDatabase() {
+        this.db = new Database(FirebaseFirestore.getInstance());
+        listenForAllImages();
+    }
+
+
+    private void listenForAllImages() {
+        if (allImagesListener != null) {
+            allImagesListener.remove();
         }
-        return instance;
-    }
 
-    public Boolean addImage(Image_holder image){ //
-        database.add(image);
-        return true;
-    }
+        CollectionReference imagesCollection = db.getDb().collection("images");
 
-    public Boolean removeImage(Image_holder image){
-        return database.remove(image);
-    }
-
-    public Image_holder getImage(String token){
-        for (Image_holder image : database) {
-            if (image.getDescription().contains(token)) {
-                return image;
+        allImagesListener = imagesCollection.addSnapshotListener((snapshots, error) -> {
+            if (error != null) {
+                Log.e("ImageDatabase", "Listen for all images failed", error);
+                allImages.postValue(null); // Signal an error state
+                return;
             }
+            if (snapshots != null) {
+                List<Image_datamap> imageList = new ArrayList<>();
+                for (QueryDocumentSnapshot doc : snapshots) {
+                    Image_datamap metadata = doc.toObject(Image_datamap.class);
+                    imageList.add(metadata);
+                }
+                allImages.postValue(imageList);
+            } else {
+                allImages.postValue(new ArrayList<>()); // Post an empty list if snapshot is null
+            }
+        });
+    }
+
+    public MutableLiveData<List<Image_datamap>> getAllImages() {
+        return allImages;
+    }
+
+    public void deleteImage(Image_datamap image, OnImageDeleteListener listener) {
+        if (image == null || image.getId() == null || image.getPath() == null) {
+            listener.onFailure("Invalid or incomplete Image_datamap provided.");
+            return;
         }
-        return null;
+
+        db.deleteImageFromMetadata(image)
+                .addOnSuccessListener(aVoid -> listener.onSuccess())
+                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
+
     }
 
-    public ArrayList<Image_holder> getAllImages(){
-        return new ArrayList<>(database);
+    public void uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String ownerId, @Nullable String eventId, OnImageUploadListener listener) {
+        db.uploadImage(imageUri, imageType, description, ownerId, eventId)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
     }
-
+    public void cleanupListeners() {
+        if (allImagesListener != null) {
+            allImagesListener.remove();
+            allImagesListener = null;
+        }
+        if (singleImageListener != null) {
+            singleImageListener.remove();
+            singleImageListener = null;
+        }
+        Log.d("ImageDatabase", "All image listeners have been cleaned up.");
+    }
 }

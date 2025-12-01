@@ -1,8 +1,8 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_event;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+
 public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_adapter.VH> {
 
     public enum Mode { MY_EVENTS, SEARCH } // Modes to determine which UI elements to show
@@ -65,10 +67,14 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
 
         h.title.setText(e.getTitle() != null ? e.getTitle() : "—");
 
-        Bitmap bmp = e.getPoster();
-        if (bmp != null) {
-            h.img.setImageBitmap(bmp);
+        if (e.getImageInfo() != null && e.getImageInfo().getUrl() != null) {
+            Glide.with(ctx)
+                    .load(e.getImageInfo().getUrl())
+                    .placeholder(android.R.drawable.sym_def_app_icon)
+                    .error(android.R.drawable.sym_def_app_icon)
+                    .into(h.img);
         } else {
+            Glide.with(ctx).clear(h.img);
             h.img.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
@@ -91,32 +97,43 @@ public class entrant_events_adapter extends RecyclerView.Adapter<entrant_events_
             h.btnSecondary.setText("Cancel");
 
             h.btnSecondary.setOnClickListener(v -> {
-                if (e.getId() == null || e.getId().isEmpty() || currentUserEmail == null || currentUserEmail.isEmpty()) {
-                    Toast.makeText(ctx, "Missing event/user info", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                h.btnSecondary.setEnabled(false);
-                h.btnSecondary.setText("Removing...");
-
-                Database db = new Database(FirebaseFirestore.getInstance());
-                db.removeUserFromWaitlist(e.getId(), currentUserEmail)
-                        .addOnSuccessListener(ignored -> {
-                            Toast.makeText(ctx, "Removed from waitlist", Toast.LENGTH_SHORT).show();
-
-                            // Remove this item from the list immediately
-                            int idx = h.getBindingAdapterPosition();
-                            if (idx != RecyclerView.NO_POSITION) {
-                                items.remove(idx);
-                                notifyItemRemoved(idx);
+                // ADDED: Confirmation Dialog to prevent accidental removal
+                new AlertDialog.Builder(ctx)
+                        .setTitle("Leave Waitlist")
+                        .setMessage("Are you sure you want to cancel your spot in the waitlist?")
+                        .setPositiveButton("Yes, Remove", (dialog, which) -> {
+                            if (e.getId() == null || e.getId().isEmpty() || currentUserEmail == null || currentUserEmail.isEmpty()) {
+                                Toast.makeText(ctx, "Missing event/user info", Toast.LENGTH_SHORT).show();
+                                return;
                             }
+
+                            h.btnSecondary.setEnabled(false);
+                            h.btnSecondary.setText("Removing...");
+
+                            Database db = new Database(FirebaseFirestore.getInstance());
+                            db.removeUserFromWaitlist(e.getId(), currentUserEmail)
+                                    .addOnSuccessListener(ignored -> {
+                                        Toast.makeText(ctx, "Removed from waitlist", Toast.LENGTH_SHORT).show();
+
+                                        // Remove this item from the list immediately
+                                        int idx = h.getBindingAdapterPosition();
+                                        if (idx != RecyclerView.NO_POSITION) {
+                                            items.remove(idx);
+                                            notifyItemRemoved(idx);
+                                        }
+                                    })
+                                    .addOnFailureListener(err -> {
+                                        h.btnSecondary.setEnabled(true);
+                                        h.btnSecondary.setText("Cancel");
+                                        Toast.makeText(ctx, "Failed to remove: " +
+                                                (err != null ? err.getMessage() : "unknown error"), Toast.LENGTH_LONG).show();
+                                    });
                         })
-                        .addOnFailureListener(err -> {
-                            h.btnSecondary.setEnabled(true);
-                            h.btnSecondary.setText("Cancel");
-                            Toast.makeText(ctx, "Failed to remove: " +
-                                    (err != null ? err.getMessage() : "unknown error"), Toast.LENGTH_LONG).show();
-                        });
+                        .setNegativeButton("No", (dialog, which) -> {
+                            // Do nothing, event stays in list
+                            dialog.dismiss();
+                        })
+                        .show();
             });
 
         } else {
