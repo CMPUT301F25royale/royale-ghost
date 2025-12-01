@@ -35,17 +35,19 @@
     </LinearLayout>
 
     <!-- 🔹 Map showing entrant locations -->
+
+    <!-- Existing entrants list below the map -->
     <fragment
         android:id="@+id/entrant_map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/back_button_and_title_container"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="408dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toTopOf="@id/organizer_event_entrant_list"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/organizer_event_entrant_list" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back_button_and_title_container" />
 
-    <!-- Existing entrants list below the map -->
     <ListView
         android:id="@+id/organizer_event_entrant_list"
         android:layout_width="0dp"
