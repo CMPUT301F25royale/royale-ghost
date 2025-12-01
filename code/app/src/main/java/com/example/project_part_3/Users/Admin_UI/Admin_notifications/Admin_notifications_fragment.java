@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.project_part_3.Notification.Notification_Entrant;
 import com.example.project_part_3.Notification.Notification_admin_adapter;
+import com.example.project_part_3.Notification.Notification_Entrant;
 import com.example.project_part_3.R;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.EventListener;
@@ -26,7 +26,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Admin_notification_view extends Fragment {
+public class Admin_notifications_fragment extends Fragment {
 
     private static final String TAG = "AdminNotifications";
 
@@ -35,20 +35,23 @@ public class Admin_notification_view extends Fragment {
     private final List<Notification_Entrant> notifications = new ArrayList<>();
     private FirebaseFirestore db;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.admin_notifications, container, false);
+        // Reuse organizer_notifications layout
+        return inflater.inflate(R.layout.organizer_notifications, container, false);
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        listView = view.findViewById(R.id.admin_notifications_list);
+        listView = view.findViewById(R.id.organizer_notifications_list);
         db = FirebaseFirestore.getInstance();
 
         adapter = new Notification_admin_adapter(requireContext(), notifications);
@@ -58,6 +61,7 @@ public class Admin_notification_view extends Fragment {
     }
 
     private void listenForAllEntrantNotifications() {
+        // collectionGroup picks up users/{email}/notifications/* across all users
         db.collectionGroup("notifications")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -67,21 +71,25 @@ public class Admin_notification_view extends Fragment {
                         if (error != null) {
                             Log.e(TAG, "Listen failed", error);
                             if (getContext() != null) {
-                                Toast.makeText(getContext(), "Failed to load notifications", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(),
+                                        "Failed to load notifications", Toast.LENGTH_SHORT).show();
                             }
                             return;
                         }
-                        if (value == null) return;
+                        if (value == null) {
+                            return;
+                        }
 
                         notifications.clear();
 
                         for (QueryDocumentSnapshot doc : value) {
                             String title = doc.getString("title");
                             String message = doc.getString("message");
-                            String userEmail = doc.getString("userEmail");
-                            String eventId = doc.getString("eventId");
                             String eventTitle = doc.getString("eventTitle");
+                            String eventId = doc.getString("eventId");
                             String type = doc.getString("type");
+                            String userEmail = doc.getString("userEmail");
+
                             Timestamp ts = doc.getTimestamp("createdAt");
 
                             Notification_Entrant n = new Notification_Entrant(
@@ -93,13 +101,6 @@ public class Admin_notification_view extends Fragment {
                                     eventTitle,
                                     type
                             );
-
-                            // If you have isRead field in Notification_Entrant:
-                            Boolean read = doc.getBoolean("read");
-                            if (read != null) {
-                                n.setRead(read);
-                            }
-
                             notifications.add(n);
                         }
 
