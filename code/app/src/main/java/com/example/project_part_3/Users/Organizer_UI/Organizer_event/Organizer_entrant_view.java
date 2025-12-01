@@ -73,6 +73,9 @@ public class Organizer_entrant_view extends Fragment {
 
     private ActivityResultLauncher<Intent> saveCsvLauncher;
 
+    ArrayList<Pair<Entrant, String>> entrantArrayListAndStatuses;
+
+
     // 🔹 optional: keep current event reference
     private Event currentEvent;
 
@@ -129,13 +132,17 @@ public class Organizer_entrant_view extends Fragment {
             if (selectedEvent != null) {
                 this.event = selectedEvent;
                 fetchEntrants(selectedEvent);
-        model.getSelectedEvent().observe(getViewLifecycleOwner(), event -> {
-            if (event != null) {
-                currentEvent = event;              // 🔹 remember event
-                populateUI(view, event);
+                model.getSelectedEvent().observe(getViewLifecycleOwner(), event -> {
+                    if (event != null) {
+                        currentEvent = event;              // 🔹 remember event
+                        populateUI(view, event);
+                    }
+                });
             }
         });
     }
+
+
 
     public void populateUI(View view, Event event) {
         db.getAllEntrantsByEvent(event).addOnSuccessListener(entrants -> {
@@ -179,7 +186,7 @@ public class Organizer_entrant_view extends Fragment {
     }
 
     private void setUpNotifyButton(View view) {
-        Button notifyButton = view.findViewById(R.id.noify_button);
+        Button notifyButton = view.findViewById(R.id.notify_button);
         notifyButton.setOnClickListener(v -> {
             if (event == null) return;
             showNotifyPopup();

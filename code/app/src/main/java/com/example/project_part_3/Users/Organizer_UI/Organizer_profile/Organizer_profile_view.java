@@ -37,13 +37,13 @@ import com.example.project_part_3.R;
  * Fragment that displays a profile for an organizer.
  */
 public class Organizer_profile_view extends Fragment {
-    private Database db;
-    private String username;
+    protected Database db;
+    protected String username;
     private ImageView OrganizerProfileImageView;
     private Button interests;
     private MaterialSwitch notification;
     private Uri ImageUri;
-    private SharedPreferences prefs;
+    protected SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -60,10 +60,6 @@ public class Organizer_profile_view extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
-
-        // Organizers don't have interests
-        Button addInterest = view.findViewById(R.id.Add_interest_button);
-        addInterest.setVisibility(View.GONE);
 
 
         //get password
@@ -91,9 +87,9 @@ public class Organizer_profile_view extends Fragment {
      */
     protected void setupButtons(View view, TextView profileNameLabel) {
         interests = view.findViewById(R.id.Add_interest_button);
-        interests.setVisibility(View.GONE);
+        //interests.setVisibility(View.GONE);
         notification = view.findViewById(R.id.entrant_notifications_switch);
-        notification.setVisibility(View.GONE);
+        //notification.setVisibility(View.GONE);
         // Reset Password
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         if (passwordReset != null) {

@@ -1,5 +1,6 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_event;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -329,7 +330,8 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                             vConfirmed.setText(String.valueOf(confirmed + 1));
                             vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
                             vRemaining.setText(String.valueOf(Math.max(remaining - 1, 0)));
-                        } catch (NumberFormatException ignored2) {}
+                        } catch (NumberFormatException ignored2) {
+                        }
                     })
                     .addOnFailureListener(e -> {
                         acceptBtn.setEnabled(true);
@@ -345,37 +347,41 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             acceptBtn.setEnabled(false);
             declineBtn.setEnabled(false);
             declineBtn.setText("Declining…");
-                //accept and decline lottery don't exist in the database?
-                db.declineLotterySelection(event.getId(), viewerUserEmail)
-                        .addOnSuccessListener(ignored -> {
-                            Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
-
-            // changed to decline entrant
-            db.declineEntrant(event, viewerUserEmail)
+            //accept and decline lottery don't exist in the database?
+            db.declineLotterySelection(event.getId(), viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
-                            joinBtn.setVisibility(View.VISIBLE);
-                            joinBtn.setText("You declined");
-                            joinBtn.setEnabled(false);
+                        // changed to decline entrant
+                        db.declineEntrant(event, viewerUserEmail)
+                                .addOnSuccessListener(ignored2 -> {
+                                    Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
-                            // Update counts on screen
-                            try {
-                                int declined = Integer.parseInt(vDeclined.getText().toString());
-                                int selected = Integer.parseInt(vSelected.getText().toString());
-                                vDeclined.setText(String.valueOf(declined + 1));
-                                vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
-                            } catch (NumberFormatException ignored2) {}
-                        })
-                        .addOnFailureListener(e -> {
-                            acceptBtn.setEnabled(true);
-                            declineBtn.setEnabled(true);
-                            declineBtn.setText("Decline");
-                            Toast.makeText(this, "Failed to decline: " +
-                                    (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
-                        
+                                    joinBtn.setVisibility(View.VISIBLE);
+                                    joinBtn.setText("You declined");
+                                    joinBtn.setEnabled(false);
+
+                                    // Update counts on screen
+                                    try {
+                                        int declined = Integer.parseInt(vDeclined.getText().toString());
+                                        int selected = Integer.parseInt(vSelected.getText().toString());
+                                        vDeclined.setText(String.valueOf(declined + 1));
+                                        vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
+                                    } catch (NumberFormatException ignored3) {
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    acceptBtn.setEnabled(true);
+                                    declineBtn.setEnabled(true);
+                                    declineBtn.setText("Decline");
+                                    Toast.makeText(this, "Failed to decline: " +
+                                            (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+
+                                });
+                    });
         });
     }
+
 
     private boolean isRegistrationOpen(Event e, long nowMs) {
         Date o = e.getDate_open(), c = e.getDate_close();
@@ -406,6 +412,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("MissingPermission")
     private void captureAndUploadLocation(Database db, Event event, String viewerUserEmail) {
         if (event == null || !event.getGeolocationEnabled()) {
             android.util.Log.d("GeoDebug", "Geo disabled for this event, skipping.");
