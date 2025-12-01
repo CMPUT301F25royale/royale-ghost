@@ -147,7 +147,7 @@ public class Entrant_search_view extends Fragment {
         final String q = currentQuery.toLowerCase(Locale.US);
         final boolean interestsMode = interestsToggle != null && interestsToggle.isChecked();
 
-        // If no text and interests mode is off → show everything
+        // If no text and interests mode is off show everything
         if (q.isEmpty() && !interestsMode) {
             adapter.setData(allEvents);
             recycler.scrollToPosition(0);
@@ -166,7 +166,7 @@ public class Entrant_search_view extends Fragment {
 
             boolean matchesText;
             if (q.isEmpty()) {
-                // No query → don't restrict by text
+                // No query don't restrict by text
                 matchesText = true;
             } else {
                 matchesText =
@@ -178,10 +178,10 @@ public class Entrant_search_view extends Fragment {
 
             boolean matchesInterest;
             if (!interestsMode) {
-                // Chip is off → ignore interests
+                // Chip is off ignore interests
                 matchesInterest = true;
             } else if (userInterests == null || userInterests.isEmpty()) {
-                // Chip on but user has no interests → don't filter by interests
+                // Chip on but user has no interests don't filter by interests
                 matchesInterest = true;
             } else {
                 matchesInterest = false;
