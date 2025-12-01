@@ -177,17 +177,30 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                         joinBtn.setText("Enter lottery");
                         joinBtn.setEnabled(true);
                         joinBtn.setOnClickListener(v -> {
+                            // 🔹 1. If event wants geolocation and we don't have permission yet, ask for it
+                            if (event.getGeolocationEnabled() && !hasFineLocation()) {
+                                ActivityCompat.requestPermissions(
+                                        entrant_event_detail_activity.this,
+                                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                        REQ_LOCATION
+                                );
+                                // We STILL let them join immediately; logging will only work next time if they accept.
+                            }
+
                             joinBtn.setEnabled(false);
                             joinBtn.setText("Entering…");
+
                             db.addUserToWaitlistById(event.getId(), viewerUserEmail)
                                     .addOnSuccessListener(ignored -> {
                                         joinBtn.setText("Entered");
                                         Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
-                                        // Bump the waitlist count on screen... will add checks and such later.
                                         List<String> list = event.getWaitlistUserIds();
-                                        db.addEventToUser(viewerUserEmail, event.getId());//adds to array holding each event User signed up for
+                                        db.addEventToUser(viewerUserEmail, event.getId());
                                         int newCount = (list == null ? 0 : list.size()) + 1;
                                         vWaitlist.setText(String.valueOf(newCount));
+
+                                        // 🔹 2. After join succeeds, try logging location (non-blocking)
+                                        captureAndUploadLocation(db, event, viewerUserEmail);
                                     })
                                     .addOnFailureListener(e -> {
                                         joinBtn.setText("Enter lottery");
@@ -223,4 +236,49 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
         return df.format(ts);
     }
+    //permission helper
+    private boolean hasFineLocation() {
+        return ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    private void captureAndUploadLocation(Database db, Event event, String viewerUserEmail) {
+        if (event == null || !event.getGeolocationEnabled()) {
+            android.util.Log.d("GeoDebug", "Geo disabled for this event, skipping.");
+            return;
+        }
+
+        if (!hasFineLocation()) {
+            android.util.Log.d("GeoDebug", "No location permission, skipping capture.");
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(loc -> {
+                    if (loc == null) {
+                        android.util.Log.d("GeoDebug", "getLastLocation() returned null.");
+                        return;
+                    }
+
+                    double lat = Math.round(loc.getLatitude() * 1000.0) / 1000.0;
+                    double lng = Math.round(loc.getLongitude() * 1000.0) / 1000.0;
+
+                    android.util.Log.d("GeoDebug", "Got location lat=" + lat + ", lng=" + lng);
+
+                    db.saveUserLocationForEvent(event.getId(), viewerUserEmail, lat, lng)
+                            .addOnSuccessListener(unused ->
+                                    android.util.Log.d("GeoDebug", "Location saved to Firestore."))
+                            .addOnFailureListener(e ->
+                                    android.util.Log.d("GeoDebug", "Failed to save location: " +
+                                            (e != null ? e.getMessage() : "unknown")));
+                })
+                .addOnFailureListener(e ->
+                        android.util.Log.d("GeoDebug", "Location fetch failed: " +
+                                (e != null ? e.getMessage() : "unknown")));
+    }
+
+
 }

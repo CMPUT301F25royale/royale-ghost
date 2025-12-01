@@ -28,6 +28,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.google.firebase.firestore.GeoPoint;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Database class provides methods for interacting with the Firebase Firestore database. Most
  * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
@@ -494,5 +498,42 @@ public class Database {
         StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
         return photoRef.delete();
     }
+
+    /**
+     * Save or update a single entrant's location for a given event.
+     * Stored under users/{organizerId}/organized_events/{eventId}/entrant_locations/{userEmail}
+     */
+    public com.google.android.gms.tasks.Task<Void> saveUserLocationForEvent(
+            @NonNull String eventId,
+            @NonNull String userEmail,
+            double lat,
+            double lng
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("userEmail", userEmail);
+                    data.put("location", new GeoPoint(lat, lng));
+                    data.put("timestamp", FieldValue.serverTimestamp());
+
+                    return ref.collection("entrant_locations")
+                            .document(userEmail)   // one doc per entrant per event
+                            .set(data);
+                });
+    }
+    public com.google.android.gms.tasks.Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
+            @NonNull String eventId
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.collection("entrant_locations").get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) {
+                        return new ArrayList<DocumentSnapshot>();
+                    }
+                    QuerySnapshot snap = task.getResult();
+                    return new ArrayList<>(snap.getDocuments());
+                });
+    }
+
 }
 

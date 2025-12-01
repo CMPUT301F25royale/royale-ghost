@@ -58,6 +58,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 
     // ==== CameraX Stuff ====
     // Using camera2 implementation

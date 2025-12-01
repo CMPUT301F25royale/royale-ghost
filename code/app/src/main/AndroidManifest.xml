@@ -36,6 +36,9 @@
         <activity
             android:name=".Users.Admin_UI.Admin_search.Admin_event_detail_activity"
             android:parentActivityName=".Users.Admin_UI.Admin_search.Admin_search_view" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAW3GODlbuv2PC1Bv_-3v8sEldMgDK_DtQ" />
     </application>
 
 </manifest>
