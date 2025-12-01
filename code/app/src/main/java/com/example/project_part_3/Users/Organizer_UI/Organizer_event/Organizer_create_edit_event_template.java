@@ -353,7 +353,6 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                 // Assuming newEvent.getId() is populated by addEvent or constructor.
                 db.uploadImage(ImageUri, "event_poster", description, organizerEmail, newEvent.getId())
                         .addOnSuccessListener(meta -> {
-                            // 4. Update Event with URL
                             newEvent.setPosterImageUrl(meta.getUrl());
                             db.updateEvent(newEvent).addOnSuccessListener(s -> {
                                 Toast.makeText(getContext(), "Event created!", Toast.LENGTH_SHORT).show();
@@ -361,8 +360,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                             });
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Event created, but image upload failed.", Toast.LENGTH_LONG).show();
-                            navigateBack();
+                            Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
             } else {
                 Toast.makeText(getContext(), "Failed to create event.", Toast.LENGTH_SHORT).show();
