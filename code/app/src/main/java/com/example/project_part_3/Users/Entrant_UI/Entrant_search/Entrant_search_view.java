@@ -21,11 +21,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Entrant_UI.Entrant_event.Entrant_event_model;
 import com.example.project_part_3.Users.Entrant_UI.Entrant_event.entrant_events_adapter;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +45,16 @@ public class Entrant_search_view extends Fragment {
     private TextInputEditText etSearch;
     private RecyclerView recycler;
 
+    private Chip interestsToggle;
+
     private final List<Event> allEvents = new ArrayList<>();
     private String currentQuery = "";
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final long DEBOUNCE_MS = 250;
 
     private final Runnable filterRunnable = this::applyFilter;
+
+    private List<String> userInterests = new ArrayList<>();
 
     public Entrant_search_view() {}
 
@@ -71,6 +78,8 @@ public class Entrant_search_view extends Fragment {
 
         etSearch = v.findViewById(R.id.etSearch);
         recycler = v.findViewById(R.id.searchRecycler);
+        interestsToggle = v.findViewById(R.id.chipInterests);
+
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
 
@@ -88,6 +97,26 @@ public class Entrant_search_view extends Fragment {
             allEvents.clear();
             if (events != null) allEvents.addAll(events);
             applyFilter(); // Rerun query whenever the source list changes
+        });
+
+        Database db = new Database(FirebaseFirestore.getInstance());
+
+        if (currentUserEmail != null) {
+            db.getInterests(currentUserEmail)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            userInterests = new ArrayList<>(task.getResult());
+                        } else {
+                            userInterests = new ArrayList<>();
+                        }
+
+                        applyFilter();
+                    });
+        }
+
+        interestsToggle.setOnCheckedChangeListener((button, isChecked) -> {
+            handler.removeCallbacks(filterRunnable);
+            handler.post(filterRunnable);
         });
 
         // Search typing, Textwatcher fires on each keystroke
@@ -116,14 +145,17 @@ public class Entrant_search_view extends Fragment {
         if (!isAdded()) return;
 
         final String q = currentQuery.toLowerCase(Locale.US);
+        final boolean interestsMode = interestsToggle != null && interestsToggle.isChecked();
 
-        if (q.isEmpty()) {
+        // If no text and interests mode is off → show everything
+        if (q.isEmpty() && !interestsMode) {
             adapter.setData(allEvents);
             recycler.scrollToPosition(0);
             return;
         }
 
         List<Event> filtered = new ArrayList<>();
+
         for (Event e : allEvents) {
             if (e == null) continue;
 
@@ -132,14 +164,42 @@ public class Entrant_search_view extends Fragment {
             String description = safe(e.getDescription());
             String organizer = safe(e.getOrganizerId());
 
-            // We can add more searchable fields here
-            boolean matches =
-                    title.contains(q) ||
-                            location.contains(q) ||
-                            description.contains(q) ||
-                            organizer.contains(q);
+            boolean matchesText;
+            if (q.isEmpty()) {
+                // No query → don't restrict by text
+                matchesText = true;
+            } else {
+                matchesText =
+                        title.contains(q) ||
+                                location.contains(q) ||
+                                description.contains(q) ||
+                                organizer.contains(q);
+            }
 
-            if (matches) filtered.add(e);
+            boolean matchesInterest;
+            if (!interestsMode) {
+                // Chip is off → ignore interests
+                matchesInterest = true;
+            } else if (userInterests == null || userInterests.isEmpty()) {
+                // Chip on but user has no interests → don't filter by interests
+                matchesInterest = true;
+            } else {
+                matchesInterest = false;
+                for (String interest : userInterests) {
+                    String term = safe(interest);
+                    if (term.isEmpty()) continue;
+
+                    // Match interest in description OR title
+                    if (description.contains(term) || title.contains(term)) {
+                        matchesInterest = true;
+                        break;
+                    }
+                }
+            }
+
+            if (matchesText && matchesInterest) {
+                filtered.add(e);
+            }
         }
 
         adapter.setData(filtered);
