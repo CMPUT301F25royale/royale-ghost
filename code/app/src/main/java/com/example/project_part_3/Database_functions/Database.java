@@ -843,11 +843,16 @@ public class Database {
             return Tasks.forException(new IllegalArgumentException("Invalid image type or missing eventId for poster."));
         }
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(urlField, metadata != null ? metadata.getUrl() : null);
-        updates.put(infoField, metadata);
-
-        return docRef.update(updates);
+        if (metadata != null) {
+            return docRef.update(
+                    urlField, metadata.getUrl(),
+                    infoField, metadata  );
+        } else {
+            return docRef.update(
+                    urlField, null,
+                    infoField, null
+            );
+        }
     }
 
 
