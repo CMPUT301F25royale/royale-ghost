@@ -23,11 +23,15 @@ import com.example.project_part_3.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import com.example.project_part_3.Events.Event;
+import com.example.project_part_3.Image.Image_holder;
 
 /**
- * Custom ArrayAdapter capable of displaying and managing both {@link Event} and {@link Image_holder}
- * objects in the Admin Search interface
+ * Custom ArrayAdapter capable of displaying and managing both
+ * {@link com.example.project_part_3.Events.Event} and
+ * {@link com.example.project_part_3.Image.Image_holder}.
  */
+
 public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
     private final Context context;
     private final Admin_search_model viewModel; // Use ViewModel instead of direct DB
