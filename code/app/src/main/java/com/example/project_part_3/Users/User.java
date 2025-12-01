@@ -2,16 +2,9 @@ package com.example.project_part_3.Users;
 
 import java.io.Serializable;
 
-import com.example.project_part_3.Image.ImageMetadata;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.project_part_3.Image.Image_datamap;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import android.util.Log;
 
 /**
  * Represents a user in the system.
@@ -25,7 +18,7 @@ public class User implements Serializable {
     private String phone; // optional
     private String userType;
     private String profilePicUrl;
-    private ImageMetadata imageInfo;
+    private Image_datamap imageInfo;
     private HashSet<String> deviceIDs;
 
 
@@ -65,11 +58,11 @@ public class User implements Serializable {
     public String getName() {
         return name;
     }
-    public ImageMetadata getImageInfo() {
+    public Image_datamap getImageInfo() {
         return imageInfo;
     }
 
-    public void setImageInfo(ImageMetadata imageInfo) {
+    public void setImageInfo(Image_datamap imageInfo) {
         this.imageInfo = imageInfo;
     }
 

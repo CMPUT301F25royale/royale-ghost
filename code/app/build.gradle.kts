@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.camera.view)
     implementation(libs.identity.jvm)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.firebase.messaging)

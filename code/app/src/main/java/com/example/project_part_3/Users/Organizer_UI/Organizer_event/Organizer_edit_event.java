@@ -17,6 +17,7 @@ import com.example.project_part_3.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * Concrete fragment for editing an existing event in the Organizer UI.
@@ -26,19 +27,18 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
     protected void populateFields(Event event) {
-        // set up delete button
-        Button deleteEventButton = getView().findViewById(R.id.organizer_delete_event_button);
-        deleteEventButton.setVisibility(View.VISIBLE);
-        deleteEventButton.setOnClickListener(l -> {
-            handleEventDelete(event);
-        });
-
-
-        // if views weren't found, don't try to set them
         if (titleEditText == null || event == null || getView() == null) return;
 
+        Button deleteEventButton = getView().findViewById(R.id.organizer_delete_event_button);
+        if (deleteEventButton != null) {
+            deleteEventButton.setVisibility(View.VISIBLE);
+            deleteEventButton.setOnClickListener(l -> handleEventDelete(event));
+        }
+
         TextView pageName = getView().findViewById(R.id.create_event_title);
-        pageName.setText(String.format("Editing: %s", event.getTitle()));
+        if (pageName != null) {
+            pageName.setText(String.format("Editing: %s", event.getTitle()));
+        }
 
         titleEditText.setText(event.getTitle());
         descriptionEditText.setText(event.getDescription());
@@ -60,6 +60,11 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
             if (closeDateButton != null) {
                 closeDateButton.setText(sdf.format(event.getDate_close()));
             }
+        }
+
+        if (registrationCloseDate != null && registrationCloseDate.before(Calendar.getInstance().getTime())) {
+            openDateButton.setEnabled(false);
+            closeDateButton.setEnabled(false);
         }
 
         if (event.getEventStartAt() != null) {
@@ -86,16 +91,17 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
         if (event.getPosterImageUrl() != null) {
             imageURL = event.getPosterImageUrl();
-            EventImageView.setVisibility(View.VISIBLE);
-            Glide.with(requireContext())
-                    .load(event.getPosterImageUrl())
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .into(EventImageView);
-
-            if (geolocationSwitch != null) {
-                geolocationSwitch.setChecked(event.getGeolocationEnabled());
+            if (EventImageView != null) {
+                EventImageView.setVisibility(View.VISIBLE);
+                Glide.with(requireContext())
+                        .load(event.getPosterImageUrl())
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(EventImageView);
             }
+        }
+        if (geolocationSwitch != null) {
+            geolocationSwitch.setChecked(event.getGeolocationEnabled());
         }
     }
     private void handleEventDelete(Event event) {
@@ -103,8 +109,10 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         db.deleteEvent(event).addOnSuccessListener(success -> {
             if (success) {
                 Toast.makeText(getContext(), "Event deleted successfully!", Toast.LENGTH_SHORT).show();
-                NavController navBack = NavHostFragment.findNavController(this);
-                navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
+                if (getView() != null) {
+                    NavController navBack = NavHostFragment.findNavController(this);
+                    navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
+                }
             } else {
                 Toast.makeText(getContext(), "Failed to delete event.", Toast.LENGTH_SHORT).show();
             }
@@ -113,7 +121,6 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
 
     @Override
     public void setupDateButtons(@NonNull View view) {
-        // Use the helper from the parent class to enable Date + Time picking
         setupDateTimePicker(openDateButton, date -> registrationOpenDate = date);
         setupDateTimePicker(closeDateButton, date -> registrationCloseDate = date);
         setupDateTimePicker(startDateButton, date -> eventStartDate = date);
@@ -123,10 +130,12 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
     @Override
     protected void setupBackButton(@NonNull View view) {
         ImageButton back = view.findViewById(R.id.organizer_create_edit_event_back);
-        back.setOnClickListener(v -> {
-            NavController navBack = NavHostFragment.findNavController(this);
-            navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
-        });
+        if (back != null) {
+            back.setOnClickListener(v -> {
+                NavController navBack = NavHostFragment.findNavController(this);
+                navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
+            });
+        }
     }
 
     //TODO: KANAJENIJNFI
