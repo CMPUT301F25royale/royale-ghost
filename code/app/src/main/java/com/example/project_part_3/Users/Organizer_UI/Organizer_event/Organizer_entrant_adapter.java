@@ -86,7 +86,7 @@ public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String
             // Handle Decline Button
             if (holder.declineButton != null) {
                 // Only show decline button if status is Pending
-                if ("Declined".equalsIgnoreCase(status)) {
+                if (!"Pending".equalsIgnoreCase(status)) {
                     holder.declineButton.setVisibility(View.GONE);
                 } else {
                     holder.declineButton.setVisibility(View.VISIBLE);
