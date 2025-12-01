@@ -84,15 +84,16 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
                 holder.date.setText("");
             }
 
-            if (notif.isRead() || !notif.getType().equals("lottery_won")) {
+            // FIXED LINE: Put the string first to prevent NullPointerException
+            if (notif.isRead() || !"lottery_won".equals(notif.getType())) {
                 // HIDE BUTTONS
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
 
-                // HIDE OVERLAY (Always hide it here to clean up recycled views)
+                // HIDE OVERLAY
                 holder.overlay.setVisibility(View.GONE);
             } else {
-                // SHOW BUTTONS & OVERLAY (It is unread AND lottery_won)
+                // SHOW BUTTONS & OVERLAY
                 holder.acceptButton.setVisibility(View.VISIBLE);
                 holder.declineButton.setVisibility(View.VISIBLE);
                 holder.overlay.setVisibility(View.VISIBLE);
