@@ -293,7 +293,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             declineBtn.setEnabled(false);
             acceptBtn.setText("Accepting…");
 
-            db.acceptLotterySelection(event.getId(), viewerUserEmail)
+            db.acceptEntrant(event, viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You’ve confirmed your spot", Toast.LENGTH_SHORT).show();
 
@@ -331,7 +331,8 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             declineBtn.setEnabled(false);
             declineBtn.setText("Declining…");
 
-            db.declineLotterySelection(event.getId(), viewerUserEmail)
+            // changed to decline entrant
+            db.declineEntrant(event, viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 

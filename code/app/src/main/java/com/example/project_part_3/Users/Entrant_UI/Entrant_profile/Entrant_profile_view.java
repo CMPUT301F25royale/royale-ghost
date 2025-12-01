@@ -1,13 +1,9 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_profile;
 
-import static java.security.AccessController.getContext;
-
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,45 +14,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Switch;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.example.project_part_3.Database_functions.Database;
-import com.example.project_part_3.MainActivity;
-import com.example.project_part_3.Users.Entrant;
-import com.example.project_part_3.Users.Organizer;
-import com.google.firebase.Firebase;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.fragment.app.Fragment;
+
+import com.example.project_part_3.MainActivity;
+import com.example.project_part_3.R;
+import com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-import com.example.project_part_3.R;
-import com.example.project_part_3.Users.Organizer_UI.Organizer_profile.Organizer_profile_view;
+public class Entrant_profile_view extends Organizer_profile_view {
 
+    private ArrayList<String> interests = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
 
-/**
- * Fragment responsible for displaying the currently logged-in entrant's profile.
- */
-public class Entrant_profile_view extends Fragment{
-
-    ArrayList<String> interests = new ArrayList<>();
-    ArrayAdapter<String> adapter;
-    private Database db;
-    private String username;
-    private ImageView profileImageView;
-    private Uri ImageUri;
-    private String name;
+    private interface InterestDialogCallback {
+        void onInputSubmitted(String input);
+    }
 
     @Nullable
     @Override
@@ -65,306 +44,101 @@ public class Entrant_profile_view extends Fragment{
     }
 
     @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        db = new Database(FirebaseFirestore.getInstance());
-
-        SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        String updateInterestEmail = prefs.getString("username", "");
-        username = prefs.getString("username", "");
-
-        profileImageView = view.findViewById(R.id.profile_photo);
-
-        loadProfileImage();
-
-        profileImageView.setOnClickListener(v -> showImagePopup());
-
-        // change text at top so that it displays the user's name
-        TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
-            name = user.getName();
-            profileName.setText("Profile: " + user.getName());
-        });
-
-        // add interest
-        ListView listOfInterests = view.findViewById(R.id.InterestsListView);
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, interests);
-        listOfInterests.setAdapter(adapter);
-
-        db.getInterests(updateInterestEmail)
-                .addOnSuccessListener(list -> {
-                    interests.clear();
-                    interests.addAll(list);
-                    adapter.notifyDataSetChanged();
-                });
-
-        Button addInterest = view.findViewById(R.id.Add_interest_button);
-        addInterest.setOnClickListener(v -> {
-            InterestDialog((input) -> {
-                if (input == null || input.isEmpty()) return;
-                String username = prefs.getString("username", "");
-                db.addInterest(username, input)
-                        .addOnSuccessListener(result -> {
-                            Toast.makeText(getActivity(), "Interest added!", Toast.LENGTH_SHORT).show();
-                            interests.add(input);
-                            adapter.notifyDataSetChanged();
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(getActivity(), "Failed to add interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-            });
-        });
-
-        // reset password
-        Button passwordReset = view.findViewById(R.id.Pass_Reset);
-        passwordReset.setOnClickListener(v -> {
-            InputDialog((old, _new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if (user.getPassword().equals(old)) {
-                        user.setPassword(_new);
-                        db.setUser(user);
-                    } else {
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("password", _new);
-                editor.apply();
-            });
-        });
-
-        // reset Name
-        Button nameRest = view.findViewById(R.id.name_change);
-        nameRest.setOnClickListener(v -> {
-            InputDialog((old, _new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if (user.getName().equals(old)) {
-                        user.setName(_new);
-                        db.setUser(user);
-                        profileName.setText(_new);
-                    } else {
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            });
-        });
-
-        // reset phone
-        Button phone = view.findViewById(R.id.number_Change);
-        phone.setOnClickListener(v -> {
-            InputDialog((old, _new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if (user.getPhone().equals(old)) {
-                        user.setPhone(_new);
-                        db.setUser(user);
-                    } else {
-                        Toast.makeText(getActivity(), "Incorrect info given!!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            });
-        });
-
-        // reset email
-        Button emailReset = view.findViewById(R.id.change_email);
-        emailReset.setOnClickListener(v -> {
-            InputDialog((old, _new) -> {
-                String username = prefs.getString("username", "");
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    String name = user.getName();
-                    String password = user.getPassword();
-                    String number = user.getPhone();
-                    db.deleteUser(username);
-                    Organizer new_user = new Organizer(name, password, _new, number);
-                    db.addUser(new_user);
-
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("username", _new);
-                    editor.apply();
-                });
-            });
-        });
-
-        // delete user
-        Button delete = view.findViewById(R.id.delete_user_button);
-        delete.setOnClickListener(v -> {
-            String username = prefs.getString("username", "");
-            db.fetchUser(username).addOnSuccessListener(user -> {
-                db.deleteUser(username);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.clear();
-                editor.apply();
-                Toast.makeText(getActivity(), "Have a nice day!", Toast.LENGTH_LONG).show();
-
-                Intent intent = new Intent(requireActivity(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-
-                requireActivity().finish();
-            });
-        });
-
-        Button logoutButton = view.findViewById(R.id.entrant_logout_button);
-            if (logoutButton != null) {
-                logoutButton.setOnClickListener(v -> {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.clear();
-                        editor.apply();
-
-                        // Show a confirmation message
-                        Toast.makeText(getActivity(), "You have been logged out.", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(requireActivity(), MainActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                if (getActivity() != null) {
-                    getActivity().finish();
-                }
-            });
-        }
-
-        SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
-        boolean localPref = prefs.getBoolean("receiveNotifications", true);
-        notificationsSwitch.setChecked(localPref);
-        notificationsSwitch.setEnabled(false);
-
-        TextView interestsTitle = view.findViewById(R.id.Interests);
-        interestsTitle.setVisibility(View.VISIBLE);
-
-        listOfInterests.setOnItemClickListener((parent, view1, position, id) -> {
-            String username = prefs.getString("username", "");
-            String choice = adapter.getItem(position);
-            db.deleteInterest(username, choice)
-                    .addOnSuccessListener(result -> {
-                        Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
-                        interests.remove(position);
-                        adapter.notifyDataSetChanged();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getActivity(), "Failed to delete interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        });
-
-
-        listOfInterests.setVisibility(View.VISIBLE);
-
-        if (username == null || username.isEmpty()) {
-            notificationsSwitch.setEnabled(false);
-        } else {
-            FirebaseFirestore ff = FirebaseFirestore.getInstance();
-            ff.collection("users")
-                    .document(username)
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        Boolean remotePref = doc.getBoolean("receiveNotifications");
-                        boolean remoteValue = (remotePref == null) ? true : remotePref;
-
-                        if (remoteValue != localPref) {
-                            notificationsSwitch.setChecked(remoteValue);
-
-                            SharedPreferences.Editor editor = prefs.edit();
-                            editor.putBoolean("receiveNotifications", remoteValue);
-                            editor.apply();
-                        }
-
-                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
-                        notificationsSwitch.setEnabled(true);
-                    })
-                    .addOnFailureListener(e -> {
-                        attachNotificationListener(notificationsSwitch, ff, username, prefs);
-                        notificationsSwitch.setEnabled(true);
-                    });
-        }
-        listOfInterests.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String username = prefs.getString("username", "");
-                    String choice = adapter.getItem(position);
-                    db.deleteInterest(username, choice)
-                            .addOnSuccessListener(result -> {
-                                Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
-                                interests.remove(position);
-                                adapter.notifyDataSetChanged();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(getActivity(), "Failed to delete interest: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
-            }
-        });
-
+        // Now add Entrant-specific logic (Interests & Notification Switch)
+        setupEntrantSpecifics(view);
     }
 
-    private void attachNotificationListener (SwitchCompat notificationsSwitch, FirebaseFirestore ff, String username, SharedPreferences prefs){
+    private void setupEntrantSpecifics(View view) {
+        SwitchCompat notificationsSwitch = view.findViewById(R.id.entrant_notifications_switch);
+        boolean localPref = prefs.getBoolean("receiveNotifications", true);
+
+        if (notificationsSwitch != null) {
+            notificationsSwitch.setChecked(localPref);
+            FirebaseFirestore ff = FirebaseFirestore.getInstance();
+            ff.collection("users").document(username).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            Boolean remotePref = doc.getBoolean("receiveNotifications");
+                            boolean remoteValue = (remotePref == null) ? true : remotePref;
+                            if (remoteValue != localPref) {
+                                notificationsSwitch.setChecked(remoteValue);
+                                prefs.edit().putBoolean("receiveNotifications", remoteValue).apply();
+                            }
+                        }
+                        attachNotificationListener(notificationsSwitch, ff);
+                    })
+                    .addOnFailureListener(e -> attachNotificationListener(notificationsSwitch, ff));
+        }
+
+        ListView listOfInterests = view.findViewById(R.id.InterestsListView);
+        TextView interestsTitle = view.findViewById(R.id.Interests);
+        Button addInterest = view.findViewById(R.id.Add_interest_button);
+
+        if (listOfInterests != null) {
+            if (interestsTitle != null) interestsTitle.setVisibility(View.VISIBLE);
+
+            adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, interests);
+            listOfInterests.setAdapter(adapter);
+
+            // Load Interests
+            db.getInterests(username).addOnSuccessListener(list -> {
+                interests.clear();
+                interests.addAll(list);
+                adapter.notifyDataSetChanged();
+            });
+
+            // Delete Interest on Click
+            listOfInterests.setOnItemClickListener((parent, view1, position, id) -> {
+                String choice = adapter.getItem(position);
+                db.deleteInterest(username, choice).addOnSuccessListener(result -> {
+                    Toast.makeText(getActivity(), "Interest deleted!", Toast.LENGTH_SHORT).show();
+                    interests.remove(position);
+                    adapter.notifyDataSetChanged();
+                });
+            });
+        }
+
+        // Add Interest Button
+        if (addInterest != null) {
+            addInterest.setOnClickListener(v -> {
+                InterestDialog((input) -> {
+                    if (input == null || input.isEmpty()) return;
+                    db.addInterest(username, input).addOnSuccessListener(result -> {
+                        Toast.makeText(getActivity(), "Interest added!", Toast.LENGTH_SHORT).show();
+                        interests.add(input);
+                        adapter.notifyDataSetChanged();
+                    });
+                });
+            });
+        }
+    }
+
+    private void attachNotificationListener(SwitchCompat notificationsSwitch, FirebaseFirestore ff) {
         notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Update Firestore
             ff.collection("users")
                     .document(username)
                     .update("receiveNotifications", isChecked)
                     .addOnSuccessListener(unused -> {
-                        // Also update local SharedPreferences so next load is instant
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("receiveNotifications", isChecked);
-                        editor.apply();
+                        prefs.edit().putBoolean("receiveNotifications", isChecked).apply();
                     })
                     .addOnFailureListener(e -> {
-                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
-                        android.widget.Toast.makeText(getContext(),
-                                "Failed to update notification setting",
-                                android.widget.Toast.LENGTH_SHORT).show();// revert UI if update failed
-                                buttonView.setChecked(!isChecked);
-                            });
-                });
-    }
-
-    public void loadProfileImage() {
-        if (username != null && !username.isEmpty()) {
-            db.fetchUser(username).addOnSuccessListener(user -> {
-                if (user != null && user.getProfilePicUrl() != null) {
-                    Glide.with(requireContext())
-                            .load(user.getProfilePicUrl())
-                            .placeholder(android.R.drawable.sym_def_app_icon)
-                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
-                            .dontAnimate()
-                            .into(profileImageView);
-                }
-            }).addOnFailureListener(e -> {
-                Log.e("EntrantProfile", "Failed to load profile image.", e);
-            });
-        }
-    }
-
-    public void InputDialog(InputDialogCallback callback) {
-        LayoutInflater inflator = LayoutInflater.from(requireContext());
-        View dialogView = inflator.inflate(R.layout.profile_popup, null);
-
-        EditText old = dialogView.findViewById(R.id.oldpass);
-        EditText _new = dialogView.findViewById(R.id.newpass);
-
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle("Enter Old value and New Value")
-                .setView(dialogView)
-                .setPositiveButton("OK", (d, which) -> {
-                    String oldtext = old.getText().toString().trim();
-                    String newtext = _new.getText().toString().trim();
-                    callback.onInputSubmitted(oldtext, newtext);
-                })
-                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
-                .create();
-
-        dialog.show();
+                        Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
+                        Toast.makeText(getContext(), "Failed to update setting", Toast.LENGTH_SHORT).show();
+                        // Revert switch visually without triggering listener again (simplified)
+                        buttonView.setChecked(!isChecked);
+                    });
+        });
     }
 
     private void InterestDialog(InterestDialogCallback callback) {
         LayoutInflater inflator = LayoutInflater.from(requireContext());
         View dialogView = inflator.inflate(R.layout.interest_add, null);
-
         EditText interest = dialogView.findViewById(R.id.interest_add_text);
 
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Enter Interest")
                 .setView(dialogView)
                 .setPositiveButton("OK", (d, which) -> {
@@ -372,86 +146,6 @@ public class Entrant_profile_view extends Fragment{
                     callback.onInputSubmitted(input);
                 })
                 .setNegativeButton("Cancel", (d, which) -> d.dismiss())
-                .create();
-
-        dialog.show();
-    }
-
-    protected void showImagePopup() {
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        View dialogView = inflater.inflate(R.layout.image_popup, null);
-
-        ImageView popupImagePreview = dialogView.findViewById(R.id.popup_image_preview);
-        Button changeImageButton = dialogView.findViewById(R.id.popup_change_image_button);
-
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .create();
-
-        Glide.with(requireContext())
-                .load(profileImageView.getDrawable())
-                .into(popupImagePreview);
-
-        changeImageButton.setOnClickListener(v -> {
-            galleryLauncher.launch("image/*");
-            dialog.dismiss();
-        });
-    }
-
-//    private void attachNotificationListener(SwitchCompat notificationsSwitch,
-//                                            FirebaseFirestore ff,
-//                                            String username,
-//                                            SharedPreferences prefs) {
-//        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//            ff.collection("users")
-//                    .document(username)
-//                    .update("receiveNotifications", isChecked)
-//                    .addOnSuccessListener(unused -> {
-//                        SharedPreferences.Editor editor = prefs.edit();
-//                        editor.putBoolean("receiveNotifications", isChecked);
-//                        editor.apply();
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        android.util.Log.e("EntrantProfile", "Failed to update receiveNotifications", e);
-//                        Toast.makeText(getContext(),
-//                                "Failed to update notification setting",
-//                                Toast.LENGTH_SHORT).show();
-//                        buttonView.setChecked(!isChecked);
-//                    });
-//        });
-//
-//        dialog.show();
-//    }
-
-    private final ActivityResultLauncher<String> galleryLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    ImageUri = uri;
-                    uploadProfilePicture();
-                }
-            });
-
-    public void uploadProfilePicture() {
-        String desc = "profile picture" + username;
-        if (ImageUri != null) {
-            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
-                if (getContext() == null) return;
-                db.fetchUser(username).addOnSuccessListener(user -> {
-                    if (user != null) {
-                        String imageUrl = ImageMetadata.getUrl();
-                        user.setImageInfo(ImageMetadata);
-                        user.setProfilePicUrl(imageUrl);
-                        db.setUser(user);
-                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
-                    }
-                }).addOnFailureListener(e -> {
-                    Log.e("EntrantProfile", "Failed to load profile image.", e);
-                });
-            }).addOnFailureListener(e -> {
-                Log.e("EntrantProfile", "Failed to upload profile image.", e);
-            });
-        }
-
+                .show();
     }
 }

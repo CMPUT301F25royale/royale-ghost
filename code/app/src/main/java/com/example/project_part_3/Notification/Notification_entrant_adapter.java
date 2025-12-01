@@ -89,17 +89,12 @@ public class Notification_entrant_adapter extends ArrayAdapter<Notification_Entr
             if (notif.isRead() || (notif.getType() != null && !notif.getType().equals("lottery_won"))) {
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
-
-                if (notif.getType() != null && notif.getType().equals("lottery_won") && notif.isRead()) {
-                    holder.overlay.setVisibility(View.VISIBLE);
-                } else {
-                    holder.overlay.setVisibility(View.GONE);
-                }
+                holder.overlay.setVisibility(View.GONE);
 
             } else {
                 holder.acceptButton.setVisibility(View.VISIBLE);
                 holder.declineButton.setVisibility(View.VISIBLE);
-                holder.overlay.setVisibility(View.GONE);
+                holder.overlay.setVisibility(View.VISIBLE);
 
                 holder.acceptButton.setOnClickListener(v -> {
                     if (listener != null) {
