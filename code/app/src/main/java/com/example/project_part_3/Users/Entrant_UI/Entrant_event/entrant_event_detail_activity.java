@@ -85,7 +85,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
         infoBtn.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
                     .setTitle("Event Details")
-                    .setMessage("Here is the info about the lottery, location, or requirements.")
+                    .setMessage("Lotteries will be auto run when the registration date closes. Upon being selected by the lottery system, you will be prompted to accept or decline your spot. In the case that you are not selected, you may still have a chance to be selected if other decline.")
                     .setPositiveButton("OK", null)
                     .show();
         });
