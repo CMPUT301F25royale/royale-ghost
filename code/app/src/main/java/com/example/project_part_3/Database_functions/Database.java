@@ -478,6 +478,19 @@ public class Database {
                             .set(data);
                 });
     }
+    public com.google.android.gms.tasks.Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
+            @NonNull String eventId
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.collection("entrant_locations").get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) {
+                        return new ArrayList<DocumentSnapshot>();
+                    }
+                    QuerySnapshot snap = task.getResult();
+                    return new ArrayList<>(snap.getDocuments());
+                });
+    }
 
 }
 
