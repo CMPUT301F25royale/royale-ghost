@@ -7,10 +7,10 @@ import com.google.firebase.Timestamp;
  */
 public class Notification_Entrant {
     private String id;
-    private String title;
-    private String entrantEmail;
+    private String organizerName;
+    private String userEmail; // entrant's Email
     private String message;
-    private Timestamp time_sent;
+    private Timestamp createdAt;
     private String eventId;
     private String eventTitle;
     private String type; // "lottery_won" or "lottery_not_won"
@@ -20,17 +20,17 @@ public class Notification_Entrant {
     // Required empty constructor for Firestore
     public Notification_Entrant() {}
 
-    public Notification_Entrant(String title,
-                                String entrantEmail,
+    public Notification_Entrant(String organizerName,
+                                String userEmail,
                                 String message,
-                                Timestamp time_sent,
+                                Timestamp createdAt,
                                 String eventId,
                                 String eventTitle,
                                 String type) {
-        this.title = title;
-        this.entrantEmail = entrantEmail;
+        this.organizerName = organizerName;
+        this.userEmail = userEmail;
         this.message = message;
-        this.time_sent = time_sent;
+        this.createdAt = createdAt;
         this.eventId = eventId;
         this.eventTitle = eventTitle;
         this.type = type;
@@ -38,11 +38,11 @@ public class Notification_Entrant {
     }
 
     // Convenience constructor (matches your current usage)
-    public Notification_Entrant(String title,
-                                String entrantEmail,
+    public Notification_Entrant(String organizerName,
+                                String userEmail,
                                 String message,
-                                Timestamp time_sent) {
-        this(title, entrantEmail, message, time_sent, null, null, null);
+                                Timestamp createdAt) {
+        this(organizerName, userEmail, message, createdAt, null, null, null);
         this.read = false;
     }
 
@@ -52,20 +52,20 @@ public class Notification_Entrant {
         return id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getOrganizerName() {
+        return organizerName;
     }
 
-    public String getEntrantEmail() {
-        return entrantEmail;
+    public String getUserEmail() {
+        return userEmail;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public Timestamp getTime_sent() {
-        return time_sent;
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
 
     public String getEventId() {
@@ -84,20 +84,20 @@ public class Notification_Entrant {
 
 
     // ---- Setters ----
-    public void setTitle(String title) {
-        this.title = title;
+    public void setOrganizerName(String organizerName) {
+        this.organizerName = organizerName;
     }
 
-    public void setEntrantEmail(String entrantEmail) {
-        this.entrantEmail = entrantEmail;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public void setTime_sent(Timestamp time_sent) {
-        this.time_sent = time_sent;
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setEventId(String eventId) {
