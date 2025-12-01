@@ -1017,6 +1017,7 @@ public class Database {
                     QuerySnapshot snap = task.getResult();
                     return new ArrayList<>(snap.getDocuments());
                 });
+    }
 
     // If declined move user from selectedUserIds to declinedUserIds and clean other lists
     public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
