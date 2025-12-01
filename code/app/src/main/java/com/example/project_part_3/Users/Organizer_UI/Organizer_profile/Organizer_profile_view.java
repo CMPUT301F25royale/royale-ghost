@@ -35,11 +35,11 @@ import com.example.project_part_3.R;
  * Fragment that displays a profile for an organizer.
  */
 public class Organizer_profile_view extends Fragment {
-    private Database db;
-    private String username;
-    private ImageView OrganizerProfileImageView;
-    private Uri ImageUri;
-    private SharedPreferences prefs;
+    protected Database db;
+    protected String username;
+    protected ImageView OrganizerProfileImageView;
+    protected Uri ImageUri;
+    protected SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -58,11 +58,7 @@ public class Organizer_profile_view extends Fragment {
         db = new Database(FirebaseFirestore.getInstance());
 
         // Organizers don't have interests
-        ListView interestView = view.findViewById(R.id.InterestView);
-        interestView.setVisibility(View.GONE);
-        TextView interests = view.findViewById(R.id.Interests);
-        interests.setVisibility(View.GONE);
-        Button addInterest = view.findViewById(R.id.Add_interest);
+        Button addInterest = view.findViewById(R.id.Add_interest_button);
         addInterest.setVisibility(View.GONE);
 
 

@@ -44,8 +44,6 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
         descriptionEditText.setText(event.getDescription());
         locationEditText.setText(event.getLocation());
 
-
-        // Use DateTimeInstance to show both date and time
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy\nHH:mm a");
 
         if (event.getDate_open() != null) {
@@ -62,9 +60,10 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
             }
         }
 
+        // Disable buttons if registration is closed (optional)
         if (registrationCloseDate != null && registrationCloseDate.before(Calendar.getInstance().getTime())) {
-            openDateButton.setEnabled(false);
-            closeDateButton.setEnabled(false);
+            if (openDateButton != null) openDateButton.setEnabled(false);
+            if (closeDateButton != null) closeDateButton.setEnabled(false);
         }
 
         if (event.getEventStartAt() != null) {
@@ -100,10 +99,15 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
                         .into(EventImageView);
             }
         }
+
+        // Sync Geolocation Switch
         if (geolocationSwitch != null) {
-            geolocationSwitch.setChecked(event.getGeolocationEnabled());
+            boolean isGeoEnabled = event.getGeolocationEnabled();
+            geolocationSwitch.setChecked(isGeoEnabled);
+            geolocationEnabled = isGeoEnabled;
         }
     }
+
     private void handleEventDelete(Event event) {
         Database db = new Database(FirebaseFirestore.getInstance());
         db.deleteEvent(event).addOnSuccessListener(success -> {
@@ -136,14 +140,5 @@ public class Organizer_edit_event extends Organizer_create_edit_event_template {
                 navBack.navigate(R.id.action_organizer_edit_event_to_organizerEventsFragment);
             });
         }
-    }
-
-    //TODO: KANAJENIJNFI
-    /**
-     * @param db    The database to push to
-     * @param event The event to push
-     */
-    protected void pushEventToDatabase(Database db, Event event) {
-
     }
 }

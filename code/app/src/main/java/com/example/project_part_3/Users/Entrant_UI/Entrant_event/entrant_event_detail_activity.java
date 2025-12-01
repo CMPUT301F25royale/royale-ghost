@@ -293,9 +293,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             declineBtn.setEnabled(false);
             acceptBtn.setText("Accepting…");
 
-
-            // accept and decline lottery don't exist in the database?
-            db.acceptLotterySelection(event.getId(), viewerUserEmail)
+            db.acceptEntrant(event, viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You’ve confirmed your spot", Toast.LENGTH_SHORT).show();
 
@@ -337,8 +335,10 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                         .addOnSuccessListener(ignored -> {
                             Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
-                            acceptBtn.setVisibility(View.GONE);
-                            declineBtn.setVisibility(View.GONE);
+            // changed to decline entrant
+            db.declineEntrant(event, viewerUserEmail)
+                    .addOnSuccessListener(ignored -> {
+                        Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
                             joinBtn.setVisibility(View.VISIBLE);
                             joinBtn.setText("You declined");
