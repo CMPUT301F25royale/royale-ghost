@@ -28,6 +28,7 @@ public class UserTest {
 
     @Test
     public void constructorWithPhone_setsAllFieldsExceptUserType() {
+        // Matches User(String name, String password, String email, String phone)
         User u = new User("Liam", "password123", "liam@example.com", "555-1234");
         assertEquals("Liam", u.getName());
         assertEquals("password123", u.getPassword());
@@ -38,6 +39,7 @@ public class UserTest {
 
     @Test
     public void constructorWithoutPhone_setsPhoneNull() {
+        // Matches User(String name, String password, String email)
         User u = new User("Liam", "secret", "bob@example.com");
         assertEquals("Liam", u.getName());
         assertEquals("secret", u.getPassword());
@@ -48,8 +50,10 @@ public class UserTest {
 
     @Test
     public void altConstructor_setsUserType() {
-        // Signature: (String name, String email, String phone, String password, String userType, Object o)
-        User u = new User("Jane Doe", "jane@example.com", "555-2222", "password456", "organizer", null);
+        // FIXED: Removed the 6th 'null' argument.
+        // Matches User(String name, String email, String phone, String password, String userType)
+        User u = new User("Jane Doe", "jane@example.com", "555-2222", "password456", "organizer");
+
         assertEquals("Jane Doe", u.getName());
         assertEquals("password456", u.getPassword());
         assertEquals("jane@example.com", u.getEmail());

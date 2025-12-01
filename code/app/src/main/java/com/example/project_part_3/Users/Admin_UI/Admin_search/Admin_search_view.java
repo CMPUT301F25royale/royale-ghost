@@ -14,13 +14,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.project_part_3.Events.Event;
-import com.example.project_part_3.Image.Image_holder;
+import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that provides the admin search interface for browsing and filtering all events and
+ * images stored in the system.
+ */
 public class Admin_search_view extends Fragment {
 
     private Admin_search_model viewModel;
@@ -59,12 +63,10 @@ public class Admin_search_view extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Observe the combined data from the ViewModel
         viewModel.getCombinedData().observe(getViewLifecycleOwner(), combinedData -> {
             if (combinedData != null) {
                 fullDataList = combinedData;
-                performSearch(); // Re-apply search filter or show all data
+                performSearch();
             }
         });
     }
@@ -100,8 +102,8 @@ public class Admin_search_view extends Fragment {
                 else if (event.getOrganizerId() != null && event.getOrganizerId().toLowerCase().contains(query)) {
                     filteredResults.add(event);
                 }
-            } else if (item instanceof Image_holder) {
-                Image_holder image = (Image_holder) item;
+            } else if (item instanceof Image_datamap) {
+                Image_datamap image = (Image_datamap) item;
                 if (image.getDescription() != null && image.getDescription().toLowerCase().contains(query)) {
                     filteredResults.add(image);
                 }

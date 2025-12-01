@@ -4,6 +4,9 @@ import com.example.project_part_3.Users.Organizer;
 
 import java.sql.Timestamp;
 
+/**
+ * Class to hold notifications for organizers. Contains various properties relating to notifications.
+ */
 public class Notification_Organizer {
     private String type;
     private Organizer organizer;

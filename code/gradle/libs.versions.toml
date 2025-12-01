@@ -17,6 +17,8 @@ camerax = "1.4.1"
 firebaseFirestore = "26.0.2"
 cameraView = "1.5.1"
 identityJvm = "202411.1"
+firebaseMessaging = "25.0.1"
+firebaseAuth = "24.0.1"
 firebaseStorage = "22.0.1"
 playServicesLocation = "21.3.0"
 
@@ -41,6 +43,8 @@ camerax-camera2   = { group = "androidx.camera", name = "camera-camera2",   vers
 camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camerax-view      = { group = "androidx.camera", name = "camera-view",      version.ref = "camerax" }
 identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 # Optional:

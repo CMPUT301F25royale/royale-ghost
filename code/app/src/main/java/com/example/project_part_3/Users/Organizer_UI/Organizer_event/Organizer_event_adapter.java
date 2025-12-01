@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
@@ -23,6 +25,11 @@ import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+/**
+ * Adapter for displaying a list of events in the Organizer UI.
+ * Each list item displays event details including title, location, start date, registration status,
+ * capacity, and buttons for editing, viewing entrants, and showing QR code.
+ */
 public class Organizer_event_adapter extends ArrayAdapter<Event> {
     private final int resourceLayout;
 
@@ -59,6 +66,7 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.seeEntrantsButton = view.findViewById(R.id.organizer_event_view_entrants_button);
             holder.editEventButton = view.findViewById(R.id.organizer_event_edit_event_button);
             holder.qrButton = view.findViewById(R.id.organizer_event_qr_button);
+            holder.eventImage = view.findViewById(R.id.organizer_event_image);
             view.setTag(holder);
         } else {
             holder = (Organizer_event_adapter.ViewHolder) view.getTag();
@@ -71,12 +79,32 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.eventLocation.setText(event.getLocation());
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
+            if(event.getEventStartAt()!= null) {
+                holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
+            }
+            if(event.getEventEndAt()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getEventEndAt()));
+            }
+            if(event.getDate_close()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_close()));
+            }
+            if(event.getDate_open()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_open()));
+            }
 
-            holder.eventRegistrationStatus.setText(event.registrationStatus());
-
+            if (event.getCapacity() == null || event.getCapacity() == 0) {
+                holder.eventCapacity.setText("Capacity: None");
+            } else {
+                holder.eventCapacity.setText(String.valueOf("Capacity: " + event.getCapacity()));
+            }
             // Build event capacity and attendees string
-            String eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+
+            String eventCapacityAndAttendees = "Entrants: 0 | Capacity: None";
+            if (event.getWaitlistUserIds().isEmpty()) {
+                eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getSelectedUserIds().size(), event.getCapacity());
+            } else {
+                eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+            }
             holder.eventCapacity.setText(eventCapacityAndAttendees);
 
             holder.editEventButton.setOnClickListener(v -> {
@@ -88,6 +116,10 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.qrButton.setOnClickListener(v -> {
                 if (listener != null) listener.onQrClick(event);
             });
+
+            if (event.getPosterImageUrl() != null) {
+                Glide.with(getContext()).load(event.getPosterImageUrl()).into(holder.eventImage);
+            }
         }
         return view;
     }
@@ -108,6 +140,7 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
         return s;
     }
     public static class ViewHolder {
+        ImageView eventImage;
         TextView eventName;
         TextView eventLocation;
         TextView eventDate;

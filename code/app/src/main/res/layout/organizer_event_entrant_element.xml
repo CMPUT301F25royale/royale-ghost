@@ -8,7 +8,7 @@
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_margin="8dp"
-        android:contentDescription="User avatar"
+        android:contentDescription="Profile Picture"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
     <TextView
@@ -34,7 +34,7 @@
         android:id="@+id/organizer_event_entrant_decline_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:contentDescription="Cancel Entrant"
+        android:contentDescription="Decline Entrant"
         android:src="@drawable/cancel_cross"
         android:background="@null"
         app:layout_constraintEnd_toStartOf="@id/organizer_event_entrant_status"

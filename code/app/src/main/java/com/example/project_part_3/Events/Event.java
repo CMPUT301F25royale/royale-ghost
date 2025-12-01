@@ -2,22 +2,25 @@ package com.example.project_part_3.Events;
 
 import android.graphics.Bitmap;
 
-import com.example.project_part_3.Users.Entrant;
-import com.example.project_part_3.Users.Organizer;import com.example.project_part_3.Users.User;
+import com.example.project_part_3.Image.Image_datamap;
+import com.example.project_part_3.Users.Organizer;
 import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represents an event with associated data. Contains various methods relating to interactions with users
+ */
 public class Event {
 
     private Boolean geolocationEnabled;
@@ -39,6 +42,8 @@ public class Event {
     private Long seed;
     private Long lastLotteryTs;
 
+    private Boolean lotteryDone;
+    private Image_datamap imageInfo;
     private List<String> waitlistUserIds;
     private List<String> selectedUserIds;
     private List<String> confirmedUserIds;
@@ -54,6 +59,8 @@ public class Event {
     private ArrayList<String> attendant_list;
     @Exclude
     private Integer attendees;
+
+
     public Event(){
         this.waitlistUserIds = new ArrayList<>();
         this.selectedUserIds = new ArrayList<>();
@@ -61,6 +68,7 @@ public class Event {
         this.declinedUserIds = new ArrayList<>();
         this.alternatesUserIds = new ArrayList<>();
         this.attendant_list = new ArrayList<>();
+        this.imageInfo = null;
         this.attendees = 0;
     }
 
@@ -74,7 +82,8 @@ public class Event {
                  Float price,
                  String location,
                  Integer capacity,
-                 Bitmap poster) {
+                 Image_datamap imageInfo
+                 ) {
         this(); // Calls the default constructor to init lists
         this.time = time;
         this.price = price;
@@ -86,10 +95,11 @@ public class Event {
         if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
-        this.poster = poster;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
+        this.imageInfo = null;
+        resetLotteryState();
     }
 
     public Event(String title,
@@ -101,7 +111,8 @@ public class Event {
                  Organizer organizer,
                  String location,
                  Integer capacity,
-                 Bitmap poster
+                 String posterImageUrl,
+                 Image_datamap imageInfo
                  ) {
         this();
         this.time = time;
@@ -113,11 +124,12 @@ public class Event {
         if(organizer != null) { this.organizerId = organizer.getEmail(); } // Populate the correct ID field
         this.location = location;
         this.capacity = capacity;
-        this.poster = poster;
+        this.posterImageUrl = posterImageUrl;
         this.attendant_list = (attendees != null) ? attendees : new ArrayList<>();
         this.attendees = this.attendant_list.size();
         this.eventStartAt = time;
-
+        resetLotteryState();
+        this.imageInfo = null;
     }
 
     public Event(
@@ -135,7 +147,6 @@ public class Event {
                  Float price,
                  Boolean geolocationEnabled) {
         this();
-        this.id = generateUniqueId(organizerId, title, eventStartAtMs) ;
         this.organizerId = organizerId;
         this.title = title;
         this.description = description;
@@ -148,6 +159,8 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.imageInfo = null;
+        resetLotteryState();
         this.geolocationEnabled = geolocationEnabled;
 
     }
@@ -181,15 +194,17 @@ public class Event {
         this.eventEndAt = (eventEndAtMs != null) ? new Timestamp(eventEndAtMs) : null;
         this.capacity = capacity;
         this.price = price;
+        this.imageInfo = null;
+        resetLotteryState();
         this.geolocationEnabled = geolocationEnabled;
     }
 
     /**
      * generate random eventId that is unique
-     * @param organizerId
-     * @param title
-     * @param startTimeMs
-     * @return
+     * @param organizerId The ID of the organizer
+     * @param title The event title
+     * @param startTimeMs The start time of the event
+     * @return The unique event ID
      */
 
     @Exclude
@@ -214,7 +229,13 @@ public class Event {
         }
     }
 
+    public Image_datamap getImageInfo(){
+        return this.imageInfo;
+    }
 
+    public void setImageInfo( Image_datamap imageInfo){
+        this.imageInfo = imageInfo;
+    }
 
     public String getTitle(){ return title; }
     public void setTitle(String title) { this.title = title; }
@@ -236,6 +257,9 @@ public class Event {
 
     public Integer getCapacity(){ return capacity; }
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public Boolean getLotteryDone() { return lotteryDone; }
+    public void setLotteryDone(Boolean lotteryDone) { this.lotteryDone = lotteryDone; }
 
     public String getId() { return id; }
     public void setId(String eventId) { this.id = eventId; }
@@ -312,6 +336,8 @@ public class Event {
     public int getConfirmedCount() {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
+    // For unit test
+    public void setConfirmedUserIds(List<String> list) { this.confirmedUserIds = (list != null) ? list : new ArrayList<>(); }
 
     public List<String> getConfirmedUserIds() {
         return (confirmedUserIds != null) ? confirmedUserIds : new ArrayList<>();
@@ -351,6 +377,11 @@ public class Event {
         return TimeUnit.MILLISECONDS.toHours(diff);
     }
 
+
+    /**
+     *
+     * @return A string representing the registration status of the event.
+     */
     @Exclude
     public String registrationStatus() {
         if (!registrationOpen()) {
@@ -376,8 +407,52 @@ public class Event {
         return String.format("Open (closes within %d hours)", hours + 1);
     }
 
+
+    public void acceptAttendant(String email) {
+        confirmedUserIds.add(email);
+    }
+
     public void declineAttendant(String email) {
         declinedUserIds.add(email);
+    }
+
+    /**
+     * Resets the lottery for this event.
+     */
+    public void resetLotteryState() {
+        waitlistUserIds = new ArrayList<>();
+        selectedUserIds = new ArrayList<>();
+        alternatesUserIds = new ArrayList<>();
+        confirmedUserIds = new ArrayList<>();
+        declinedUserIds = new ArrayList<>();
+        lotteryDone = false;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("title", title);
+        map.put("description", description);
+        map.put("organizerId", organizerId);
+        map.put("location", location);
+        map.put("locationName", locationName);
+        map.put("posterImageUrl", posterImageUrl);
+        map.put("date_open", date_open);
+        map.put("date_close", date_close);
+        map.put("eventStartAt", eventStartAt);
+        map.put("eventEndAt", eventEndAt);
+        map.put("price", price);
+        map.put("capacity", capacity);
+        map.put("seed", seed);
+        map.put("lastLotteryTs", lastLotteryTs);
+        map.put("imageInfo", imageInfo);
+        map.put("waitlistUserIds", waitlistUserIds);
+        map.put("selectedUserIds", selectedUserIds);
+        map.put("confirmedUserIds", confirmedUserIds);
+        map.put("declinedUserIds", declinedUserIds);
+        map.put("alternatesUserIds", alternatesUserIds);
+        map.put("attendant_list", attendant_list);
+        return map;
     }
     public Boolean getGeolocationEnabled() {
         return geolocationEnabled != null && geolocationEnabled;
@@ -386,5 +461,10 @@ public class Event {
     public void setGeolocationEnabled(Boolean geolocationEnabled) {
         this.geolocationEnabled = geolocationEnabled;
     }
+
+    public boolean isFull() {
+        return getRemainingCapacity() <= 0;
+    }
+
 }
 

@@ -15,10 +15,18 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
+
 
 import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * The main fragment for the entrant UI which sets up and
+ * manages the navigation components.
+ */
 public class Entrant_main_fragment extends Fragment {
 
     public Entrant_main_fragment() {
@@ -58,6 +66,19 @@ public class Entrant_main_fragment extends Fragment {
 
         BottomNavigationView bottom = view.findViewById(R.id.entrant_bottom_nav);
 
+        // 🔹 ADD THIS: remove extra bottom inset padding so the bar isn't "too tall"
+        ViewCompat.setOnApplyWindowInsetsListener(bottom, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // keep existing left/right/top padding, but force bottom padding to 0
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    0
+            );
+            return insets;
+        });
+
         NavOptions navOpts = new NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
@@ -77,6 +98,7 @@ public class Entrant_main_fragment extends Fragment {
             bottom.getMenu().findItem(destination.getId()).setChecked(true);
         });
     }
+
 
 
 }

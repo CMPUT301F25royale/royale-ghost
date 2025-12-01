@@ -10,6 +10,9 @@ import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Events.Event;
 import java.util.List;
 
+/**
+ * ViewModel responsible for supplying event data to the entrant event UI.
+ */
 public class Entrant_event_model extends ViewModel {
 
     private final EventDatabase eventDb;

@@ -12,6 +12,10 @@ import androidx.fragment.app.Fragment;
 
 import com.example.project_part_3.R;
 
+//TODO Javadocs
+/**
+ *
+ */
 public class Entrant_notification_view extends Fragment {
 
     public Entrant_notification_view() {

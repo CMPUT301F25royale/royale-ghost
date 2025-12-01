@@ -34,6 +34,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Fragment responsible for displaying the QR code scanner page for entrants.
+ */
 public class Entrant_qrscan_view extends Fragment {
 
     private PreviewView cameraPreviewView;

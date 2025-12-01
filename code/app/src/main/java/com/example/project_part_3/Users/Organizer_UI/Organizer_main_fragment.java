@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -23,6 +26,10 @@ import com.example.project_part_3.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * The main fragment for the organizer UI. This fragment initializes and
+ * manages various UI elements used by organizers
+ */
 public class Organizer_main_fragment extends Fragment {
     private OrganizerSharedViewModel sharedViewModel;
 
@@ -55,6 +62,18 @@ public class Organizer_main_fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         BottomNavigationView bottomNav = view.findViewById(R.id.organizer_bottom_nav);
+        // 🔹 ADD THIS: remove extra bottom inset padding so the bar isn't "too tall"
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // keep existing left/right/top padding, but force bottom padding to 0
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    0
+            );
+            return insets;
+        });
         NavHostFragment navHostFragment = (NavHostFragment) getChildFragmentManager()
                 .findFragmentById(R.id.organizer_nav_host_fragment);
 

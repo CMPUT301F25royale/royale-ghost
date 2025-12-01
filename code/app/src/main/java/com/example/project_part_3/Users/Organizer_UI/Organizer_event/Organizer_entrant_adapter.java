@@ -2,6 +2,7 @@ package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +16,15 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Entrant;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter for displaying a list of entrants for a specific event in the Organizer UI.
+ */
 public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String>> {
 
     private final int resourceLayout;
@@ -58,9 +63,6 @@ public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String
             holder.emailTextView = view.findViewById(R.id.organizer_event_entrant_email);
             holder.statusTextView = view.findViewById(R.id.organizer_event_entrant_status);
             holder.profileImageView = view.findViewById(R.id.organizer_event_entrant_profile_image);
-
-            // FIX: Initialize the button! This was missing and causing crashes.
-            // Ensure this ID matches your XML layout
             holder.declineButton = view.findViewById(R.id.organizer_event_entrant_decline_button);
 
             view.setTag(holder);
@@ -84,7 +86,7 @@ public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String
             // Handle Decline Button
             if (holder.declineButton != null) {
                 // Only show decline button if status is Pending
-                if ("Declined".equalsIgnoreCase(status)) {
+                if (!"Pending".equalsIgnoreCase(status)) {
                     holder.declineButton.setVisibility(View.GONE);
                 } else {
                     holder.declineButton.setVisibility(View.VISIBLE);
@@ -94,18 +96,32 @@ public class Organizer_entrant_adapter extends ArrayAdapter<Pair<Entrant, String
                 }
             }
 
-            updateStatusColor(holder.statusTextView, status);
-
-            /*if (entrant.getProfileImage() != null) {
-                holder.profileImageView.setImageBitmap(entrant.getProfileImage());
+            // Handle Profile Image
+            if (entrant.getProfilePicUrl() != null) {
+                Glide.with(getContext())
+                        .load(entrant.getProfilePicUrl())
+                        .placeholder(R.drawable.ic_profile)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                        .dontAnimate()
+                        .into(holder.profileImageView);
             } else {
-                holder.profileImageView.setImageResource(R.drawable.default_profile_image);
-            }*/
+                // Use default profile image if URL is null
+                holder.profileImageView.setImageResource(R.drawable.ic_profile);
+            }
+
+
+            // Handle Status
+            updateStatusColor(holder.statusTextView, status);
         }
 
         return view;
     }
 
+    /**
+     * Updates the color of the status TextView based on the provided status.
+     * @param statusView The TextView to update.
+     * @param status The status to check.
+     */
     private void updateStatusColor(TextView statusView, String status) {
         Context context = getContext();
         statusView.setText(status);

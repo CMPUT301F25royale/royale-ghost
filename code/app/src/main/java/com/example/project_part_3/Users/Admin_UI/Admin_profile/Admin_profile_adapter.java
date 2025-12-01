@@ -16,6 +16,11 @@ import com.example.project_part_3.Users.User;
 
 import java.util.ArrayList;
 
+/**
+ * An ArrayAdapter for displaying a list of Users and date relating to the users
+ * This adapter is responsible for taking a list of User objects and converting them
+ * into segments that display the  name, email, and profile picture of the user.
+ */
 public class Admin_profile_adapter extends ArrayAdapter<User> {
 
     private final int resourceLayout;
@@ -47,14 +52,14 @@ public class Admin_profile_adapter extends ArrayAdapter<User> {
         if (profile != null) {
             holder.nameTextView.setText(profile.getName());
             holder.emailTextView.setText(profile.getEmail());
-            if (profile.getProfilePicUrl() != null && !profile.getProfilePicUrl().isEmpty()) {
+            if (profile.getImageInfo() != null && profile.getImageInfo().getUrl() != null) {
                 Glide.with(getContext())
-                        .load(profile.getProfilePicUrl())
-                        .placeholder(android.R.drawable.sym_def_app_icon) // Placeholder while loading
-                        .error(android.R.drawable.sym_def_app_icon)       // Placeholder on error
+                        .load(profile.getImageInfo().getUrl())
+                        .placeholder(R.drawable.ic_person) // Placeholder while loading
+                        .error(R.drawable.ic_person)       // Placeholder on error
                         .into(holder.imageView);
             } else {
-                holder.imageView.setImageResource(android.R.drawable.sym_def_app_icon);
+                holder.imageView.setImageResource(R.drawable.ic_person);
             }
         }
         return view;

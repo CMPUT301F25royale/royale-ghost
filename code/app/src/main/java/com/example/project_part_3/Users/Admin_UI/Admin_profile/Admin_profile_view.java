@@ -17,6 +17,10 @@ import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
 import java.util.ArrayList;
 
+/**
+ * The fragment for the admin profile view which displays a list of users and their information.
+ * The admin can click on a user to open up a profile view of the user.
+ */
 public class Admin_profile_view extends Fragment {
 
     private ListView profileList;

@@ -35,25 +35,111 @@
     </LinearLayout>
 
     <!-- 🔹 Map showing entrant locations -->
+
+    <!-- Existing entrants list below the map -->
     <fragment
         android:id="@+id/entrant_map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/back_button_and_title_container"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="408dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toTopOf="@id/organizer_event_entrant_list"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/organizer_event_entrant_list" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back_button_and_title_container" />
 
-    <!-- Existing entrants list below the map -->
     <ListView
         android:id="@+id/organizer_event_entrant_list"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="300dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/entrant_map_fragment"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toTopOf="@id/gridLayout"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/organizer_event_entrant_list"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/gridLayout"
+        android:alignmentMode="alignMargins"
+        android:rowCount="3"
+        android:columnCount="2"
+        android:orientation="vertical"
+        android:paddingHorizontal="8dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:text="@string/show_chosen_entrants"
+            android:textSize="16sp"
+            android:layout_marginEnd="40dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/show_cancelled_entrants"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/export_as_csv_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_pill_black"
+            app:backgroundTint="@color/black"
+            android:textColor="@color/white"
+            android:layout_gravity="fill_horizontal"
+            android:layout_columnSpan="2"
+            android:text="@string/export_as_csv"
+            android:textSize="16sp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/show_chosen_entrants_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            app:trackTint="@color/switch_track_selector"
+            />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/show_cancelled_entrants_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            app:trackTint="@color/switch_track_selector"
+            />
+
+        <Button
+            android:id="@+id/see_map_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_pill_black"
+            app:backgroundTint="@color/black"
+            android:textColor="@color/white"
+            android:layout_gravity="fill_horizontal"
+            android:layout_columnSpan="1"
+            android:text="See Map"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/notify_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_pill_black"
+            app:backgroundTint="@color/black"
+            android:textColor="@color/white"
+            android:layout_gravity="fill_horizontal"
+            android:layout_columnSpan="1"
+            android:text="Notify"
+            android:textSize="16sp" />
+
+    </GridLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

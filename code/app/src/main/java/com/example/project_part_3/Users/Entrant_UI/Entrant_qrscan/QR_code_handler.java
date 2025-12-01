@@ -15,6 +15,9 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
+/**
+ * QR_Coder_Handler analyzes QR codes and triggers a callback when a QR code is scanned.
+ */
 public class QR_code_handler implements ImageAnalysis.Analyzer {
     private final BarcodeScanner scanner = BarcodeScanning.getClient();
     private final OnQrScanListener listener;
