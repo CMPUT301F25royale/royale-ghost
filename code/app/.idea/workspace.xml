@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="28973c54-da88-4b58-9d86-b84d1a1a1a83" name="Changes" comment="" />
+    <list default="true" id="28973c54-da88-4b58-9d86-b84d1a1a1a83" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Database_functions/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Database_functions/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Events/Event.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Events/Event.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Users/Entrant_UI/Entrant_profile/Entrant_profile_view.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/project_part_3/Users/Entrant_UI/Entrant_profile/Entrant_profile_view.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,21 +21,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "aidanslator"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;aidanslator&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/CMPUT301F25royale/royale-ghost.git",
-    "accountId": "6461f9ff-b0ed-4a20-b74a-96758e302e27"
+    "accountId": "96d1a4d4-5e5f-414b-a410-44c23b8c79e4"
   }
 }]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="34qZB1oqei4JmjrkJJSLP0tlSJJ" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -46,8 +51,8 @@
     "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "Aidans-Branch",
-    "last_opened_file_path": "C:/Users/aidan/OneDrive/Documents/GitHub/royale-ghost/code/app"
+    "git-widget-placeholder": "Emmanuels-branch",
+    "last_opened_file_path": "C:/Users/ejibi/Downloads/Project_Part_3/royale-ghost/code/app"
   }
 }]]></component>
   <component name="TaskManager">

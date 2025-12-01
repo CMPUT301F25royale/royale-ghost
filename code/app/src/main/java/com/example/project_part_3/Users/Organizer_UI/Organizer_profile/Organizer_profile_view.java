@@ -32,11 +32,11 @@ import androidx.fragment.app.Fragment;
 import com.example.project_part_3.R;
 
 public class Organizer_profile_view extends Fragment {
-    protected Database db;
-    protected String username;
-    protected ImageView profileImageView;
-    protected Uri ImageUri;
-    protected SharedPreferences prefs;
+    private Database db;
+    private String username;
+    private ImageView OrganizerProfileImageView;
+    private Uri ImageUri;
+    private SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -54,25 +54,24 @@ public class Organizer_profile_view extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
 
-        // Setup Shared Prefs
+        //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
         username = prefs.getString("username", "");
 
-        // Setup Name Title
+        OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
+        loadProfileImage();
+
+        OrganizerProfileImageView.setOnClickListener(v -> showImagePopup());
+
+        // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(username).addOnSuccessListener(user -> {
-            if (user != null) {
-                profileName.setText("Profile: " + user.getName());
-            }
+        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+            profileName.setText("Profile: " + user.getName());
         });
 
-        // Setup Image
-        profileImageView = view.findViewById(R.id.profile_photo);
-        loadProfileImage();
-        profileImageView.setOnClickListener(v -> showImagePopup());
-
-
+        //reset password here
         setupButtons(view, profileName);
+
     }
 
     /**
@@ -204,7 +203,7 @@ public class Organizer_profile_view extends Fragment {
                             .placeholder(android.R.drawable.sym_def_app_icon)
                             .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                             .dontAnimate()
-                            .into(profileImageView);
+                            .into(OrganizerProfileImageView);
                 }
             }).addOnFailureListener(e -> {
                 Log.e("Profile", "Failed to load profile image.", e);
@@ -233,7 +232,7 @@ public class Organizer_profile_view extends Fragment {
         dialog.show();
     }
 
-    protected void showImagePopup() {
+    private void showImagePopup() {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.image_popup, null);
 
@@ -244,11 +243,9 @@ public class Organizer_profile_view extends Fragment {
                 .setView(dialogView)
                 .create();
 
-        if (profileImageView.getDrawable() != null) {
-            Glide.with(requireContext())
-                    .load(profileImageView.getDrawable())
-                    .into(popupImagePreview);
-        }
+        Glide.with(requireContext())
+                .load(OrganizerProfileImageView.getDrawable())
+                .into(popupImagePreview);
 
         changeImageButton.setOnClickListener(v -> {
             galleryLauncher.launch("image/*");
@@ -267,19 +264,25 @@ public class Organizer_profile_view extends Fragment {
                 }
             });
 
-    protected void uploadProfilePicture() {
+    private void uploadProfilePicture() {
+        String desc = "profile picture" + username;
         if (ImageUri != null) {
-            String desc = "profile_pic_" + username;
-            db.uploadImage(ImageUri, "profile_pic", desc, username, null).addOnSuccessListener(downloadUrl -> {
-                String imageUrl = downloadUrl.getUrl();
+            db.uploadImage(ImageUri,"profile_pic", desc, username, null).addOnSuccessListener(ImageMetadata -> {
+                if(getContext() == null) return;
                 db.fetchUser(username).addOnSuccessListener(user -> {
                     if (user != null) {
+                        String imageUrl = ImageMetadata.getUrl();
+                        user.setImageInfo(ImageMetadata);
                         user.setProfilePicUrl(imageUrl);
+
                         db.setUser(user);
-                        Glide.with(requireContext()).load(imageUrl).into(profileImageView);
-                        Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
+                        Glide.with(requireContext()).load(imageUrl).into(OrganizerProfileImageView);
                     }
+                }).addOnFailureListener(e -> {
+                    Log.e("EntrantProfile", "Failed to load profile image.", e);
                 });
+            }).addOnFailureListener(e -> {
+                Log.e("EntrantProfile", "Failed to upload profile image.", e);
             });
         }
     }

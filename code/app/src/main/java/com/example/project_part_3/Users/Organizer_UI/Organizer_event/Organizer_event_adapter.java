@@ -74,9 +74,18 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
             holder.eventLocation.setText(event.getLocation());
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
-
-            holder.eventRegistrationStatus.setText(event.registrationStatus());
+            if(event.getEventStartAt()!= null) {
+                holder.eventDate.setText("Starts: " + sdf.format(event.getEventStartAt()));
+            }
+            if(event.getEventEndAt()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getEventEndAt()));
+            }
+            if(event.getDate_close()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_close()));
+            }
+            if(event.getDate_open()!= null) {
+                holder.eventDate.setText("Ends: " + sdf.format(event.getDate_open()));
+            }
 
             if (event.getCapacity() == null || event.getCapacity() == 0) {
                 holder.eventCapacity.setText("Capacity: None");
