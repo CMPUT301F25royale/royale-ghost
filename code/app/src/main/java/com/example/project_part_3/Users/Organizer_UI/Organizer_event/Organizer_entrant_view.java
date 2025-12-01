@@ -125,7 +125,7 @@ public class Organizer_entrant_view extends Fragment {
     private void showNotifyPopup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Send Notification");
-        builder.setMessage("Enter the message you want to send...");
+        builder.setMessage("Enter the message you want to send");
 
         final EditText input = new EditText(requireContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);

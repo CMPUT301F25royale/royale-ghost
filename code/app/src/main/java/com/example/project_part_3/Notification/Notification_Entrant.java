@@ -4,7 +4,7 @@ import com.google.firebase.Timestamp;
 
 public class Notification_Entrant {
     private String id;
-    private String title;
+    private String organizerName;
     private String userEmail; // entrant's Email
     private String message;
     private Timestamp createdAt;
@@ -17,14 +17,14 @@ public class Notification_Entrant {
     // Required empty constructor for Firestore
     public Notification_Entrant() {}
 
-    public Notification_Entrant(String title,
+    public Notification_Entrant(String organizerName,
                                 String userEmail,
                                 String message,
                                 Timestamp createdAt,
                                 String eventId,
                                 String eventTitle,
                                 String type) {
-        this.title = title;
+        this.organizerName = organizerName;
         this.userEmail = userEmail;
         this.message = message;
         this.createdAt = createdAt;
@@ -35,11 +35,11 @@ public class Notification_Entrant {
     }
 
     // Convenience constructor (matches your current usage)
-    public Notification_Entrant(String title,
+    public Notification_Entrant(String organizerName,
                                 String userEmail,
                                 String message,
                                 Timestamp createdAt) {
-        this(title, userEmail, message, createdAt, null, null, null);
+        this(organizerName, userEmail, message, createdAt, null, null, null);
         this.read = false;
     }
 
@@ -49,8 +49,8 @@ public class Notification_Entrant {
         return id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getOrganizerName() {
+        return organizerName;
     }
 
     public String getUserEmail() {
@@ -81,8 +81,8 @@ public class Notification_Entrant {
 
 
     // ---- Setters ----
-    public void setTitle(String title) {
-        this.title = title;
+    public void setOrganizerName(String organizerName) {
+        this.organizerName = organizerName;
     }
 
     public void setUserEmail(String userEmail) {

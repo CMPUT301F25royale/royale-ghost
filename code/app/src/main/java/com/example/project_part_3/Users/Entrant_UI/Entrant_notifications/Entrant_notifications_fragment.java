@@ -109,6 +109,9 @@ public class Entrant_notifications_fragment extends Fragment {
                             String message = doc.getString("message");
                             if (message == null) message = "";
 
+                            String organizerName = doc.getString("organizerName");
+                            if (organizerName == null) organizerName = "";
+
                             String eventId = doc.getString("eventId");
                             String type = doc.getString("type");
 
@@ -118,6 +121,7 @@ public class Entrant_notifications_fragment extends Fragment {
 
                             Notification_Entrant n = new Notification_Entrant(title, null, message, ts);
 
+                            n.setOrganizerName(organizerName);
                             n.setEventTitle(title);
                             n.setId(doc.getId());
                             n.setEventId(eventId);

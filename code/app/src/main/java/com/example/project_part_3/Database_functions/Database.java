@@ -932,6 +932,7 @@ public class Database {
             Notification_Entrant notification = new Notification_Entrant(
                     "Message", recipient, message, Timestamp.now(), event.getId(), event.getTitle(), type);
 
+            notification.setOrganizerName(event.getOrganizerId()); // TODO: change to name of organizer
             notification.setId(newDocRef.getId());
 
             taskList.add(newDocRef.set(notification));
