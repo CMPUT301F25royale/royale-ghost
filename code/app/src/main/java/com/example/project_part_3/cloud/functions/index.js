@@ -215,6 +215,45 @@ async function notifyLotteryResults(eventRef, winners, losers, eventData) {
   });
 }
 
+
+
+/**
+ * Notify a single new winner (replenish case).
+ * - Ignores winnersNotifiedAt / nonWinnersNotifiedAt
+ * - Respects receiveNotifications + dedup tokens
+ * - Writes one inbox notification
+ */
+async function notifySingleWinnerForReplenish(eventRef, winnerEmail, eventData) {
+  if (!winnerEmail) return;
+
+  const eventTitle =
+    (eventData && eventData.title) ? eventData.title : "Event";
+  const eventId = (eventData && eventData.id) ? eventData.id : "";
+
+  const title = `Results updated: ${eventTitle}`;
+  const body = `A spot opened up and you’ve been selected! Open the event to confirm your spot.`;
+
+  // FCM tokens (respect receiveNotifications)
+  const winnerTokens = await tokensForUserIds([winnerEmail]);
+
+  // Push notification (if they haven't opted out and have tokens)
+  await sendMulticast(winnerTokens, {
+    title,
+    body,
+    data: { eventId, action: "lottery_won_replenish" },
+  });
+
+  // Inbox notification (also respects receiveNotifications internally)
+  await createInboxNotifications([winnerEmail], {
+    title,
+    message: body,
+    eventId,
+    eventTitle,
+    type: "lottery_won_replenish",
+  });
+}
+
+
 /**
  * Given a list of user emails, return unique FCM tokens
  * for users who have NOT opted out of notifications.
@@ -340,3 +379,74 @@ async function sendMulticast(tokens, { title, body, data }) {
     ),
   );
 }
+
+
+const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+
+// ... your existing setup ...
+
+/**
+Automatically pick a new winner when someone declines.
+ */
+exports.autoReplenishLottery = onDocumentUpdated(
+  "users/{userId}/organized_events/{eventId}",
+  async (event) => {
+    const oldData = event.data.before.data();
+    const newData = event.data.after.data();
+
+    // 1. Safety Checks
+    if (!oldData || !newData) return;
+    if (newData.lotteryDone !== true) return; // Only relevant if lottery happened
+
+    const oldDeclined = oldData.declinedUserIds || [];
+    const newDeclined = newData.declinedUserIds || [];
+
+    // 2. Only run if someone new just declined
+    if (newDeclined.length <= oldDeclined.length) {
+      return;
+    }
+
+    // 3. Check for vacancy
+    const confirmedCount = (newData.confirmedUserIds || []).length;
+    const selectedCount = (newData.selectedUserIds || []).length;
+    const capacity = newData.capacity || 0;
+
+    if ((confirmedCount + selectedCount) >= capacity) {
+      console.log(
+        `Event ${event.params.eventId}: Someone declined, but event is still full/overcapacity.`
+      );
+      return;
+    }
+
+    // 4. Check for Alternates
+    const alternates = newData.alternatesUserIds || [];
+    if (alternates.length === 0) {
+      console.log(
+        `Event ${event.params.eventId}: Spot opened, but no alternates available.`
+      );
+      return;
+    }
+
+    // 5. Pick the next person (FIFO)
+    const newWinner = alternates[0];
+    const newAlternatesList = alternates.slice(1);
+
+    console.log(`Replenishing spot. New Winner: ${newWinner}`);
+
+    // 6. Move them Alternate -> Selected
+    await event.data.after.ref.update({
+      selectedUserIds: admin.firestore.FieldValue.arrayUnion(newWinner),
+      alternatesUserIds: newAlternatesList,
+      waitlistUserIds: admin.firestore.FieldValue.arrayRemove(newWinner),
+    });
+
+    // 7. Notify ONLY this new winner (no losers, no winnersNotifiedAt changes)
+    const updatedSnap = await event.data.after.ref.get();
+    const finalData = updatedSnap.data();
+    await notifySingleWinnerForReplenish(
+      event.data.after.ref,
+      newWinner,
+      finalData
+    );
+  }
+);
