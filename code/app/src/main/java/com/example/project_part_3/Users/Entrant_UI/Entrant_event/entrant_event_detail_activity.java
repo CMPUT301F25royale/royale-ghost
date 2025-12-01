@@ -309,7 +309,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
             declineBtn.setEnabled(false);
             acceptBtn.setText("Accepting…");
 
-            db.acceptEntrant(event, viewerUserEmail)
+            db.acceptLotterySelection(event.getId(), viewerUserEmail)
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You’ve confirmed your spot", Toast.LENGTH_SHORT).show();
 
@@ -352,32 +352,27 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                     .addOnSuccessListener(ignored -> {
                         Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
 
-                        // changed to decline entrant
-                        db.declineEntrant(event, viewerUserEmail)
-                                .addOnSuccessListener(ignored2 -> {
-                                    Toast.makeText(this, "You declined this spot", Toast.LENGTH_SHORT).show();
+                        acceptBtn.setVisibility(View.GONE);
+                        declineBtn.setVisibility(View.GONE);
 
-                                    joinBtn.setVisibility(View.VISIBLE);
-                                    joinBtn.setText("You declined");
-                                    joinBtn.setEnabled(false);
+                        joinBtn.setVisibility(View.VISIBLE);
+                        joinBtn.setText("You declined");
+                        joinBtn.setEnabled(false);
 
-                                    // Update counts on screen
-                                    try {
-                                        int declined = Integer.parseInt(vDeclined.getText().toString());
-                                        int selected = Integer.parseInt(vSelected.getText().toString());
-                                        vDeclined.setText(String.valueOf(declined + 1));
-                                        vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
-                                    } catch (NumberFormatException ignored3) {
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    acceptBtn.setEnabled(true);
-                                    declineBtn.setEnabled(true);
-                                    declineBtn.setText("Decline");
-                                    Toast.makeText(this, "Failed to decline: " +
-                                            (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
-
-                                });
+                        // Update counts on screen
+                        try {
+                            int declined = Integer.parseInt(vDeclined.getText().toString());
+                            int selected = Integer.parseInt(vSelected.getText().toString());
+                            vDeclined.setText(String.valueOf(declined + 1));
+                            vSelected.setText(String.valueOf(Math.max(selected - 1, 0)));
+                        } catch (NumberFormatException ignored2) {}
+                    })
+                    .addOnFailureListener(e -> {
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        declineBtn.setText("Decline");
+                        Toast.makeText(this, "Failed to decline: " +
+                                (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
                     });
         });
     }

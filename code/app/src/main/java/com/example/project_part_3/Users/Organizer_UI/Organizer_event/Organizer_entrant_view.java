@@ -1,21 +1,17 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputType;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -28,7 +24,6 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.Database_functions.Database;
@@ -121,9 +116,6 @@ public class Organizer_entrant_view extends Fragment {
         setUpBackButton(view);
         setUpSwitches();
         setUpExportButton(view);
-        //setUpMapButton(view);
-        setUpNotifyButton(view);
-
 
         adapter = new Organizer_entrant_adapter(getContext(), R.layout.organizer_event_entrant_element, displayList, this::declineEntrant);
         listView.setAdapter(adapter);
