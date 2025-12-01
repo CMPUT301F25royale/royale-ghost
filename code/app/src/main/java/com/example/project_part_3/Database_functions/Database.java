@@ -31,6 +31,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.google.firebase.firestore.GeoPoint;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Database class provides methods for interacting with the Firebase Firestore database. Most
  * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
@@ -697,6 +701,9 @@ public class Database {
         if (event.getWaitlistUserIds() != null) {
             entrantIDs.addAll(event.getWaitlistUserIds());
         }
+        if (event.getSelectedUserIds() != null) {
+            entrantIDs.addAll(event.getSelectedUserIds());
+        }
 
         if (entrantIDs.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
@@ -976,16 +983,40 @@ public class Database {
                         "alternatesUserIds", FieldValue.arrayRemove(userEmail)
                 ));
     }
-
-    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
-    public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
+    /**
+     * Save or update a single entrant's location for a given event.
+     * Stored under users/{organizerId}/organized_events/{eventId}/entrant_locations/{userEmail}
+     */
+    public com.google.android.gms.tasks.Task<Void> saveUserLocationForEvent(
+            @NonNull String eventId,
+            @NonNull String userEmail,
+            double lat,
+            double lng
+    ) {
         return findEventDocRefById(eventId)
-                .onSuccessTask(ref -> ref.update(
-                        "declinedUserIds", FieldValue.arrayUnion(userEmail),
-                        "selectedUserIds", FieldValue.arrayRemove(userEmail),
-                        "waitlistUserIds", FieldValue.arrayRemove(userEmail),
-                        "alternatesUserIds", FieldValue.arrayRemove(userEmail)
-                ));
+                .onSuccessTask(ref -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("userEmail", userEmail);
+                    data.put("location", new GeoPoint(lat, lng));
+                    data.put("timestamp", FieldValue.serverTimestamp());
+
+                    return ref.collection("entrant_locations")
+                            .document(userEmail)   // one doc per entrant per event
+                            .set(data);
+                });
+    }
+    public com.google.android.gms.tasks.Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
+            @NonNull String eventId
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.collection("entrant_locations").get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) {
+                        return new ArrayList<DocumentSnapshot>();
+                    }
+                    QuerySnapshot snap = task.getResult();
+                    return new ArrayList<>(snap.getDocuments());
+                });
     }
 
 }
