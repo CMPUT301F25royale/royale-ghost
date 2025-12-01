@@ -98,7 +98,13 @@ public class Organizer_event_adapter extends ArrayAdapter<Event> {
                 holder.eventCapacity.setText(String.valueOf("Capacity: " + event.getCapacity()));
             }
             // Build event capacity and attendees string
-            String eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+
+            String eventCapacityAndAttendees = "Entrants: 0 | Capacity: None";
+            if (event.getWaitlistUserIds().isEmpty()) {
+                eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getSelectedUserIds().size(), event.getCapacity());
+            } else {
+                eventCapacityAndAttendees = buildEntrantAndCapacityString(event.getWaitlistUserIds().size(), event.getCapacity());
+            }
             holder.eventCapacity.setText(eventCapacityAndAttendees);
 
             holder.editEventButton.setOnClickListener(v -> {

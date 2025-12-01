@@ -789,6 +789,9 @@ public class Database {
         if (event.getWaitlistUserIds() != null) {
             entrantIDs.addAll(event.getWaitlistUserIds());
         }
+        if (event.getSelectedUserIds() != null) {
+            entrantIDs.addAll(event.getSelectedUserIds());
+        }
 
         if (entrantIDs.isEmpty()) {
             return Tasks.forResult(new ArrayList<>());
