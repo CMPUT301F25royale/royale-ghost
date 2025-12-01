@@ -46,7 +46,7 @@ public class Entrant_search_view extends Fragment {
     private RecyclerView recycler;
 
     private Chip interestsToggle;
-
+    private Chip availabilityToggle;
     private final List<Event> allEvents = new ArrayList<>();
     private String currentQuery = "";
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -79,7 +79,7 @@ public class Entrant_search_view extends Fragment {
         etSearch = v.findViewById(R.id.etSearch);
         recycler = v.findViewById(R.id.searchRecycler);
         interestsToggle = v.findViewById(R.id.chipInterests);
-
+        availabilityToggle = v.findViewById(R.id.chipAvailability);
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
 
@@ -119,6 +119,13 @@ public class Entrant_search_view extends Fragment {
             handler.post(filterRunnable);
         });
 
+        if (availabilityToggle != null) {
+            availabilityToggle.setOnCheckedChangeListener((button, isChecked) -> {
+                handler.removeCallbacks(filterRunnable);
+                handler.post(filterRunnable);
+            });
+        }
+
         // Search typing, Textwatcher fires on each keystroke
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -146,9 +153,10 @@ public class Entrant_search_view extends Fragment {
 
         final String q = currentQuery.toLowerCase(Locale.US);
         final boolean interestsMode = interestsToggle != null && interestsToggle.isChecked();
+        final boolean availabilityMode = availabilityToggle != null && availabilityToggle.isChecked();
 
-        // If no text and interests mode is off show everything
-        if (q.isEmpty() && !interestsMode) {
+        //If no text, no interests filter, no availability filter → show everything
+        if (q.isEmpty() && !interestsMode && !availabilityMode) {
             adapter.setData(allEvents);
             recycler.scrollToPosition(0);
             return;
@@ -159,6 +167,19 @@ public class Entrant_search_view extends Fragment {
         for (Event e : allEvents) {
             if (e == null) continue;
 
+            boolean matchesAvailability;
+            if (!availabilityMode) {
+                //Chip off then ignore availability (show regardless of registration window)
+                matchesAvailability = true;
+            } else {
+                //Chip on then only show events whose registration is currently open
+                matchesAvailability = e.registrationOpen();
+            }
+
+            if (!matchesAvailability) {
+                continue; //skip early if availability doesn't match
+            }
+
             String title = safe(e.getTitle());
             String location = safe(e.getLocation());
             String description = safe(e.getDescription());
@@ -166,7 +187,7 @@ public class Entrant_search_view extends Fragment {
 
             boolean matchesText;
             if (q.isEmpty()) {
-                // No query don't restrict by text
+                //No query then don't restrict by text
                 matchesText = true;
             } else {
                 matchesText =
@@ -178,18 +199,17 @@ public class Entrant_search_view extends Fragment {
 
             boolean matchesInterest;
             if (!interestsMode) {
-                // Chip is off ignore interests
+                //Chip is off then ignore interests
                 matchesInterest = true;
             } else if (userInterests == null || userInterests.isEmpty()) {
-                // Chip on but user has no interests don't filter by interests
+                //Chip on but user has no interests stored then don't filter by interests
                 matchesInterest = true;
             } else {
                 matchesInterest = false;
                 for (String interest : userInterests) {
                     String term = safe(interest);
                     if (term.isEmpty()) continue;
-
-                    // Match interest in description OR title
+                    //Match interest in description OR title
                     if (description.contains(term) || title.contains(term)) {
                         matchesInterest = true;
                         break;
@@ -197,7 +217,7 @@ public class Entrant_search_view extends Fragment {
                 }
             }
 
-            if (matchesText && matchesInterest) {
+            if (matchesText && matchesInterest && matchesAvailability) {
                 filtered.add(e);
             }
         }
