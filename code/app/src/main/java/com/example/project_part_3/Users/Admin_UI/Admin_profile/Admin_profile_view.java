@@ -1,5 +1,3 @@
-// File: com/example/project_part_3/Users/Admin_UI/Admin_profile/Admin_profile_view.java
-
 package com.example.project_part_3.Users.Admin_UI.Admin_profile;
 
 import android.os.Bundle;
@@ -7,19 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
+
 import java.util.ArrayList;
 
 /**
- * The fragment for the admin profile view which displays a list of users and their information.
- * The admin can click on a user to open up a profile view of the user.
+ * Fragment that displays a list of all users for the admin.
+ * Allows navigation to detailed user profile views.
  */
 public class Admin_profile_view extends Fragment {
 
@@ -27,6 +28,11 @@ public class Admin_profile_view extends Fragment {
     private Admin_profile_adapter adapter;
     private Admin_profile_model adminprofilemodel;
 
+    /**
+     * Initializes the ViewModel and sets up the adapter for displaying user profiles.
+     *
+     * @param savedInstanceState the saved instance state, may be null
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,14 +40,31 @@ public class Admin_profile_view extends Fragment {
         adapter = new Admin_profile_adapter(getContext(), R.layout.admin_profiles_element, new ArrayList<>());
     }
 
+    /**
+     * Inflates the main layout for the admin profile list screen.
+     *
+     * @param inflater used to inflate the layout
+     * @param container parent container for the fragment
+     * @param savedInstanceState saved state, may be null
+     * @return the inflated view hierarchy
+     */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.admin_profiles, container, false);
     }
 
+    /**
+     * Sets up the list view, observes user data, and handles navigation events.
+     *
+     * @param view the root view of the fragment
+     * @param savedInstanceState saved state, may be null
+     */
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         profileList = view.findViewById(R.id.admin_profiles_list);

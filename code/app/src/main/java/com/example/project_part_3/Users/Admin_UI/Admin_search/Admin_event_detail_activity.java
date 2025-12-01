@@ -19,15 +19,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * The activity for an admin to view the details of an event.
+ * Activity that displays detailed information about a selected event for admin users.
  */
 public class Admin_event_detail_activity extends AppCompatActivity {
 
-    // No direct database access needed here anymore
     private Admin_search_model viewModel;
     private EventDatabase eventDb;
-
-    // A LiveData object to hold the details of just this one event
     private final MutableLiveData<Event> eventDetails = new MutableLiveData<>();
 
     private ImageView poster;
@@ -47,12 +44,17 @@ public class Admin_event_detail_activity extends AppCompatActivity {
     private TextView alternates;
     private TextView description;
 
+    /**
+     * Initializes the activity, loads the event ID from the intent,
+     * starts listening for event updates, and prepares the UI elements.
+     *
+     * @param savedInstanceState saved state bundle, may be null
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.admin_event_detail);
 
-        // Initialize ViewModel and high-level EventDatabase
         viewModel = new ViewModelProvider(this).get(Admin_search_model.class);
         eventDb = new EventDatabase();
 
@@ -67,30 +69,32 @@ public class Admin_event_detail_activity extends AppCompatActivity {
             return;
         }
 
-        // Start listening for changes to this specific event
         eventDb.listenForSingleEvent(eventId, eventDetails);
 
-        // Observe the LiveData for this event and update the UI when it changes
         eventDetails.observe(this, event -> {
             if (event != null) {
                 populateUI(event);
             } else {
-                // This will be triggered if the event is deleted while being viewed
                 Toast.makeText(this, "This event has been removed.", Toast.LENGTH_LONG).show();
                 finish();
             }
         });
     }
 
+    /**
+     * Cleans up event listeners when the activity is destroyed.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up the listeners from EventDatabase when the activity is destroyed
         if (eventDb != null) {
             eventDb.cleanupListeners();
         }
     }
 
+    /**
+     * Initializes all view components used to display event information.
+     */
     private void setupViews() {
         poster = findViewById(R.id.detail_poster);
         title = findViewById(R.id.detail_title);
@@ -100,16 +104,21 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         regWindow = findViewById(R.id.detail_reg_window);
         startEnd = findViewById(R.id.detail_start_end);
         price = findViewById(R.id.detail_price);
-        capacity  = findViewById(R.id.value_capacity);
+        capacity = findViewById(R.id.value_capacity);
         confirmed = findViewById(R.id.value_confirmed);
         remaining = findViewById(R.id.value_remaining);
-        waitlist  = findViewById(R.id.value_waitlist);
-        selected  = findViewById(R.id.value_selected);
-        declined  = findViewById(R.id.value_declined);
-        alternates= findViewById(R.id.value_alternates);
+        waitlist = findViewById(R.id.value_waitlist);
+        selected = findViewById(R.id.value_selected);
+        declined = findViewById(R.id.value_declined);
+        alternates = findViewById(R.id.value_alternates);
         description = findViewById(R.id.detail_description);
     }
 
+    /**
+     * Populates the UI fields with event data.
+     *
+     * @param event the event containing the information to display
+     */
     private void populateUI(Event event) {
         if (event == null) {
             title.setText("Event data is null");
@@ -144,7 +153,6 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         remaining.setText(String.valueOf(event.getRemainingCapacity()));
 
         waitlist.setText(String.valueOf(sizeSafe(event.getWaitlistUserIds())));
-        // These fields are not in your Event class, but this shows how to handle them if added
         selected.setText(String.valueOf(sizeSafe(event.getSelectedUserIds())));
         declined.setText(String.valueOf(sizeSafe(event.getDeclinedUserIds())));
         alternates.setText(String.valueOf(sizeSafe(event.getAlternatesUserIds())));
@@ -152,20 +160,45 @@ public class Admin_event_detail_activity extends AppCompatActivity {
         description.setText(nonEmpty(event.getDescription(), "—"));
     }
 
+    /**
+     * Returns the string if it is not empty, otherwise returns a fallback value.
+     *
+     * @param s the input string
+     * @param fallback the value to return if input is empty
+     * @return a non-empty string or the fallback
+     */
     private String nonEmpty(String s, String fallback) {
         return (s != null && !s.trim().isEmpty()) ? s : fallback;
     }
 
+    /**
+     * Formats a date into a readable string.
+     *
+     * @param d the date to format
+     * @return the formatted date, or a placeholder if null
+     */
     private String fmtDate(Date d) {
         if (d == null) return "—";
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d);
     }
 
+    /**
+     * Formats a date and time into a readable string.
+     *
+     * @param d the date to format
+     * @return the formatted date and time, or a placeholder if null
+     */
     private String fmtDateTime(Date d) {
         if (d == null) return "—";
         return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(d);
     }
 
+    /**
+     * Safely returns the size of a list, returning 0 if the list is null.
+     *
+     * @param list the list to measure
+     * @return the number of items in the list, or 0 if null
+     */
     private int sizeSafe(List<?> list) {
         return list == null ? 0 : list.size();
     }

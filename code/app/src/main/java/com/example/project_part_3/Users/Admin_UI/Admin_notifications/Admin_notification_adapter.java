@@ -13,18 +13,33 @@ import com.example.project_part_3.R;
 import java.util.ArrayList;
 
 /**
- * Adapter for admin notifications.
+ * Adapter for displaying admin notifications in a list view.
  */
 public class Admin_notification_adapter extends ArrayAdapter<Notification_Organizer> {
     private final int resourceLayout;
     private final ArrayList<Notification_Organizer> organizers;
 
+    /**
+     * Creates a new adapter for admin notifications.
+     *
+     * @param context   the current context
+     * @param resource  the layout resource ID for each list item
+     * @param organizers the list of organizer notifications to display
+     */
     public Admin_notification_adapter(Context context, int resource, ArrayList<Notification_Organizer> organizers) {
         super(context, 0, organizers);
         this.resourceLayout = resource;
         this.organizers = organizers;
     }
 
+    /**
+     * Returns a populated row View for the given position.
+     *
+     * @param position     the position of the item in the list
+     * @param convertView  an existing view to reuse if possible
+     * @param parent       the parent view group
+     * @return the populated list item view
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
@@ -54,11 +69,13 @@ public class Admin_notification_adapter extends ArrayAdapter<Notification_Organi
         return view;
     }
 
+    /**
+     * Holder class to cache view references for performance.
+     */
     private static class ViewHolder {
         TextView organizerName;
         TextView dateSent;
         TextView eventTitle;
         TextView eventMessage;
     }
-
 }

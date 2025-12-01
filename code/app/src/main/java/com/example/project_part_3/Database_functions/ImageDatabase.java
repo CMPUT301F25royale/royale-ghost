@@ -15,6 +15,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Database for string images on the firebase
+ */
 public class ImageDatabase {
 
     private final Database db;
