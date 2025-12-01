@@ -58,10 +58,17 @@ public class Organizer_profile_view extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         db = new Database(FirebaseFirestore.getInstance());
 
-        //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        username = prefs.getString("username", "");
+        username = prefs.getString("userEmail", ""); // Changed "username" to "userEmail"
 
+        if (username.isEmpty()) {
+            Log.e("OrganizerProfile", "User email not found in SharedPreferences. Cannot load profile.");
+            if (isAdded()) {
+                Toast.makeText(getContext(), "Error: User not logged in.", Toast.LENGTH_LONG).show();
+                logoutUser();
+            }
+            return;
+        }
         OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
         loadProfileImage();
 
@@ -69,7 +76,7 @@ public class Organizer_profile_view extends Fragment {
 
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+        db.fetchUser(prefs.getString("userEmail", "")).addOnSuccessListener(user -> {
             profileName.setText("Profile: " + user.getName());
         });
 

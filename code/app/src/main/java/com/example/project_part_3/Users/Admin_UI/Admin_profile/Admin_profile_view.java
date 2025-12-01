@@ -2,10 +2,14 @@
 
 package com.example.project_part_3.Users.Admin_UI.Admin_profile;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,25 +17,23 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
+import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
 import java.util.ArrayList;
 
-/**
- * The fragment for the admin profile view which displays a list of users and their information.
- * The admin can click on a user to open up a profile view of the user.
- */
 public class Admin_profile_view extends Fragment {
 
     private ListView profileList;
     private Admin_profile_adapter adapter;
     private Admin_profile_model adminprofilemodel;
+    private SharedPreferences prefs;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adminprofilemodel = new ViewModelProvider(this).get(Admin_profile_model.class);
-        adapter = new Admin_profile_adapter(getContext(), R.layout.admin_profiles_element, new ArrayList<>());
     }
 
     @Nullable
@@ -44,8 +46,13 @@ public class Admin_profile_view extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Initialize adapter here where context is guaranteed
+        adapter = new Admin_profile_adapter(requireContext(), R.layout.admin_profiles_element, new ArrayList<>());
+
         profileList = view.findViewById(R.id.admin_profiles_list);
         profileList.setAdapter(adapter);
+
+        prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
 
         adminprofilemodel.getUserProfiles().observe(getViewLifecycleOwner(), users -> {
             if (users != null) {
@@ -64,5 +71,19 @@ public class Admin_profile_view extends Fragment {
                 navController.navigate(R.id.action_admin_profile_view_to_admin_profile_info, bundle);
             }
         });
+
+        Button logout = view.findViewById(R.id.logout_button_admin);
+        logout.setOnClickListener(v -> logoutUser());
+    }
+
+    protected void logoutUser() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(requireActivity(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        requireContext().startActivity(intent);
+        requireActivity().finish();
     }
 }

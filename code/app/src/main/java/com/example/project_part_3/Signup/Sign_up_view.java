@@ -27,10 +27,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.util.ArrayList;
 import java.util.Objects;
 
-/**
- * Fragment for signing up. Initializes various buttons and text fields to allow the user
- * to sign up and create a new account as an entrant or an organizer
- */
 public class Sign_up_view extends Fragment {
     private Button Organizer_button_sign_up;
     private Button Entrant_button_sign_up;
@@ -43,7 +39,6 @@ public class Sign_up_view extends Fragment {
     Sign_up_model sign_up_model;
 
     public Sign_up_view() {
-        // Required empty public constructor
     }
 
     @Override
@@ -64,6 +59,7 @@ public class Sign_up_view extends Fragment {
         return inflater.inflate(R.layout.sign_up, container, false);
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
@@ -81,99 +77,44 @@ public class Sign_up_view extends Fragment {
         submit_sign_up.setOnClickListener(v -> {
             submit_sign_up.setText("Signing up...");
             submit_sign_up.setEnabled(false);
-
-            String name = Objects.requireNonNull(nameText.getText()).toString();
-            String password = Objects.requireNonNull(passwordText.getText()).toString();
-            String email = Objects.requireNonNull(emailText.getText()).toString();
-            String phone = phoneText.getText().toString();
-            ArrayList<String> interest = new ArrayList<>();
-
-            SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("username", name);
-            editor.putString("password", password);
-            editor.apply();
-
-            if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
-                Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                submit_sign_up.setEnabled(true); // re-enable the button after failure
-                return;
-            }
-            sign_up_model = new Sign_up_model(name, password, email, phone, interest, selectedOption);
-            sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
-                if (wasAdded) {
-                    Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                    // Grab token now!
-                    FirebaseMessaging.getInstance().getToken()
-                            .addOnCompleteListener(task -> {
-                                if (!task.isSuccessful()) {
-                                    Log.w("FCM", "Fetching FCM registration token failed", task.getException());
-                                    return;
-                                }
-                                String token = task.getResult();
-                                if (token != null) {
-                                    NotificationMessagingService.saveTokenForEmail(email, token);
-                                }
-                            });
-                    clearForm();
-                    Bundle args = new Bundle();
-                    args.putString("userEmail", email);
-                    NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
-                    if ("Organizer".equals(selectedOption)) {
-                        navController.navigate(R.id.action_sign_up_fragment_to_organizer_main_fragment, args);
-                    } else if ("Entrant".equals(selectedOption)) {
-                        navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
-                    submit_sign_up.setEnabled(true); // re-enable the button after failure
-                }
-            }).addOnFailureListener(e -> {
-                Log.d("Sign_up", "Failed to sign up");
-                Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                submit_sign_up.setEnabled(true); // re-enable the button after failure
-            });
-            // Use Handler to allow UI to update text before heavy logic runs
             new Handler(Looper.getMainLooper()).post(this::performSignUp);
         });
     }
 
     private void performSignUp() {
+        if (!isAdded()) return; // Prevent actions if fragment is detached
+
         String name = Objects.requireNonNull(nameText.getText()).toString();
         String password = Objects.requireNonNull(passwordText.getText()).toString();
         String email = Objects.requireNonNull(emailText.getText()).toString();
         String phone = phoneText.getText().toString();
         ArrayList<String> interest = new ArrayList<>();
 
-
         if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
-            Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please fill in all fields and select a user type", Toast.LENGTH_SHORT).show();
             resetButton();
             return;
         }
 
         sign_up_model = new Sign_up_model(name, password, email, phone,interest, selectedOption);
         sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+            if (!isAdded()) return;
             if (wasAdded) {
-                Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
-                // get token
+                Toast.makeText(getContext(), "Sign up successful", Toast.LENGTH_SHORT).show();
                 FirebaseMessaging.getInstance().getToken()
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful() && task.getResult() != null) {
                                 NotificationMessagingService.saveTokenForEmail(email, task.getResult());
+                            } else {
+                                Log.w("FCM", "Fetching FCM registration token failed", task.getException());
                             }
                         });
 
-                // save preferences
-                if (getContext() != null) {
-                    SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("userEmail", email);
-                    editor.putString("userType", selectedOption); // SelectedOption is still valid here
-                    editor.apply();
-                }
-
-                // navigate
+                SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("userEmail", email);
+                editor.putString("userType", selectedOption);
+                editor.apply();
                 Bundle args = new Bundle();
                 args.putString("userEmail", email);
                 NavController navController = NavHostFragment.findNavController(Sign_up_view.this);
@@ -184,25 +125,25 @@ public class Sign_up_view extends Fragment {
                     navController.navigate(R.id.action_sign_up_fragment_to_entrant_main, args);
                 }
 
-                // clear form
                 clearForm();
-
             } else {
-                Toast.makeText(getActivity(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Sign up failed: User already exists", Toast.LENGTH_SHORT).show();
                 resetButton();
             }
         }).addOnFailureListener(e -> {
-            Log.d("Sign_up", "Failed to sign up");
-            if (getContext() != null) {
-                Toast.makeText(getActivity(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (isAdded()) {
+                Log.d("Sign_up", "Failed to sign up", e);
+                Toast.makeText(getContext(), "Sign up failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                resetButton();
             }
-            resetButton();
         });
     }
 
     private void resetButton() {
-        submit_sign_up.setEnabled(true);
-        submit_sign_up.setText("Sign Up");
+        if (isAdded()) {
+            submit_sign_up.setEnabled(true);
+            submit_sign_up.setText("Sign Up");
+        }
     }
 
     private void selectOption(Button selectedButton) {
@@ -219,11 +160,14 @@ public class Sign_up_view extends Fragment {
     }
 
     private void clearForm(){
-        nameText.setText("");
-        passwordText.setText("");
-        emailText.setText("");
-        phoneText.setText("");
-        Organizer_button_sign_up.setBackgroundColor(Color.DKGRAY);
-        resetButton();
+        if (isAdded()) {
+            nameText.setText("");
+            passwordText.setText("");
+            emailText.setText("");
+            phoneText.setText("");
+            Organizer_button_sign_up.setBackgroundColor(Color.DKGRAY);
+            Entrant_button_sign_up.setBackgroundColor(Color.DKGRAY);
+            resetButton();
+        }
     }
 }

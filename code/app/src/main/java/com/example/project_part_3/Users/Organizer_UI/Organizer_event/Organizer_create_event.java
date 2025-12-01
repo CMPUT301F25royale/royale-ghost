@@ -46,4 +46,6 @@ public class Organizer_create_event extends Organizer_create_edit_event_template
     protected void pushEventToDatabase(Database db, Event event) {
 
     }
+
+
 }

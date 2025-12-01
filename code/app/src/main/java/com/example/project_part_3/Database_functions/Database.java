@@ -338,7 +338,6 @@ public class Database {
         DocumentReference userDocRef = db.collection(USERS_COLLECTION).document(email);
         return getEventsByOrganizer(email).continueWithTask(eventsTask -> {
             WriteBatch batch = db.batch();
-            batch.delete(userDocRef);
             if (eventsTask.isSuccessful()) {
                 for (Event event : eventsTask.getResult()) {
                     if (event.getImageInfo() != null && event.getImageInfo().getPath() != null && event.getImageInfo().getId() != null) {
@@ -377,6 +376,7 @@ public class Database {
                         }
                     }
                 }
+                batch.delete(userDocRef);
                 return batch.commit();
             });
         });
