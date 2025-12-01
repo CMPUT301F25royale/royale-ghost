@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.Users.Organizer;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.activity.result.ActivityResultLauncher;
