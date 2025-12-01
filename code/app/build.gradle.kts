@@ -46,8 +46,6 @@ dependencies {
     implementation(libs.identity.jvm)
     implementation(libs.firebase.storage)
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation(libs.firebase.messaging)
-    implementation(libs.firebase.auth)
     implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
