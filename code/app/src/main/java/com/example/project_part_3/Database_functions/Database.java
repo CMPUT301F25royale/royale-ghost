@@ -1,10 +1,14 @@
 package com.example.project_part_3.Database_functions;
+
 import static java.util.UUID.randomUUID;
+
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.Users.Admin;
@@ -23,36 +27,40 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
- * The Database class provides methods for interacting with the Firebase Firestore database. Most
- * Database methods are tasks that require onSuccessListeners() or onFailureListeners() to be called.
+ * The {@code Database} class provides a higher-level API for interacting with
+ * Firebase Firestore and Firebase Storage, mainly around {@link User},
+ * {@link Event}, and {@link Image_datamap} objects.
+ * <p>
+ * Most methods return a {@link Task} that must be handled asynchronously via
+ * {@code addOnSuccessListener(...)} / {@code addOnFailureListener(...)}.
  * Example usage:
- * <pre>
- *     FirebaseFirestore ff = FirebaseFirestore.getInstance();
- *     Database db = new Database(ff);
+ * <pre>{@code
+ * FirebaseFirestore ff = FirebaseFirestore.getInstance();
+ * Database db = new Database(ff);
  *
- *     String email = "ballsdeep69@gmail.com"
- *     db.fetchUser(email).addOnSuccessListener(user -> {
- *          user.setName("Dion"); // changes user name
+ * String email = "example@gmail.com";
+ * db.fetchUser(email).addOnSuccessListener(user -> {
+ *     if (user != null) {
+ *         user.setName("Dion");
  *     }
- *     db.fetchUser(email).addOnFailureListener(e -> {
- *          // e is the exception that was thrown
- *          Log.e("fetchUser", "Failed to fetch user", e);
- *     }
- *     db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
- *          // success = true if user was added
- *          // success = false if user exists already
- *     }
- * </pre>
+ * });
  *
+ * db.fetchUser(email).addOnFailureListener(e -> {
+ *     Log.e("fetchUser", "Failed to fetch user", e);
+ * });
+ *
+ * db.addUser(new Entrant(...)).addOnSuccessListener(success -> {
+ *     // success = true if user was added
+ *     // success = false if user already exists
+ * });
+ * }</pre>
  */
 public class Database {
     private final FirebaseFirestore db;
@@ -61,39 +69,78 @@ public class Database {
     private static final String EVENTS_SUBCOLLECTION = "organized_events";
     private static final String IMAGES_COLLECTION = "images";
 
+    /**
+     * Returns the underlying {@link FirebaseFirestore} instance.
+     *
+     * @return the Firestore instance used by this {@code Database}
+     */
     public FirebaseFirestore getDb() {
         return this.db;
     }
 
+    /**
+     * Creates a new {@code Database} wrapper using the given
+     * {@link FirebaseFirestore} instance and a default {@link FirebaseStorage}.
+     *
+     * @param db the Firestore instance to use
+     */
     public Database(FirebaseFirestore db) {
         this.db = db;
         this.storage = FirebaseStorage.getInstance();
     }
 
+    /**
+     * Registers a realtime listener for all documents in the {@code users} collection.
+     *
+     * @param listener the {@link EventListener} to receive snapshot updates
+     * @return a {@link ListenerRegistration} that can be used to remove the listener
+     */
     public ListenerRegistration listenForUsers(EventListener<QuerySnapshot> listener) {
         return db.collection(USERS_COLLECTION).addSnapshotListener(listener);
     }
 
+    /**
+     * Registers a realtime listener for a single user document identified by email.
+     *
+     * @param email    the user email / document ID
+     * @param listener the {@link EventListener} to receive snapshot updates
+     * @return a {@link ListenerRegistration} that can be used to remove the listener
+     */
     public ListenerRegistration listenForSingleUser(String email, EventListener<DocumentSnapshot> listener) {
         return db.collection(USERS_COLLECTION).document(email).addSnapshotListener(listener);
     }
 
+    /**
+     * Registers a realtime listener for all {@link Event} documents in the
+     * {@code organized_events} collection group.
+     *
+     * @param listener the {@link EventListener} to receive snapshot updates
+     * @return a {@link ListenerRegistration} that can be used to remove the listener
+     */
     public ListenerRegistration listenForEvents(EventListener<QuerySnapshot> listener) {
         return db.collectionGroup(EVENTS_SUBCOLLECTION).addSnapshotListener(listener);
     }
 
+    /**
+     * Registers a realtime listener for a single {@link Event} identified by ID
+     * using the {@code organized_events} collection group.
+     *
+     * @param eventId  the ID of the event to listen to
+     * @param listener the {@link EventListener} to receive snapshot updates
+     * @return a {@link ListenerRegistration} that can be used to remove the listener
+     */
     public ListenerRegistration listenForSingleEvent(String eventId, EventListener<QuerySnapshot> listener) {
         return db.collectionGroup(EVENTS_SUBCOLLECTION).whereEqualTo("id", eventId).limit(1).addSnapshotListener(listener);
     }
 
-
     /**
-     * Add a user to the database.
+     * Add a {@link User} to the database if they do not already exist.
+     * Internally calls {@link #doesUserExist(User)}.
      *
-     * @param user The user to add to the database.
-     * @return A task that completes when the user is added to the database.
+     * @param user the {@link User} to add to the database
+     * @return a {@link Task} that resolves to {@code true} if the user was added,
+     *         or {@code false} if the user already exists
      */
-
     public Task<Boolean> addUser(@NonNull User user) {
         return doesUserExist(user).continueWithTask(task -> {
             boolean exists = task.getResult();
@@ -107,7 +154,13 @@ public class Database {
         });
     }
 
-
+    /**
+     * Add an interest string to the {@code interests} array of the specified user.
+     *
+     * @param email       the email of the user (document ID in {@code users})
+     * @param newInterest the interest to add
+     * @return a {@link Task} resolving to {@code true} if the update succeeded
+     */
     public Task<Boolean> addInterest(String email, String newInterest) {
         return db.collection(USERS_COLLECTION)
                 .document(email)
@@ -120,6 +173,12 @@ public class Database {
                 });
     }
 
+    /**
+     * Fetches the {@code interests} field for the user with the given email.
+     *
+     * @param email the email of the user whose interests are requested
+     * @return a {@link Task} resolving to an {@link ArrayList} of interests
+     */
     public Task<ArrayList<String>> getInterests(String email) {
         return db.collection(USERS_COLLECTION)
                 .document(email)
@@ -138,7 +197,14 @@ public class Database {
                 });
     }
 
-    public Task<Boolean> deleteInterest (String email, String oldInterest) {
+    /**
+     * Removes an interest string from the {@code interests} array of the specified user.
+     *
+     * @param email       the email of the user (document ID in {@code users})
+     * @param oldInterest the interest to remove
+     * @return a {@link Task} resolving to {@code true} if the update succeeded
+     */
+    public Task<Boolean> deleteInterest(String email, String oldInterest) {
         return db.collection(USERS_COLLECTION)
                 .document(email)
                 .update("interests", FieldValue.arrayRemove(oldInterest))
@@ -149,14 +215,17 @@ public class Database {
                     return true;
                 });
     }
-    /**
-     * Check if a user exists in the database.
-     *
-     * @param email The email of the user to check.
-     * @param password The password of the user to check.
-     * @return A task that completes when the user is checked.
-     */
 
+    /**
+     * Check if a user exists and validate their password.
+     * <p>
+     * This method calls {@link #fetchUser(String)} and compares the stored password.
+     *
+     * @param email    the email of the user to check
+     * @param password the password of the user to check
+     * @return a {@link Task} that resolves to the {@link User} on success;
+     *         throws if the user is not found or the password is incorrect
+     */
     public Task<User> checkUser(String email, String password) {
         return fetchUser(email).continueWith(task -> {
             if (!task.isSuccessful()) {
@@ -175,11 +244,12 @@ public class Database {
     }
 
     /**
-     * Fetch a user from the database.
+     * Fetch a {@link User} from the database by email, resolving to the appropriate subtype.
+     * May return {@link Entrant}, {@link Organizer}, {@link Admin}, or plain {@link User}.
      *
-     * @param email The email of the user to fetch.
-     * @return A task that completes when the user is fetched.
-    */
+     * @param email the email of the user to fetch (document ID in {@code users})
+     * @return a {@link Task} resolving to a {@link User} instance, or {@code null} if not found
+     */
     public Task<User> fetchUser(String email) {
         DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
 
@@ -197,13 +267,12 @@ public class Database {
             String userType = doc.getString("userType");
 
             if ("Entrant".equals(userType)) {
-                return doc.toObject(Entrant.class); // Returns an Entrant object
+                return doc.toObject(Entrant.class);
             } else if ("Organizer".equals(userType)) {
-                return doc.toObject(Organizer.class); // Returns an Organizer object
+                return doc.toObject(Organizer.class);
             } else if ("Admin".equals(userType)) {
-                return doc.toObject(Admin.class); // Returns an Organizer object
+                return doc.toObject(Admin.class);
             } else {
-                // fallback: how did we get here?
                 Log.e("Database", "Unknown user type: " + userType);
                 return doc.toObject(User.class);
             }
@@ -211,21 +280,21 @@ public class Database {
     }
 
     /**
-     * Set a user in the database.
+     * Overwrites a {@link User} document in the {@code users} collection.
+     * This is a direct setter and does not return a {@link Task}.
      *
-     * @param user The user to set in the database.
+     * @param user the {@link User} to persist
      */
-
     public void setUser(User user) {
         db.collection(USERS_COLLECTION).document(user.getEmail()).set(user);
     }
 
-    /** Get a list of all users from the database.
+    /**
+     * Get a list of all {@link User} documents from the database.
      *
-     * @return A task that contains a list of all users in the database.
+     * @return a {@link Task} resolving to a {@link List} of {@link User} objects
      */
     public Task<List<User>> getAllUsers() {
-
         return db.collection(USERS_COLLECTION).get().continueWith(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(User.class);
@@ -236,13 +305,14 @@ public class Database {
         });
     }
 
-    /** Check if a user exists in the database.
+    /**
+     * Check if a given {@link User} already exists in the database by email.
+     * This method delegates to {@link #fetchUser(String)}.
      *
-     * @param user The user to check.
-     * @return A task that completes when the user is checked.
+     * @param user the {@link User} whose existence is being checked
+     * @return a {@link Task} resolving to {@code true} if the user exists, {@code false} otherwise
      */
     public Task<Boolean> doesUserExist(User user) {
-
         return fetchUser(user.getEmail()).continueWith(task -> {
             if (!task.isSuccessful()) {
                 Log.e("Database", "Failed to check if user exists", task.getException());
@@ -253,11 +323,11 @@ public class Database {
     }
 
     /**
-     * Add an event to the database.
+     * Add an {@link Event} to the database under its organizer's {@code organized_events}
+     * subcollection. If the organizer document does not exist yet, a minimal one is created.
      *
-     * @param event The event to add to the database. which aslo create a new subcollection if it doesn't exist yet
-     * @return A task that completes when the event is added to the database.
-     *
+     * @param event the {@link Event} to add; must have a non-null {@code organizerId}
+     * @return a {@link Task} resolving to {@code true} when the event is created successfully
      */
     public Task<Boolean> addEvent(@NonNull Event event) {
         if (event.getOrganizerId() == null) {
@@ -282,13 +352,13 @@ public class Database {
         });
     }
 
-    /** Fetch an event from the database.
+    /**
+     * Fetch an {@link Event} by its ID using the {@code organized_events} collection group.
      *
-     * @param eventId The ID of the event to fetch.
-     * @return A task that completes when the event is fetched.
+     * @param eventId the ID of the event to fetch
+     * @return a {@link Task} resolving to the {@link Event} if found; throws otherwise
      */
     public Task<Event> fetchEvent(String eventId) {
-
         return db.collectionGroup(EVENTS_SUBCOLLECTION).whereEqualTo("id", eventId).limit(1).get()
                 .continueWith(task -> {
                     if (!task.isSuccessful() || task.getResult() == null || task.getResult().isEmpty()) {
@@ -298,8 +368,12 @@ public class Database {
                 });
     }
 
+    /**
+     * Get a list of all {@link Event} documents from the {@code organized_events} collection group.
+     *
+     * @return a {@link Task} resolving to a {@link List} of {@link Event} objects
+     */
     public Task<List<Event>> getAllEvents() {
-
         return db.collectionGroup(EVENTS_SUBCOLLECTION).get().continueWith(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 return task.getResult().toObjects(Event.class);
@@ -311,13 +385,12 @@ public class Database {
     }
 
     /**
-     * Get a list of all events organized by an organizer.
+     * Get all events organized by a specific organizer.
      *
-     * @param email The email of the organizer.
-     * @return A task that contains a list of all events hosted by the organizer.
+     * @param email the email of the organizer (document ID in {@code users})
+     * @return a {@link Task} resolving to a {@link List} of {@link Event} objects
      */
     public Task<List<Event>> getEventsByOrganizer(@NonNull String email) {
-
         return db.collection(USERS_COLLECTION).document(email).collection(EVENTS_SUBCOLLECTION).get()
                 .continueWith(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -329,10 +402,11 @@ public class Database {
     }
 
     /**
-     * Delete a user from the database.
+     * Delete a {@link User}, their organized events, and associated images (profile picture
+     * and event posters). This method uses a {@link WriteBatch} to ensure consistency.
      *
-     * @param email The email of the user to delete.
-     * @return A task that completes when the user is deleted.
+     * @param email the email of the user to delete
+     * @return a {@link Task} that completes when all deletions are committed
      */
     public Task<Void> deleteUser(String email) {
         DocumentReference userDocRef = db.collection(USERS_COLLECTION).document(email);
@@ -381,10 +455,12 @@ public class Database {
             });
         });
     }
-    /** Delete an event from the database.
+
+    /**
+     * Delete an {@link Event} and its associated top-level image document (if any).
      *
-     * @param event The event to delete.
-     * @return A task that completes when the event is deleted.
+     * @param event the {@link Event} to delete
+     * @return a {@link Task} resolving to {@code true} once deletion is complete
      */
     public Task<Boolean> deleteEvent(Event event) {
         String eventId = event.getId();
@@ -423,10 +499,10 @@ public class Database {
     }
 
     /**
-     * Update an event in the database.
+     * Update an {@link Event} document using {@link Event#toMap()}.
      *
-     * @param event The event to update.
-     * @return A task that completes when the event is updated.
+     * @param event the {@link Event} to update (must have non-null ID and organizer ID)
+     * @return a {@link Task} resolving to {@code true} when the update completes
      */
     public Task<Boolean> updateEvent(Event event) {
         if (event == null || event.getOrganizerId() == null || event.getId() == null) {
@@ -449,7 +525,13 @@ public class Database {
         });
     }
 
-    /** Resolve the single organized_events doc for a given eventId. */
+    /**
+     * Resolve the single {@code organized_events} document for a given eventId.
+     * Used by methods such as {@link #addUserToWaitlistById(String, String)}.
+     *
+     * @param eventId the ID of the event
+     * @return a {@link Task} resolving to the {@link DocumentReference} for that event
+     */
     private Task<DocumentReference> findEventDocById(@NonNull String eventId) {
         return db.collectionGroup(EVENTS_SUBCOLLECTION)
                 .whereEqualTo("id", eventId)
@@ -465,11 +547,12 @@ public class Database {
     }
 
     /**
-     * Add a user to the waitlistUserIds array for an event located via collectionGroup(id).
+     * Add a user to the {@code waitlistUserIds} array for an event located via
+     * {@link #findEventDocById(String)}.
      *
-     * @param eventId The ID of the event to add the user to.
-     * @param userId The ID of the user to add to the waitlist.
-     * @return A task that completes when the user is added to the waitlist.
+     * @param eventId the ID of the event
+     * @param userId  the ID/email of the user to add to the waitlist
+     * @return a {@link Task} that completes when the user is added
      */
     public Task<Void> addUserToWaitlistById(@NonNull String eventId, @NonNull String userId) {
         return findEventDocById(eventId)
@@ -478,12 +561,12 @@ public class Database {
     }
 
     /**
+     * Remove a user from the {@code waitlistUserIds} array for an event located via
+     * {@link #findEventDocById(String)}.
      *
-     * Remove a user from the waitlistUserIds array for an event located via collectionGroup(id).
-     *
-     * @param eventId The ID of the event to remove the user from.
-     * @param userId The ID of the user to remove from the waitlist.
-     * @return A task that completes when the user is removed from the waitlist.
+     * @param eventId the ID of the event
+     * @param userId  the ID/email of the user to remove from the waitlist
+     * @return a {@link Task} that completes when the user is removed
      */
     public Task<Void> removeUserFromWaitlistById(@NonNull String eventId, @NonNull String userId) {
         return findEventDocById(eventId)
@@ -492,12 +575,12 @@ public class Database {
     }
 
     /**
-     * Check whether a given user is on the waitlist for an event found via collectionGroup(id).
+     * Check whether a given user is on the {@code waitlistUserIds} array for an event
+     * found via {@link #findEventDocById(String)}.
      *
-     * @param eventId The ID of the event to check.
-     * @param userId The ID of the user to check.
-     *
-     * @return A task that completes when the user is checked.
+     * @param eventId the ID of the event to check
+     * @param userId  the ID/email of the user to check
+     * @return a {@link Task} resolving to {@code true} if the user is on the waitlist
      */
     public Task<Boolean> isUserOnWaitlistById(@NonNull String eventId, @NonNull String userId) {
         return findEventDocById(eventId)
@@ -511,11 +594,11 @@ public class Database {
     }
 
     /**
-     * Get a list of all events a user is on the waitlist for.
+     * Get a list of all {@link Event} objects where a given user ID appears in
+     * {@code waitlistUserIds}.
      *
-
-     * @param userId The ID of the user to check.
-     * @return A task that contains a list of events that the specified user has waitlisted.
+     * @param userId the ID/email of the user to check
+     * @return a {@link Task} resolving to a {@link List} of {@link Event} objects
      */
     public Task<List<Event>> getEventsUserWaitlisted(@NonNull String userId) {
         return db.collectionGroup(EVENTS_SUBCOLLECTION)
@@ -528,7 +611,13 @@ public class Database {
                 });
     }
 
-    // Helpers to locate an event doc by its id in users/*/organized_events/*
+    /**
+     * Helper to locate an event doc by its ID in users' {@code organized_events}.
+     * Similar to {@link #findEventDocById(String)} but used by other waitlist helpers.
+     *
+     * @param eventId the ID of the event
+     * @return a {@link Task} resolving to the {@link DocumentReference} tied to the given event ID
+     */
     private Task<DocumentReference> findEventDocRefById(@NonNull String eventId) {
         return db.collectionGroup(EVENTS_SUBCOLLECTION)
                 .whereEqualTo("id", eventId)
@@ -544,11 +633,11 @@ public class Database {
     }
 
     /**
-     * Add a user to the waitlist for an event.
+     * Add a user email to the {@code waitlistUserIds} array for an event.
      *
-     * @param eventId The ID of the event which contains the waitlist to add the user to.
-     * @param userEmail The email of the user to add to the waitlist.
-     * @return A task that completes when the user is added to the waitlist.
+     * @param eventId   the ID of the event
+     * @param userEmail the user email to add to the waitlist
+     * @return a {@link Task} that completes when the user is added
      */
     public Task<Void> addUserToWaitlist(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
@@ -556,13 +645,14 @@ public class Database {
     }
 
     /**
-     * Remove a user from the waitlist for an event.
+     * Remove a user email from the {@code waitlistUserIds} array for an event, and
+     * also remove that event from the user's {@code eventsAppliedFor} list by calling
+     * {@link #removeEventFromUser(String, String)}.
      *
-     * @param eventId The ID of the event which contains the waitlist to remove the user from.
-     * @param userEmail The email of the user to remove from the waitlist.
-     * @return A task that completes when the user is removed from the waitlist.
+     * @param eventId   the ID of the event
+     * @param userEmail the user email to remove from the waitlist
+     * @return a {@link Task} that completes when all updates are applied
      */
-    // TODO: Wire this to fire when user clicks cancel button on the "events youve signed up for" tab
     public Task<Void> removeUserFromWaitlist(@NonNull String eventId, @NonNull String userEmail) {
         removeEventFromUser(userEmail, eventId);
         return findEventDocRefById(eventId)
@@ -570,11 +660,11 @@ public class Database {
     }
 
     /**
-     * Check whether a user is on the waitlist for an event.
+     * Check whether a user is on the {@code waitlistUserIds} array for a given event.
      *
-     * @param eventId The ID of the event to check.
-     * @param userEmail The email of the user to check.
-     * @return A task that completes when the user is checked.
+     * @param eventId   the ID of the event to check
+     * @param userEmail the email of the user to check
+     * @return a {@link Task} resolving to {@code true} if the user is on the waitlist
      */
     public Task<Boolean> isUserOnWaitlist(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
@@ -591,10 +681,11 @@ public class Database {
     }
 
     /**
-     * Get a list of all events a user is on the waitlist for.
+     * Get the list of event IDs that a user has applied for, stored in
+     * {@code eventsAppliedFor} on the {@link User} document.
      *
-     * @param userId The ID of the user to check.
-     * @return A task that contains a list of events that the specified user has waitlisted.
+     * @param userId the ID/email of the user to check
+     * @return a {@link Task} resolving to a {@link List} of event ID strings
      */
     public Task<List<String>> getEventsUserSelected(@NonNull String userId) {
         return db.collection(USERS_COLLECTION).whereEqualTo("email", userId)
@@ -610,9 +701,9 @@ public class Database {
                         return new ArrayList<String>();
                     }
                     DocumentSnapshot snap = querySnapshots.getDocuments().get(0);
-                    if(snap.contains("eventsAppliedFor")){
+                    if (snap.contains("eventsAppliedFor")) {
                         Object eventsObj = snap.get("eventsAppliedFor");
-                        if(eventsObj instanceof List) {
+                        if (eventsObj instanceof List) {
                             List<?> rawList = (List<?>) eventsObj;
                             List<String> events = new ArrayList<>();
                             for (Object item : rawList) {
@@ -628,11 +719,11 @@ public class Database {
     }
 
     /**
-     * Adds an event to a user
+     * Adds an event ID to a user's {@code eventsAppliedFor} array.
      *
-     * @param userId The ID of the user to add the event to.
-     * @param eventId The ID of the event to add to the user.
-     * @return A task that completes when the event is added to the user.
+     * @param userId  the user ID/email
+     * @param eventId the event ID to add
+     * @return a {@link Task} that completes when the update finishes
      */
     public Task<Void> addEventToUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId)
@@ -640,21 +731,22 @@ public class Database {
     }
 
     /**
-     * Remove an event from a user.
+     * Removes an event ID from a user's {@code eventsAppliedFor} array.
      *
-     * @param userId The ID of the user to remove the event from.
-     * @param eventId The ID of the event to remove from the user.
-     * @return A task that completes when the event is removed from the user.
+     * @param userId  the user ID/email
+     * @param eventId the event ID to remove
+     * @return a {@link Task} that completes when the update finishes
      */
     public Task<Void> removeEventFromUser(@NonNull String userId, @NonNull String eventId) {
         return db.collection(USERS_COLLECTION).document(userId).update("eventsAppliedFor", FieldValue.arrayRemove(eventId));
     }
 
     /**
-     * Get a list of all entrants who have accepted an invitation to a given event.
+     * Get a list of all {@link Entrant} objects who have accepted an invitation to a given event.
+     * Uses {@link Event#getAttendant_list()} and {@link #fetchUser(String)} under the hood.
      *
-     * @param event The event to get entrants for.
-     * @return A task that contains a list of entrants.
+     * @param event the {@link Event} to get entrants for
+     * @return a {@link Task} resolving to a {@link List} of {@link Entrant} objects
      */
     public Task<List<Entrant>> getAcceptedEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = event.getAttendant_list();
@@ -686,12 +778,12 @@ public class Database {
     }
 
     /**
-     * Get a list of all entrants who are on the waitlist for an event.
+     * Get a list of {@link Entrant} objects who are on the waitlist for an event,
+     * using {@link Event#getWaitlistUserIds()} and {@link #fetchUser(String)}.
      *
-     * @param event The event to get entrants for.
-     * @return A task that contains a list of entrants.
+     * @param event the {@link Event} to get entrants for
+     * @return a {@link Task} resolving to a {@link List} of {@link Entrant} objects
      */
-
     public Task<List<Entrant>> getAllEntrantsByEvent(@NonNull Event event) {
         ArrayList<String> entrantIDs = new ArrayList<>();
         if (event.getWaitlistUserIds() != null) {
@@ -724,47 +816,74 @@ public class Database {
         });
     }
 
-
+    /**
+     * Accepts an {@link Entrant} into an {@link Event} by calling
+     * {@link Event#acceptAttendant(String)} and then {@link #updateEvent(Event)}.
+     *
+     * @param event   the {@link Event} whose status will change
+     * @param entrant the {@link Entrant} to accept
+     * @return a {@link Task} resolving to {@code true} if the update succeeds
+     */
     public Task<Boolean> acceptEntrant(Event event, Entrant entrant) {
         event.acceptAttendant(entrant.getEmail());
         return updateEvent(event);
     }
 
+    /**
+     * Accepts an entrant (by email) into an {@link Event} by calling
+     * {@link Event#acceptAttendant(String)} and then {@link #updateEvent(Event)}.
+     *
+     * @param event        the {@link Event} whose status will change
+     * @param entrantEmail the email of the entrant to accept
+     * @return a {@link Task} resolving to {@code true} if the update succeeds
+     */
     public Task<Boolean> acceptEntrant(Event event, String entrantEmail) {
         event.acceptAttendant(entrantEmail);
         return updateEvent(event);
     }
 
     /**
-     * Decline an entrant from an event.
+     * Declines an {@link Entrant} from an {@link Event} by calling
+     * {@link Event#declineAttendant(String)} and then {@link #updateEvent(Event)}.
      *
-     * @param event The event to decline the entrant from.
-     * @param entrant The entrant to decline.
-     * @return A task that completes when the entrant is declined.
+     * @param event   the {@link Event} to decline the entrant from
+     * @param entrant the {@link Entrant} to decline
+     * @return a {@link Task} resolving to {@code true} if the update succeeds
      */
     public Task<Boolean> declineEntrant(Event event, Entrant entrant) {
         event.declineAttendant(entrant.getEmail());
         return updateEvent(event);
     }
+
+    /**
+     * Declines an entrant (by email) from an {@link Event} by calling
+     * {@link Event#declineAttendant(String)} and then {@link #updateEvent(Event)}.
+     *
+     * @param event        the {@link Event} to decline the entrant from
+     * @param entrantEmail the email of the entrant to decline
+     * @return a {@link Task} resolving to {@code true} if the update succeeds
+     */
     public Task<Boolean> declineEntrant(Event event, String entrantEmail) {
         event.declineAttendant(entrantEmail);
         return updateEvent(event);
     }
 
-
     /**
-     * Upload an image to Firebase Storage.
+     * Uploads an image to Firebase Storage, replaces any existing image of the same type
+     * for the given user/event, and updates both the nested metadata document and the
+     * top-level {@code images} collection with an {@link Image_datamap}.
      *
-     * @param imageUri The URI of the image to upload.
-     * @param imageType The type of the image.
-     * @param description The description of the image.
-     * @param associated_user The ID of the owner of the image.
-     * @param eventId The ID of the event the image is associated with.
-     * @return A task that completes when the image is uploaded.
+     * @param imageUri        the URI of the image file to upload
+     * @param imageType       the logical type/category of the image (e.g., {@code "profile_pic"}, {@code "event_poster"})
+     * @param description     a descriptive text associated with the image
+     * @param associated_user the user ID/email to whom this image belongs
+     * @param eventId         optional event ID if the image is associated with a specific event;
+     *                        may be {@code null}
+     * @return a {@link Task} that resolves to an {@link Image_datamap} containing the
+     *         uploaded image’s metadata once all upload and Firestore writes complete
+     * @see #deleteImage(String, String, String)
+     * @see #updateImageMetadataInDocument(Image_datamap, String, String, String)
      */
-
-
-
     public Task<Image_datamap> uploadImage(@NonNull Uri imageUri, @NonNull String imageType, @NonNull String description, @NonNull String associated_user, @Nullable String eventId) {
         Task<Void> deleteOldImageTask = deleteOldImageIfExists(this, associated_user, eventId, imageType);
 
@@ -786,7 +905,7 @@ public class Database {
                     throw uriTask.getException();
                 }
                 String downloadUrl = uriTask.getResult().toString();
-                Image_datamap metadata = new Image_datamap(newImageId,downloadUrl, imagePath, imageType, description, eventId, associated_user);
+                Image_datamap metadata = new Image_datamap(newImageId, downloadUrl, imagePath, imageType, description, eventId, associated_user);
 
                 Task<Void> updateNestedDocTask = updateImageMetadataInDocument(metadata, associated_user, eventId, imageType);
                 Task<Void> createTopLevelDocTask = db.collection(IMAGES_COLLECTION).document(newImageId).set(metadata);
@@ -802,24 +921,43 @@ public class Database {
     }
 
     /**
-     * Delete an image from Firebase Storage.
+     * Delete an image in Firebase Storage by its public download URL.
      *
-     * @param imageUrl The URL of the image to delete.
-     * @return A task that completes when the image is deleted.
+     * @param imageUrl the Storage URL of the image to delete
+     * @return a {@link Task} that completes when the image is deleted
      */
     public Task<Void> deleteImageByUrl(@NonNull String imageUrl) {
         StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
         return photoRef.delete();
     }
 
+    /**
+     * If applicable, deletes any previous image of the given type for the owner/event by
+     * delegating to {@link #deleteImage(String, String, String)}.
+     *
+     * @param db       the {@link Database} instance
+     * @param ownerId  the owner user ID/email
+     * @param eventId  the event ID (for event posters), may be {@code null}
+     * @param imageType the type of image (e.g., {@code "profile_pic"}, {@code "event_poster"})
+     * @return a {@link Task} that completes when any old image is deleted
+     */
     private Task<Void> deleteOldImageIfExists(Database db, String ownerId, @Nullable String eventId, String imageType) {
         if ("event_poster".equals(imageType) && eventId == null) {
             return Tasks.forResult(null);
         }
         return db.deleteImage(ownerId, eventId, imageType);
     }
-    
 
+    /**
+     * Updates the metadata fields ({@code profilePicUrl}/{@code posterImageUrl} and {@code imageInfo})
+     * for either a user document or a nested event document.
+     *
+     * @param metadata the {@link Image_datamap} to write, or {@code null} to clear
+     * @param ownerId  the owner user ID/email
+     * @param eventId  the event ID (for event posters), may be {@code null}
+     * @param imageType the type of image (e.g., {@code "profile_pic"}, {@code "event_poster"})
+     * @return a {@link Task} that completes when the Firestore update finishes
+     */
     private Task<Void> updateImageMetadataInDocument(Image_datamap metadata, String ownerId, @Nullable String eventId, String imageType) {
         DocumentReference docRef;
         String urlField, infoField;
@@ -843,10 +981,18 @@ public class Database {
         return docRef.update(updates);
     }
 
-
-
-
-
+    /**
+     * Deletes an image associated with a user or a specific event, including its metadata
+     * in Firestore and the actual file in Firebase Storage. The method determines the
+     * correct document to inspect based on the image type and optional event ID.
+     *
+     * @param associatedUser the ID or email of the user who owns the image
+     * @param eventId        the event ID if the image belongs to a specific event; may be {@code null}
+     * @param imageType      the category of the image, such as {@code "profile_pic"} or {@code "event_poster"}
+     * @return a {@link Task} that completes when all deletion operations (Firestore and Storage)
+     *         have finished; resolves to {@code null} on success
+     * @see #uploadImage(Uri, String, String, String, String)
+     */
     public Task<Void> deleteImage(@NonNull String associatedUser, @Nullable String eventId, @NonNull String imageType) {
         DocumentReference docRef;
         if ("profile_pic".equals(imageType)) {
@@ -887,6 +1033,15 @@ public class Database {
         });
     }
 
+    /**
+     * Retrieves the stored image metadata for a user or event, depending on the image type.
+     *
+     * @param ownerId   the ID/email of the user who owns the image
+     * @param eventId   the event ID if the image belongs to a specific event; may be {@code null}
+     * @param imageType the type of image to fetch (e.g., {@code "profile_pic"}, {@code "event_poster"})
+     * @return a {@link Task} resolving to an {@link Image_datamap} if found,
+     *         or {@code null} if no image metadata exists
+     */
     public Task<Image_datamap> fetchImage(@NonNull String ownerId, @Nullable String eventId, @NonNull String imageType) {
         DocumentReference docRef;
         if ("profile_pic".equals(imageType)) {
@@ -905,6 +1060,15 @@ public class Database {
         });
     }
 
+    /**
+     * Updates the description field of an existing image’s metadata document.
+     *
+     * @param newDescription the new description text to write
+     * @param ownerId        the ID/email of the user who owns the image
+     * @param eventId        the event ID if the image belongs to a specific event; may be {@code null}
+     * @param imageType      the type of the image to update
+     * @return a {@link Task} that completes when the Firestore update finishes
+     */
     public Task<Void> updateImage(@NonNull String newDescription, @NonNull String ownerId, @Nullable String eventId, @NonNull String imageType) {
         DocumentReference docRef;
         if ("profile_pic".equals(imageType)) {
@@ -917,6 +1081,15 @@ public class Database {
         return docRef.update("imageInfo.description", newDescription);
     }
 
+    /**
+     * Registers a realtime Firestore listener for image metadata changes on a user or event document.
+     *
+     * @param ownerId   the ID/email of the user who owns the image
+     * @param eventId   the event ID if the image belongs to a specific event; may be {@code null}
+     * @param imageType the type of image to listen for
+     * @param listener  the callback invoked when metadata changes or errors occur
+     * @return a {@link ListenerRegistration} used to stop listening to document updates
+     */
     public ListenerRegistration listenToImageChanges(@NonNull String ownerId, @Nullable String eventId, @NonNull String imageType, @NonNull EventListener<Image_datamap> listener) {
         DocumentReference docRef;
         if ("profile_pic".equals(imageType)) {
@@ -943,6 +1116,14 @@ public class Database {
         });
     }
 
+    /**
+     * Deletes an image file in Firebase Storage and its corresponding Firestore metadata document,
+     * then clears the image metadata from the owner’s nested user/event document.
+     *
+     * @param metadata the {@link Image_datamap} describing the image to delete, including ID and storage path
+     * @return a {@link Task} that completes once both the file and metadata have been deleted
+     * @see #updateImageMetadataInDocument(Image_datamap, String, String, String)
+     */
     public Task<Void> deleteImageFromMetadata(Image_datamap metadata) {
         if (metadata == null || metadata.getPath() == null || metadata.getId() == null) {
             return Tasks.forException(new IllegalArgumentException("Metadata is incomplete for deletion."));
@@ -966,7 +1147,16 @@ public class Database {
         });
     }
 
-    // If user accepted move user from selectedUserIds to confirmedUserIds clean other lists
+    /**
+     * Marks a user as confirmed for an event lottery by moving them from
+     * {@code selectedUserIds} to {@code confirmedUserIds} and removing them
+     * from the other participation lists.
+     *
+     * @param eventId   the ID of the event the user was selected for
+     * @param userEmail the email of the user accepting the lottery selection
+     * @return a {@link Task} that completes when Firestore updates are applied
+     * @see #declineLotterySelection(String, String)
+     */
     public Task<Void> acceptLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update(
@@ -977,7 +1167,15 @@ public class Database {
                 ));
     }
 
-    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
+    /**
+     * Marks a user as declined for an event lottery by adding them to
+     * {@code declinedUserIds} and removing them from all other participation lists.
+     *
+     * @param eventId   the ID of the event the user was selected for
+     * @param userEmail the email of the user declining the lottery selection
+     * @return a {@link Task} that completes when Firestore updates are applied
+     * @see #acceptLotterySelection(String, String)
+     */
     public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update(
@@ -989,4 +1187,3 @@ public class Database {
     }
 
 }
-
