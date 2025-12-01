@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.MainActivity;
 import com.example.project_part_3.Users.Organizer;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,11 +37,13 @@ import com.example.project_part_3.R;
  * Fragment that displays a profile for an organizer.
  */
 public class Organizer_profile_view extends Fragment {
-    protected Database db;
-    protected String username;
-    protected ImageView OrganizerProfileImageView;
-    protected Uri ImageUri;
-    protected SharedPreferences prefs;
+    private Database db;
+    private String username;
+    private ImageView OrganizerProfileImageView;
+    private Button interests;
+    private MaterialSwitch notification;
+    private Uri ImageUri;
+    private SharedPreferences prefs;
 
     // Interface for the input dialog
     protected interface InputDialogCallback {
@@ -69,7 +72,6 @@ public class Organizer_profile_view extends Fragment {
 
         OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
         loadProfileImage();
-
         OrganizerProfileImageView.setOnClickListener(v -> showImagePopup());
 
         // change text at top so that it displays the user's name
@@ -88,6 +90,10 @@ public class Organizer_profile_view extends Fragment {
      * Sets up all standard profile buttons.
      */
     protected void setupButtons(View view, TextView profileNameLabel) {
+        interests = view.findViewById(R.id.Add_interest_button);
+        interests.setVisibility(View.GONE);
+        notification = view.findViewById(R.id.entrant_notifications_switch);
+        notification.setVisibility(View.GONE);
         // Reset Password
         Button passwordReset = view.findViewById(R.id.Pass_Reset);
         if (passwordReset != null) {
