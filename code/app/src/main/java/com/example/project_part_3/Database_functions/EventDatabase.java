@@ -31,6 +31,12 @@ public class EventDatabase {
     // =================================================================================
     private static EventDatabase instance;
 
+    /**
+     * This is a function that checks if there is a {@code EventDatabase} object in use and if there is, it
+     * uses it, if not it makes a new one
+     * @return the instance to use
+     */
+
     public static synchronized EventDatabase getInstance() {
         if (instance == null) {
             instance = new EventDatabase();
@@ -95,10 +101,28 @@ public class EventDatabase {
         }
     }
 
+
+    /**
+     * Returns a LiveData object containing a list of all events currently
+     * loaded by the ViewModel. This LiveData is typically updated by one
+     * of the event listeners registered elsewhere in the application.
+     *
+     * @return a MutableLiveData holding a list of Event objects
+     */
     public MutableLiveData<List<Event>> getAllEvents() {
         return allEvents;
     }
 
+    /**
+     * Registers a realtime listener for a single event identified by its ID.
+     * If an existing listener is active, it is removed before the new one
+     * is created. When Firestore sends an update, the corresponding Event
+     * object is posted into the provided LiveData. If the document does not
+     * exist or an error occurs, the LiveData is updated with null.
+     *
+     * @param eventId the unique ID of the event to listen for
+     * @param eventLiveData the LiveData that will receive updates to the event
+     */
     public void listenForSingleEvent(String eventId, MutableLiveData<Event> eventLiveData) {
         if (singleEventListener != null) {
             singleEventListener.remove();
@@ -118,6 +142,16 @@ public class EventDatabase {
         });
     }
 
+    /**
+     * Deletes the specified event from the database and notifies the provided
+     * listener of the operation result. The deletion process includes removing
+     * the event document and any associated resources handled within the
+     * database layer. If the deletion succeeds, {@code onSuccess()} is invoked;
+     * otherwise, {@code onFailure(String)} is called with an error message.
+     *
+     * @param event    the Event object to be deleted
+     * @param listener a callback interface that reports success or failure
+     */
     public void deleteEvent(Event event, OnEventDeleteListener listener) {
         db.deleteEvent(event).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult()) {
@@ -129,6 +163,16 @@ public class EventDatabase {
         });
     }
 
+    /**
+     * Adds a new event to the database and notifies the provided listener of the
+     * operation result. Before submission, the event is initialized to indicate
+     * that its lottery has not yet been processed. If the database insertion
+     * succeeds, {@code onSuccess()} is invoked on the listener; otherwise,
+     * {@code onFailure(String)} is called with an error message.
+     *
+     * @param event    the Event object to be added
+     * @param listener a callback interface that reports success or failure
+     */
     public void addEvent(Event event, OnEventAddListener listener) {
         event.setLotteryDone(false);
         db.addEvent(event).addOnCompleteListener(task -> {

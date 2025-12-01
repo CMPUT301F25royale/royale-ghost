@@ -177,7 +177,7 @@ public class Database {
      * Fetches the {@code interests} field for the user with the given email.
      *
      * @param email the email of the user whose interests are requested
-     * @return a {@link Task} resolving to an {@link ArrayList} of interests
+     * @return a {@link Task} resolving to an Arraylist of interests
      */
     public Task<ArrayList<String>> getInterests(String email) {
         return db.collection(USERS_COLLECTION)
@@ -202,7 +202,7 @@ public class Database {
      *
      * @param email       the email of the user (document ID in {@code users})
      * @param oldInterest the interest to remove
-     * @return a {@link Task} resolving to {@code true} if the update succeeded
+     * @return a {@link Task} resolving to true if the update succeeded
      */
     public Task<Boolean> deleteInterest(String email, String oldInterest) {
         return db.collection(USERS_COLLECTION)
