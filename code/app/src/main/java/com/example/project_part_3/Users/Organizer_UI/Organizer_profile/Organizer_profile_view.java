@@ -49,7 +49,7 @@ public class Organizer_profile_view extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.entrant_profile, container, false);
+        return inflater.inflate(R.layout.organizer_profile, container, false);
     }
 
     @Override
