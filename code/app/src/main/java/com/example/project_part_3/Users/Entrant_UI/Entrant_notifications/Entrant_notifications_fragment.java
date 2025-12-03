@@ -85,7 +85,7 @@ public class Entrant_notifications_fragment extends Fragment {
 
     private String getCurrentUserEmail() {
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        return prefs.getString("username", null);
+        return prefs.getString("userEmail", null);
     }
 
     private void listenForNotifications(@NonNull String email) {

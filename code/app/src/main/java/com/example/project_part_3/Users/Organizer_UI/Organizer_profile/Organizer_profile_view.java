@@ -63,7 +63,7 @@ public class Organizer_profile_view extends Fragment {
 
         //get password
         prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        username = prefs.getString("username", "");
+        username = prefs.getString("userEmail", "");
 
         OrganizerProfileImageView = view.findViewById(R.id.profile_photo);
         loadProfileImage();
@@ -71,7 +71,7 @@ public class Organizer_profile_view extends Fragment {
 
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+        db.fetchUser(prefs.getString("userEmail", "")).addOnSuccessListener(user -> {
             profileName.setText("Profile: " + user.getName());
         });
 

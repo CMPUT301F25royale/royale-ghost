@@ -88,12 +88,6 @@ public class Sign_up_view extends Fragment {
             String phone = phoneText.getText().toString();
             ArrayList<String> interest = new ArrayList<>();
 
-            SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("userEmail", name);
-            editor.putString("password", password);
-            editor.apply();
-
             if (name.isEmpty() || password.isEmpty() || email.isEmpty() || selectedOption == null) {
                 Toast.makeText(getActivity(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 submit_sign_up.setEnabled(true); // re-enable the button after failure
@@ -101,6 +95,10 @@ public class Sign_up_view extends Fragment {
             }
             sign_up_model = new Sign_up_model(name, password, email, phone, interest, selectedOption);
             sign_up_model.registerUser().addOnSuccessListener(wasAdded -> {
+                if (!isAdded()) {
+                    return;
+                }
+
                 if (wasAdded) {
                     Toast.makeText(getActivity(), "Sign up successful", Toast.LENGTH_SHORT).show();
                     // Grab token now!
@@ -115,6 +113,13 @@ public class Sign_up_view extends Fragment {
                                     NotificationMessagingService.saveTokenForEmail(email, token);
                                 }
                             });
+                    SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("userEmail", email);
+                    editor.putString("username", email); // just in case lol
+                    editor.putString("password", password);
+                    editor.apply();
+
                     clearForm();
                     Bundle args = new Bundle();
                     args.putString("userEmail", email);
