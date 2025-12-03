@@ -336,7 +336,14 @@ public class Organizer_entrant_view extends Fragment {
         mapFragment.getMapAsync(googleMap -> {
             db.getEntrantLocationsForEvent(event.getId())
                     .addOnSuccessListener(docs -> {
-                        if (docs == null || docs.isEmpty()) {
+                        if (docs == null) {
+                            Log.d("GeoDebug", "getEntrantLocationsForEvent: docs is null");
+                            return;
+                        }
+
+                        Log.d("GeoDebug", "getEntrantLocationsForEvent: got " + docs.size() + " docs for event " + event.getId());
+
+                        if (docs.isEmpty()) {
                             Log.d("GeoDebug", "No entrant locations for this event.");
                             return;
                         }
@@ -345,8 +352,13 @@ public class Organizer_entrant_view extends Fragment {
                         boolean hasAny = false;
 
                         for (DocumentSnapshot snap : docs) {
+                            Log.d("GeoDebug", "Location doc: " + snap.getId() + " => " + snap.getData());
+
                             GeoPoint gp = snap.getGeoPoint("location");
-                            if (gp == null) continue;
+                            if (gp == null) {
+                                Log.d("GeoDebug", "Doc " + snap.getId() + " has no GeoPoint field 'location'");
+                                continue;
+                            }
 
                             String email = snap.getString("userEmail");
                             LatLng pos = new LatLng(gp.getLatitude(), gp.getLongitude());
@@ -363,14 +375,17 @@ public class Organizer_entrant_view extends Fragment {
 
                         if (hasAny) {
                             LatLngBounds bounds = boundsBuilder.build();
-                            googleMap.moveCamera(
-                                    CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                            googleMap.setOnMapLoadedCallback(() ->
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
                             );
+                        } else {
+                            Log.d("GeoDebug", "No valid GeoPoints found in entrant_locations docs.");
                         }
                     })
-                    .addOnFailureListener(e -> Log.d("GeoDebug",
-                            "Failed to load entrant locations: "
-                                    + (e != null ? e.getMessage() : "unknown")));
+                    .addOnFailureListener(e ->
+                            Log.e("GeoDebug", "Failed to load entrant locations", e)
+                    );
+
         });
     }
 }
