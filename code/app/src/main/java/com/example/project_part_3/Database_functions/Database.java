@@ -1190,7 +1190,7 @@ public class Database {
             @NonNull String userEmail,
             double lat,
             double lng
-    ) {
+    ){
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> {
                     Map<String, Object> data = new HashMap<>();
@@ -1203,9 +1203,7 @@ public class Database {
                             .set(data);
                 });
     }
-    public Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
-            @NonNull String eventId
-    ) {
+    public Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(@NonNull String eventId) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.collection("entrant_locations").get())
                 .continueWith(task -> {

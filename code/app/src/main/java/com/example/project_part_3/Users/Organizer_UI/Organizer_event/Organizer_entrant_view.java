@@ -325,7 +325,6 @@ public class Organizer_entrant_view extends Fragment {
         });
     }
 
-    // 🔹 NEW: load entrant locations from Firestore and show markers on map
     private void setUpMapForEvent(View root, Event event) {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.entrant_map_fragment);
 

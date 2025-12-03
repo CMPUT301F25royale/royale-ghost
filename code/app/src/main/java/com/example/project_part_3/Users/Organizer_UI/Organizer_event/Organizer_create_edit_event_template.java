@@ -433,7 +433,7 @@ public abstract class Organizer_create_edit_event_template extends Fragment {
                     Log.d("CreateEvent", "Event document created. Now uploading image for event ID: " + newEvent.getId());
                     db.uploadImage(ImageUri, "event_poster", description, organizerEmail, newEvent.getId())
                             .addOnSuccessListener(imageMetadata -> {
-                                Toast.makeText(getContext(), "Event and poster created successfully!", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getContext(), "Event and poster created successfully!", Toast.LENGTH_SHORT).show();
                                 navigateBack();
                             })
                             .addOnFailureListener(e -> {

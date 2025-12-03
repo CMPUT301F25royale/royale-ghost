@@ -1,5 +1,7 @@
 package com.example.project_part_3.Users.Entrant_UI.Entrant_event;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -224,24 +226,82 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                         } else {
                             joinBtn.setText("Enter lottery");
                             joinBtn.setEnabled(true);
+
                             joinBtn.setOnClickListener(v -> {
                                 joinBtn.setEnabled(false);
                                 joinBtn.setText("Entering…");
-                                db.addUserToWaitlistById(event.getId(), viewerUserEmail)
-                                        .addOnSuccessListener(ignored -> {
-                                            joinBtn.setText("Entered");
-                                            Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
-                                            List<String> list = event.getWaitlistUserIds();
-                                            int newCount = (list == null ? 0 : list.size()) + 1;
-                                            vWaitlist.setText(String.valueOf(newCount));
+
+                                // 1. Check permissions
+                                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                                        != PackageManager.PERMISSION_GRANTED &&
+                                        ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                                                != PackageManager.PERMISSION_GRANTED) {
+
+                                    ActivityCompat.requestPermissions(
+                                            this,
+                                            new String[] {
+                                                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                                                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                                            },
+                                            REQ_LOCATION
+                                    );
+
+                                    joinBtn.setEnabled(true);
+                                    joinBtn.setText("Enter lottery");
+                                    Toast.makeText(this, "Please grant location permission and try again.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                // 2. Get last known location
+                                fusedLocationClient.getLastLocation()
+                                        .addOnSuccessListener(location -> {
+                                            if (location == null) {
+                                                // No location available – you can decide what to do here
+                                                Toast.makeText(this, "Could not get your location.", Toast.LENGTH_SHORT).show();
+                                                joinBtn.setEnabled(true);
+                                                joinBtn.setText("Enter lottery");
+                                                return;
+                                            }
+
+                                            double lat = location.getLatitude();
+                                            double lng = location.getLongitude();
+
+                                            // 3. Save location, then add to waitlist
+                                            db.saveUserLocationForEvent(event.getId(), viewerUserEmail, lat, lng)
+                                                    .addOnSuccessListener(ignored1 -> {
+                                                        db.addUserToWaitlistById(event.getId(), viewerUserEmail)
+                                                                .addOnSuccessListener(ignored2 -> {
+                                                                    joinBtn.setText("Entered");
+                                                                    Toast.makeText(this, "You’ve been added to the waitlist", Toast.LENGTH_SHORT).show();
+                                                                    List<String> list = event.getWaitlistUserIds();
+                                                                    int newCount = (list == null ? 0 : list.size()) + 1;
+                                                                    vWaitlist.setText(String.valueOf(newCount));
+                                                                })
+                                                                .addOnFailureListener(e -> {
+                                                                    joinBtn.setText("Enter lottery");
+                                                                    joinBtn.setEnabled(true);
+                                                                    Toast.makeText(this, "Failed to join: " +
+                                                                                    (e != null ? e.getMessage() : "unknown"),
+                                                                            Toast.LENGTH_LONG).show();
+                                                                });
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        joinBtn.setText("Enter lottery");
+                                                        joinBtn.setEnabled(true);
+                                                        Toast.makeText(this, "Failed to save location: " +
+                                                                        (e != null ? e.getMessage() : "unknown"),
+                                                                Toast.LENGTH_LONG).show();
+                                                    });
                                         })
                                         .addOnFailureListener(e -> {
-                                            joinBtn.setText("Enter lottery");
                                             joinBtn.setEnabled(true);
-                                            Toast.makeText(this, "Failed to join: " +
-                                                    (e != null ? e.getMessage() : "unknown"), Toast.LENGTH_LONG).show();
+                                            joinBtn.setText("Enter lottery");
+                                            Toast.makeText(this, "Failed to get location: " +
+                                                            (e != null ? e.getMessage() : "unknown"),
+                                                    Toast.LENGTH_LONG).show();
                                         });
                             });
+
                         }
                     })
                     .addOnFailureListener(e -> joinBtn.setVisibility(View.GONE));
