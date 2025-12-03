@@ -28,7 +28,7 @@
             android:id="@+id/organizer_entrant_view_event_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Event: EventTitle"
+            android:text="Event:"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"/>
@@ -115,30 +115,6 @@
             android:checked="true"
             app:trackTint="@color/switch_track_selector"
             />
-
-        <Button
-            android:id="@+id/see_map_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/btn_pill_black"
-            app:backgroundTint="@color/black"
-            android:textColor="@color/white"
-            android:layout_gravity="fill_horizontal"
-            android:layout_columnSpan="1"
-            android:text="See Map"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/notify_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/btn_pill_black"
-            app:backgroundTint="@color/black"
-            android:textColor="@color/white"
-            android:layout_gravity="fill_horizontal"
-            android:layout_columnSpan="1"
-            android:text="Notify"
-            android:textSize="16sp" />
 
     </GridLayout>
 

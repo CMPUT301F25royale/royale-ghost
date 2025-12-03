@@ -1,8 +1,10 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -62,6 +65,7 @@ public class Organizer_entrant_view extends Fragment {
     private SwitchCompat showChosenEntrantsSwitch;
     private SwitchCompat showCancelledEntrantsSwitch;
     private Organizer_entrant_adapter adapter;
+    private String name;
 
     private OrganizerSharedViewModel model;
     private Database db;
@@ -428,8 +432,7 @@ public class Organizer_entrant_view extends Fragment {
 
     // 🔹 NEW: load entrant locations from Firestore and show markers on map
     private void setUpMapForEvent(View root, Event event) {
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager()
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                         .findFragmentById(R.id.entrant_map_fragment);
 
         if (mapFragment == null) {

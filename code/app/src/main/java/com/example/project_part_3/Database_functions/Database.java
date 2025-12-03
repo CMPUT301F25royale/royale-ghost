@@ -185,7 +185,12 @@ public class Database {
      * @return A task that completes when the user is fetched.
     */
     public Task<User> fetchUser(String email) {
-        DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("fetchUser: email must not be null or empty");
+        }
+
+        String trimmedEmail = email.trim();
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(trimmedEmail);
 
         return docRef.get().continueWith(task -> {
             if (!task.isSuccessful()) {
@@ -1010,9 +1015,7 @@ public class Database {
                             .set(data);
                 });
     }
-    public com.google.android.gms.tasks.Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
-            @NonNull String eventId
-    ) {
+    public Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(@NonNull String eventId) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.collection("entrant_locations").get())
                 .continueWith(task -> {
