@@ -72,8 +72,7 @@ public class Entrant_profile_view extends Fragment{
         db = new Database(FirebaseFirestore.getInstance());
 
         SharedPreferences prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE);
-        String updateInterestEmail = prefs.getString("username", "");
-        username = prefs.getString("username", "");
+        String updateInterestEmail = prefs.getString("userEmail", "");
 
         profileImageView = view.findViewById(R.id.profile_photo);
 
@@ -83,9 +82,9 @@ public class Entrant_profile_view extends Fragment{
 
         // change text at top so that it displays the user's name
         TextView profileName = view.findViewById(R.id.Profile_Title);
-        db.fetchUser(prefs.getString("username", "")).addOnSuccessListener(user -> {
+        db.fetchUser(updateInterestEmail).addOnSuccessListener(user -> {
             name = user.getName();
-            profileName.setText("Profile: " + user.getName());
+            profileName.setText("Profile: " + name);
         });
 
         // add interest
@@ -104,7 +103,7 @@ public class Entrant_profile_view extends Fragment{
         addInterest.setOnClickListener(v -> {
             InterestDialog((input) -> {
                 if (input == null || input.isEmpty()) return;
-                String username = prefs.getString("username", "");
+                String username = prefs.getString("userEmail", "");
                 db.addInterest(username, input)
                         .addOnSuccessListener(result -> {
                             Toast.makeText(getActivity(), "Interest added!", Toast.LENGTH_SHORT).show();
@@ -250,10 +249,7 @@ public class Entrant_profile_view extends Fragment{
 
 
         listOfInterests.setVisibility(View.VISIBLE);
-
-        if (username == null || username.isEmpty()) {
-            notificationsSwitch.setEnabled(false);
-        } else {
+        String username = prefs.getString("userEmail", "");
             FirebaseFirestore ff = FirebaseFirestore.getInstance();
             ff.collection("users")
                     .document(username)
@@ -277,7 +273,7 @@ public class Entrant_profile_view extends Fragment{
                         attachNotificationListener(notificationsSwitch, ff, username, prefs);
                         notificationsSwitch.setEnabled(true);
                     });
-        }
+
         listOfInterests.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override

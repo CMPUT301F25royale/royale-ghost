@@ -31,7 +31,14 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,6 +56,7 @@ public class Organizer_entrant_view extends Fragment {
     private SwitchCompat showChosenEntrantsSwitch;
     private SwitchCompat showCancelledEntrantsSwitch;
     private Organizer_entrant_adapter adapter;
+    private String name;
 
     private OrganizerSharedViewModel model;
     private Database db;
@@ -58,6 +66,8 @@ public class Organizer_entrant_view extends Fragment {
     private ArrayList<Pair<Entrant, String>> displayList; // holds only what is currently shown based on switches
 
     private ActivityResultLauncher<Intent> saveCsvLauncher;
+
+    ArrayList<Pair<Entrant, String>> entrantArrayListAndStatuses;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -288,5 +298,80 @@ public class Organizer_entrant_view extends Fragment {
             return "\"" + escaped + "\"";
         }
         return data;
+    }
+
+    private void declineEntrant(Event event, Entrant entrant) {
+        db.declineEntrant(event, entrant).addOnSuccessListener(success -> {
+            if (success) {
+                for (int i = 0; i < entrantArrayListAndStatuses.size(); i++) {
+                    Entrant currentEntrant = entrantArrayListAndStatuses.get(i).first;
+                    if (currentEntrant.getEmail().equals(entrant.getEmail())) {
+                        entrantArrayListAndStatuses.set(i,
+                                new Pair<>(entrant, "Declined"));
+                        break;
+                    }
+                }
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+            } else {
+                Toast.makeText(getContext(), "Failed to decline entrant",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Organizer_entrant_view", "Failed to decline entrant", e);
+            Toast.makeText(getContext(), "Error: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // 🔹 NEW: load entrant locations from Firestore and show markers on map
+    private void setUpMapForEvent(View root, Event event) {
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.entrant_map_fragment);
+
+        if (mapFragment == null) {
+            Log.d("GeoDebug", "Map fragment not found in layout.");
+            return;
+        }
+
+        mapFragment.getMapAsync(googleMap -> {
+            db.getEntrantLocationsForEvent(event.getId())
+                    .addOnSuccessListener(docs -> {
+                        if (docs == null || docs.isEmpty()) {
+                            Log.d("GeoDebug", "No entrant locations for this event.");
+                            return;
+                        }
+
+                        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+                        boolean hasAny = false;
+
+                        for (DocumentSnapshot snap : docs) {
+                            GeoPoint gp = snap.getGeoPoint("location");
+                            if (gp == null) continue;
+
+                            String email = snap.getString("userEmail");
+                            LatLng pos = new LatLng(gp.getLatitude(), gp.getLongitude());
+
+                            googleMap.addMarker(
+                                    new MarkerOptions()
+                                            .position(pos)
+                                            .title(email != null ? email : "Entrant")
+                            );
+
+                            boundsBuilder.include(pos);
+                            hasAny = true;
+                        }
+
+                        if (hasAny) {
+                            LatLngBounds bounds = boundsBuilder.build();
+                            googleMap.moveCamera(
+                                    CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                            );
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.d("GeoDebug",
+                            "Failed to load entrant locations: "
+                                    + (e != null ? e.getMessage() : "unknown")));
+        });
     }
 }

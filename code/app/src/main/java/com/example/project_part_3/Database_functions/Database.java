@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -251,7 +252,12 @@ public class Database {
      * @return a {@link Task} resolving to a {@link User} instance, or {@code null} if not found
      */
     public Task<User> fetchUser(String email) {
-        DocumentReference docRef = db.collection(USERS_COLLECTION).document(email);
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("fetchUser: email must not be null or empty");
+        }
+
+        String trimmedEmail = email.trim();
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(trimmedEmail);
 
         return docRef.get().continueWith(task -> {
             if (!task.isSuccessful()) {
@@ -1179,6 +1185,39 @@ public class Database {
      * @return a {@link Task} that completes when Firestore updates are applied
      * @see #acceptLotterySelection(String, String)
      */
+    public Task<Void> saveUserLocationForEvent(
+            @NonNull String eventId,
+            @NonNull String userEmail,
+            double lat,
+            double lng
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("userEmail", userEmail);
+                    data.put("location", new GeoPoint(lat, lng));
+                    data.put("timestamp", FieldValue.serverTimestamp());
+
+                    return ref.collection("entrant_locations")
+                            .document(userEmail)   // one doc per entrant per event
+                            .set(data);
+                });
+    }
+    public Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(
+            @NonNull String eventId
+    ) {
+        return findEventDocRefById(eventId)
+                .onSuccessTask(ref -> ref.collection("entrant_locations").get())
+                .continueWith(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null) {
+                        return new ArrayList<DocumentSnapshot>();
+                    }
+                    QuerySnapshot snap = task.getResult();
+                    return new ArrayList<>(snap.getDocuments());
+                });
+    }
+
+    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
     public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update(
