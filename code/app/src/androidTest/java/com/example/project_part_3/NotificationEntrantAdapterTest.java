@@ -49,7 +49,7 @@ public class NotificationEntrantAdapterTest {
         List<Notification_Entrant> list = new ArrayList<>();
         list.add(notif);
 
-        Notification_entrant_adapter adapter = new Notification_entrant_adapter(context, list);
+        Notification_entrant_adapter adapter = new Notification_entrant_adapter(context, list, null);
 
         // Ask adapter for a row view
         ViewGroup parent = new FrameLayout(context);
@@ -77,7 +77,7 @@ public class NotificationEntrantAdapterTest {
         list.add(new Notification_Entrant());
         list.add(new Notification_Entrant());
 
-        Notification_entrant_adapter adapter = new Notification_entrant_adapter(context, list);
+        Notification_entrant_adapter adapter = new Notification_entrant_adapter(context, list, null);
 
         assertEquals(2, adapter.getCount());
         assertSame(list.get(0), adapter.getItem(0));

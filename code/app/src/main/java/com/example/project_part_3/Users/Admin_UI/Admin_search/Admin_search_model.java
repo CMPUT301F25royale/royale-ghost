@@ -1,12 +1,10 @@
-// Create this new file in the same package:
-// com/example/project_part_3/Users/Admin_UI/Admin_search/AdminSearchViewModel.java
-
 package com.example.project_part_3.Users.Admin_UI.Admin_search;
 
 import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.ViewModel;
+
 import com.example.project_part_3.Database_functions.EventDatabase;
 import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
@@ -16,23 +14,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ViewModel responsible for managing and combining data used in the Admin Search UI.
- * This ViewModel retrieves all events and images from their respective databases and combines it into
- * a single stream containing a combined list of both data types. It uses
- * The class also provides helper methods for deleting events and images, and ensures
- * proper cleanup of database listeners when the ViewModel is cleared.
+ * ViewModel that manages event and image data for the admin search screen.
+ * Provides combined aggregated data and supports deleting events and images.
  */
 public class Admin_search_model extends ViewModel {
 
     private final EventDatabase eventDb;
     private final ImageDatabase imageDb;
 
-
     private final LiveData<List<Event>> allEvents;
     private final LiveData<List<Image_datamap>> allImages;
 
     private final MediatorLiveData<List<Object>> combinedData = new MediatorLiveData<>();
 
+    /**
+     * Initializes the ViewModel, retrieves data sources, and prepares the combined data stream.
+     */
     public Admin_search_model() {
         eventDb = new EventDatabase();
         imageDb = new ImageDatabase();
@@ -44,6 +41,9 @@ public class Admin_search_model extends ViewModel {
         combinedData.addSource(allImages, images -> combineAllData());
     }
 
+    /**
+     * Combines all events and images into a single list for UI display.
+     */
     private void combineAllData() {
         List<Event> events = allEvents.getValue();
         List<Image_datamap> images = allImages.getValue();
@@ -58,18 +58,38 @@ public class Admin_search_model extends ViewModel {
         combinedData.setValue(combinedList);
     }
 
+    /**
+     * Returns a LiveData list containing both events and images.
+     *
+     * @return LiveData list of combined objects
+     */
     public LiveData<List<Object>> getCombinedData() {
         return combinedData;
     }
 
+    /**
+     * Deletes an event using the EventDatabase.
+     *
+     * @param event    the event to delete
+     * @param listener callback invoked on success or failure
+     */
     public void deleteEvent(Event event, EventDatabase.OnEventDeleteListener listener) {
         eventDb.deleteEvent(event, listener);
     }
 
+    /**
+     * Deletes an image using the ImageDatabase.
+     *
+     * @param image    the image to delete
+     * @param listener callback invoked on success or failure
+     */
     public void deleteImage(Image_datamap image, ImageDatabase.OnImageDeleteListener listener) {
         imageDb.deleteImage(image, listener);
     }
 
+    /**
+     * Cleans up listeners when the ViewModel is cleared.
+     */
     @Override
     protected void onCleared() {
         super.onCleared();

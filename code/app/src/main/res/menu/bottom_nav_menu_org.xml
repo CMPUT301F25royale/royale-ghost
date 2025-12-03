@@ -5,20 +5,20 @@
         android:icon="@drawable/ic_home"
         android:title="Home" />
 
-<!--    <item-->
-<!--        android:id="@+id/organizerSearchFragment"-->
-<!--        android:icon="@drawable/ic_search"-->
-<!--        android:title="Search" />-->
+    <item
+        android:id="@+id/organizerSearchFragment"
+        android:icon="@drawable/ic_search"
+        android:title="Search" />
 
-<!--    <item-->
-<!--        android:id="@+id/nav_qr"-->
-<!--        android:icon="@drawable/ic_qr_code"-->
-<!--        android:title="Scan" />-->
+    <item
+        android:id="@+id/nav_qr"
+        android:icon="@drawable/ic_qr_code"
+        android:title="Scan" />
 
-<!--    <item-->
-<!--        android:id="@+id/organizerNotificationsFragment"-->
-<!--        android:icon="@drawable/ic_notifications"-->
-<!--        android:title="Notification" />-->
+    <item
+        android:id="@+id/organizerNotificationsFragment"
+        android:icon="@drawable/ic_notifications"
+        android:title="Notification" />
 
     <item
         android:id="@+id/organizerProfilesFragment"

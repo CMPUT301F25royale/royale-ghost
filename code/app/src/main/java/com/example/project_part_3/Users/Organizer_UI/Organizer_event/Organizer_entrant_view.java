@@ -1,21 +1,17 @@
 package com.example.project_part_3.Users.Organizer_UI.Organizer_event;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputType;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -28,7 +24,6 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.project_part_3.Database_functions.Database;
@@ -36,7 +31,14 @@ import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.Entrant;
 import com.example.project_part_3.Users.Organizer_UI.OrganizerSharedViewModel;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,6 +56,7 @@ public class Organizer_entrant_view extends Fragment {
     private SwitchCompat showChosenEntrantsSwitch;
     private SwitchCompat showCancelledEntrantsSwitch;
     private Organizer_entrant_adapter adapter;
+    private String name;
 
     private OrganizerSharedViewModel model;
     private Database db;
@@ -63,6 +66,8 @@ public class Organizer_entrant_view extends Fragment {
     private ArrayList<Pair<Entrant, String>> displayList; // holds only what is currently shown based on switches
 
     private ActivityResultLauncher<Intent> saveCsvLauncher;
+
+    ArrayList<Pair<Entrant, String>> entrantArrayListAndStatuses;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,9 +108,6 @@ public class Organizer_entrant_view extends Fragment {
         setUpBackButton(view);
         setUpSwitches();
         setUpExportButton(view);
-        //setUpMapButton(view);
-        setUpNotifyButton(view);
-
 
         adapter = new Organizer_entrant_adapter(getContext(), R.layout.organizer_event_entrant_element, displayList, this::declineEntrant);
         listView.setAdapter(adapter);
@@ -116,46 +118,6 @@ public class Organizer_entrant_view extends Fragment {
                 fetchEntrants(selectedEvent);
             }
         });
-    }
-
-    private void setUpNotifyButton(View view) {
-        Button notifyButton = view.findViewById(R.id.noify_button);
-        notifyButton.setOnClickListener(v -> {
-            if (event == null) return;
-            showNotifyPopup();
-        });
-    }
-
-    private void showNotifyPopup() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Send Notification");
-        builder.setMessage("Enter the message you want to send");
-
-        final EditText input = new EditText(requireContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String message = input.getText().toString();
-
-                ArrayList<String> toSend = new ArrayList<>();
-                for (Pair<Entrant, String> pair : displayList) {
-                    toSend.add(pair.first.getEmail()); // add each email
-                }
-                db.sendNotification(message, event, toSend, "message_from_organizer");
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
     }
 
     /**
@@ -336,5 +298,94 @@ public class Organizer_entrant_view extends Fragment {
             return "\"" + escaped + "\"";
         }
         return data;
+    }
+
+    private void declineEntrant(Event event, Entrant entrant) {
+        db.declineEntrant(event, entrant).addOnSuccessListener(success -> {
+            if (success) {
+                for (int i = 0; i < entrantArrayListAndStatuses.size(); i++) {
+                    Entrant currentEntrant = entrantArrayListAndStatuses.get(i).first;
+                    if (currentEntrant.getEmail().equals(entrant.getEmail())) {
+                        entrantArrayListAndStatuses.set(i,
+                                new Pair<>(entrant, "Declined"));
+                        break;
+                    }
+                }
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+            } else {
+                Toast.makeText(getContext(), "Failed to decline entrant",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Organizer_entrant_view", "Failed to decline entrant", e);
+            Toast.makeText(getContext(), "Error: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setUpMapForEvent(View root, Event event) {
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.entrant_map_fragment);
+
+        if (mapFragment == null) {
+            Log.d("GeoDebug", "Map fragment not found in layout.");
+            return;
+        }
+
+        mapFragment.getMapAsync(googleMap -> {
+            db.getEntrantLocationsForEvent(event.getId())
+                    .addOnSuccessListener(docs -> {
+                        if (docs == null) {
+                            Log.d("GeoDebug", "getEntrantLocationsForEvent: docs is null");
+                            return;
+                        }
+
+                        Log.d("GeoDebug", "getEntrantLocationsForEvent: got " + docs.size() + " docs for event " + event.getId());
+
+                        if (docs.isEmpty()) {
+                            Log.d("GeoDebug", "No entrant locations for this event.");
+                            return;
+                        }
+
+                        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+                        boolean hasAny = false;
+
+                        for (DocumentSnapshot snap : docs) {
+                            Log.d("GeoDebug", "Location doc: " + snap.getId() + " => " + snap.getData());
+
+                            GeoPoint gp = snap.getGeoPoint("location");
+                            if (gp == null) {
+                                Log.d("GeoDebug", "Doc " + snap.getId() + " has no GeoPoint field 'location'");
+                                continue;
+                            }
+
+                            String email = snap.getString("userEmail");
+                            LatLng pos = new LatLng(gp.getLatitude(), gp.getLongitude());
+
+                            googleMap.addMarker(
+                                    new MarkerOptions()
+                                            .position(pos)
+                                            .title(email != null ? email : "Entrant")
+                            );
+
+                            boundsBuilder.include(pos);
+                            hasAny = true;
+                        }
+
+                        if (hasAny) {
+                            LatLngBounds bounds = boundsBuilder.build();
+                            googleMap.setOnMapLoadedCallback(() ->
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+                            );
+                        } else {
+                            Log.d("GeoDebug", "No valid GeoPoints found in entrant_locations docs.");
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Log.e("GeoDebug", "Failed to load entrant locations", e)
+                    );
+
+        });
     }
 }

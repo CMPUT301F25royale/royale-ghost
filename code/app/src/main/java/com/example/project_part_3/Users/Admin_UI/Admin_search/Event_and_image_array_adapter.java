@@ -1,5 +1,3 @@
-// File: com/example/project_part_3/Users/Admin_UI/Admin_search/Event_and_image_array_adapter.java
-
 package com.example.project_part_3.Users.Admin_UI.Admin_search;
 
 import android.content.Context;
@@ -20,26 +18,43 @@ import com.example.project_part_3.Database_functions.ImageDatabase;
 import com.example.project_part_3.Events.Event;
 import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.R;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 /**
- * Custom ArrayAdapter capable of displaying and managing both {@link Event} and {@link Image_holder}
- * objects in the Admin Search interface
+ * Adapter that displays and manages both events and images
+ * in the admin search interface. Allows viewing details and deleting items.
  */
 public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
+
     private final Context context;
-    private final Admin_search_model viewModel; // Use ViewModel instead of direct DB
+    private final Admin_search_model viewModel;
     private static final int TYPE_EVENT = 0;
     private static final int TYPE_IMAGE = 1;
 
-    public Event_and_image_array_adapter(Context context, ArrayList<Object> items, Admin_search_model viewModel) {
+    /**
+     * Creates the adapter with initial data and a ViewModel used for data operations.
+     *
+     * @param context   the context used to inflate views
+     * @param items     the list of items to display
+     * @param viewModel the ViewModel responsible for deleting images and events
+     */
+    public Event_and_image_array_adapter(Context context,
+                                         ArrayList<Object> items,
+                                         Admin_search_model viewModel) {
         super(context, 0, items);
         this.context = context;
         this.viewModel = viewModel;
     }
 
+    /**
+     * Returns the type of the item at a specific position.
+     *
+     * @param position the position of the item
+     * @return an integer identifying the view type
+     */
     @Override
     public int getItemViewType(int position) {
         if (getItem(position) instanceof Event) {
@@ -49,19 +64,34 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
         }
     }
 
+    /**
+     * Returns the number of view types supported by the adapter.
+     *
+     * @return the number of view types
+     */
     @Override
     public int getViewTypeCount() {
         return 2;
     }
 
+    /**
+     * Creates or updates the view for an item at a given position.
+     *
+     * @param position    the position of the item
+     * @param convertView a recycled view
+     * @param parent      the parent view group
+     * @return the view displaying the item
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // ViewHolder logic remains the same...
+
         int viewType = getItemViewType(position);
         Object item = getItem(position);
 
         if (viewType == TYPE_EVENT) {
+
             EventViewHolder eventHolder;
+
             if (convertView == null) {
                 convertView = LayoutInflater.from(context).inflate(R.layout.admin_search_element, parent, false);
                 eventHolder = new EventViewHolder();
@@ -73,12 +103,16 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
                 eventHolder.eventDetail = convertView.findViewById(R.id.admin_search_detail_button);
                 eventHolder.eventDelete = convertView.findViewById(R.id.admin_search_delete_event_button);
                 convertView.setTag(eventHolder);
-            } else { // TYPE_EVENT
+            } else {
                 eventHolder = (EventViewHolder) convertView.getTag();
             }
+
             bindEventView(eventHolder, (Event) item);
-        } else{
+
+        } else {
+
             ImageViewHolder imageHolder;
+
             if (convertView == null) {
                 convertView = LayoutInflater.from(context).inflate(R.layout.admin_search_element, parent, false);
                 imageHolder = new ImageViewHolder();
@@ -86,43 +120,47 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
                 imageHolder.description = convertView.findViewById(R.id.admin_profiles_name);
                 imageHolder.deleteButton = convertView.findViewById(R.id.admin_search_delete_event_button);
                 convertView.setTag(imageHolder);
-            } else { // TYPE_IMAGE
+            } else {
                 imageHolder = (ImageViewHolder) convertView.getTag();
             }
-            bindImageView(imageHolder, (Image_datamap) item);
-        }
 
-        if (viewType == TYPE_EVENT) {
-            EventViewHolder holder = (EventViewHolder) convertView.getTag();
-            bindEventView(holder, (Event) item);
-        } else {
-            ImageViewHolder holder = (ImageViewHolder) convertView.getTag();
-            bindImageView(holder, (Image_datamap) item);
+            bindImageView(imageHolder, (Image_datamap) item);
         }
 
         return convertView;
     }
 
+    /**
+     * Populates an event list item with its data and configures interactions.
+     *
+     * @param holder the view holder containing views for the event layout
+     * @param event  the event being displayed
+     */
     private void bindEventView(EventViewHolder holder, Event event) {
+
         if (event == null) return;
+
         holder.eventTitle.setText(event.getTitle());
         holder.eventLocation.setText(event.getLocation());
 
         if (event.getDate_close() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-            holder.eventDate.setText("Closes: " + dateFormat.format(event.getDate_close()));
+            SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            holder.eventDate.setText("Closes: " + format.format(event.getDate_close()));
         }
-        holder.eventAttendees.setText("Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity());
+
+        holder.eventAttendees.setText(
+                "Attendees: " + event.getConfirmedCount() + "/" + event.getCapacity()
+        );
 
         if (event.getImageInfo() != null && event.getImageInfo().getUrl() != null) {
             Glide.with(context)
                     .load(event.getImageInfo().getUrl())
-                    .placeholder(android.R.drawable.ic_menu_report_image) // Use a consistent placeholder
+                    .placeholder(android.R.drawable.ic_menu_report_image)
                     .error(android.R.drawable.ic_menu_report_image)
                     .into(holder.eventImage);
         } else {
             Glide.with(context).clear(holder.eventImage);
-            holder.eventImage.setImageResource(android.R.drawable.ic_menu_report_image); // Set a default
+            holder.eventImage.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
         holder.eventDetail.setOnClickListener(v -> {
@@ -131,27 +169,34 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             context.startActivity(i);
         });
 
-        // Use the ViewModel for the delete operation
-        holder.eventDelete.setOnClickListener(v -> {
-            viewModel.deleteEvent(event, new EventDatabase.OnEventDeleteListener() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(context, event.getTitle() + " deleted", Toast.LENGTH_SHORT).show();
-                    // No need to call remove() or notifyDataSetChanged(). LiveData will do it for us.
-                }
+        holder.eventDelete.setOnClickListener(v ->
+                viewModel.deleteEvent(event, new EventDatabase.OnEventDeleteListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(context, event.getTitle() + " deleted", Toast.LENGTH_SHORT).show();
+                    }
 
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(context, "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    Log.e("Adapter", "Failed to delete event: " + errorMessage);
-                }
-            });
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(context, "Error: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        Log.e("Adapter", "Failed to delete event: " + errorMessage);
+                    }
+                })
+        );
     }
 
+    /**
+     * Populates an image list item with its data and configures interactions.
+     *
+     * @param holder the view holder containing views for the image layout
+     * @param image  the image being displayed
+     */
     private void bindImageView(ImageViewHolder holder, Image_datamap image) {
+
         if (image == null) return;
+
         holder.description.setText(image.getDescription());
+
         if (image.getUrl() != null && !image.getUrl().isEmpty()) {
             Glide.with(context)
                     .load(image.getUrl())
@@ -163,19 +208,22 @@ public class Event_and_image_array_adapter extends ArrayAdapter<Object> {
             holder.imageView.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
-        holder.deleteButton.setOnClickListener(v -> {
-            viewModel.deleteImage(image, new ImageDatabase.OnImageDeleteListener() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
-                }
+        holder.deleteButton.setOnClickListener(v ->
+                viewModel.deleteImage(image, new ImageDatabase.OnImageDeleteListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(context, "Image deleted", Toast.LENGTH_SHORT).show();
+                    }
 
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(context, "Failed to delete image: " + errorMessage, Toast.LENGTH_LONG).show();
-                    Log.e("Adapter", "Failed to delete image: " + errorMessage);
-                }
-            });});
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(context,
+                                "Failed to delete image: " + errorMessage,
+                                Toast.LENGTH_LONG).show();
+                        Log.e("Adapter", "Failed to delete image: " + errorMessage);
+                    }
+                })
+        );
     }
 
     private static class EventViewHolder {

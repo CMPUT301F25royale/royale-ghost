@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import com.example.project_part_3.Image.Image_datamap;
 import com.example.project_part_3.Users.Organizer;
-import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.Exclude; // <-- IMPORT THIS
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -337,6 +337,8 @@ public class Event {
     public int getConfirmedCount() {
         return (confirmedUserIds != null) ? confirmedUserIds.size() : 0;
     }
+    // For unit test
+    public void setConfirmedUserIds(List<String> list) { this.confirmedUserIds = (list != null) ? list : new ArrayList<>(); }
 
     public List<String> getConfirmedUserIds() {
         return (confirmedUserIds != null) ? confirmedUserIds : new ArrayList<>();
@@ -460,5 +462,10 @@ public class Event {
     public void setGeolocationEnabled(Boolean geolocationEnabled) {
         this.geolocationEnabled = geolocationEnabled;
     }
+
+    public boolean isFull() {
+        return getRemainingCapacity() <= 0;
+    }
+
 }
 

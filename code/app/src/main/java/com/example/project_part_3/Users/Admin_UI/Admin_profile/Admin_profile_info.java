@@ -1,5 +1,3 @@
-// File: com/example/project_part_3/Users/Admin_UI/Admin_profile/Admin_profile_info.java
-
 package com.example.project_part_3.Users.Admin_UI.Admin_profile;
 
 import android.os.Bundle;
@@ -11,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -22,12 +21,11 @@ import com.example.project_part_3.Database_functions.Database;
 import com.example.project_part_3.Database_functions.UserDatabase;
 import com.example.project_part_3.R;
 import com.example.project_part_3.Users.User;
-import com.google.firebase.Firebase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
- * The fragment that displays profile information about a user to an admin.
- * It also allows an admin to view and delete profiles of non-admin users.
+ * Fragment that displays a user's profile information to an admin
+ * and provides options to delete the user or remove their profile photo.
  */
 public class Admin_profile_info extends Fragment {
 
@@ -40,6 +38,11 @@ public class Admin_profile_info extends Fragment {
     private TextView phoneTextView;
     private ImageView profilePhoto;
 
+    /**
+     * Initializes the ViewModel and retrieves arguments passed to this fragment.
+     *
+     * @param savedInstanceState the previous saved state, if any
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +53,25 @@ public class Admin_profile_info extends Fragment {
         }
     }
 
+    /**
+     * Inflates the layout for this fragment.
+     *
+     * @param inflater layout inflater used to inflate the view
+     * @param container parent view container
+     * @param savedInstanceState saved state bundle
+     * @return the inflated view for the fragment UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.admin_profile_info, container, false);
     }
 
+    /**
+     * Sets up UI components, button listeners, and begins observing user profile data.
+     *
+     * @param view the root view for this fragment
+     * @param savedInstanceState the previous saved state, if any
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -75,6 +92,7 @@ public class Admin_profile_info extends Fragment {
 
         adminprofilemodel.getUserProfiles().observe(getViewLifecycleOwner(), users -> {
             if (users == null || userEmail == null) return;
+
             for (User user : users) {
                 if (userEmail.equals(user.getEmail())) {
                     currentUser = user;
@@ -85,30 +103,39 @@ public class Admin_profile_info extends Fragment {
         });
     }
 
+    /**
+     * Updates the displayed user information in the UI.
+     */
     private void updateUI() {
         if (currentUser != null) {
             nameTextView.setText("Name: " + currentUser.getName());
             emailTextView.setText("Email: " + currentUser.getEmail());
+
             if (currentUser.getPhone() == null || currentUser.getPhone().isEmpty()) {
-                phoneTextView.setText("Phone: Not provided"); // Placeholder text
+                phoneTextView.setText("Phone: Not provided");
             } else {
                 phoneTextView.setText("Phone: " + currentUser.getPhone());
             }
-            if (currentUser.getProfilePicUrl() != null && currentUser.getImageInfo().getUrl() != null) {
+
+            if (currentUser.getProfilePicUrl() != null &&
+                    currentUser.getImageInfo() != null &&
+                    currentUser.getImageInfo().getUrl() != null) {
+
                 Glide.with(getContext())
                         .load(currentUser.getImageInfo().getUrl())
-                        .placeholder(R.drawable.ic_person) // Placeholder while loading
-                        .error(R.drawable.ic_person)       // Placeholder on error
+                        .placeholder(R.drawable.ic_person)
+                        .error(R.drawable.ic_person)
                         .into(profilePhoto);
             } else {
-                Glide.with(getContext())
-                        .load(R.drawable.ic_person)
-                        .into(profilePhoto);
                 profilePhoto.setImageResource(R.drawable.ic_person);
             }
         }
     }
 
+    /**
+     * Deletes the currently displayed user if allowed.
+     * Prevents deletion of admin accounts.
+     */
     private void handleDelete() {
         if (currentUser == null) {
             Toast.makeText(getContext(), "Cannot delete user: data is missing.", Toast.LENGTH_SHORT).show();
@@ -119,6 +146,7 @@ public class Admin_profile_info extends Fragment {
             Toast.makeText(getContext(), "Cannot delete an Admin user.", Toast.LENGTH_SHORT).show();
             return;
         }
+
         adminprofilemodel.deleteUser(currentUser.getEmail(), new UserDatabase.OnUserDeleteListener() {
             @Override
             public void onSuccess() {
@@ -136,21 +164,29 @@ public class Admin_profile_info extends Fragment {
         });
     }
 
+    /**
+     * Deletes the current user's profile photo if one exists.
+     */
     private void handleDeletePhoto() {
-        if (currentUser == null || currentUser.getImageInfo() == null || currentUser.getImageInfo().getUrl() == null) {
+        if (currentUser == null ||
+                currentUser.getImageInfo() == null ||
+                currentUser.getImageInfo().getUrl() == null) {
+
             Toast.makeText(getContext(), "Cannot delete photo: data is missing.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Database db = new Database(FirebaseFirestore.getInstance());
-        db.deleteImage(currentUser.getEmail(), null, "profile_pic").addOnSuccessListener(aVoid -> {
-            currentUser.setImageInfo(null);
-            currentUser.setProfilePicUrl(null);
-            Toast.makeText(getContext(), "Profile photo deleted successfully.", Toast.LENGTH_SHORT).show();
-            profilePhoto.setImageResource(R.drawable.ic_person); // set back to default
-        }).addOnFailureListener(e -> {
-            Log.e("Admin_profile_info", "Failed to delete profile photo: " + e.getMessage());
-            Toast.makeText(getContext(), "Failed to delete profile photo.", Toast.LENGTH_SHORT).show();
-        });
+        db.deleteImage(currentUser.getEmail(), null, "profile_pic")
+                .addOnSuccessListener(aVoid -> {
+                    currentUser.setImageInfo(null);
+                    currentUser.setProfilePicUrl(null);
+                    Toast.makeText(getContext(), "Profile photo deleted successfully.", Toast.LENGTH_SHORT).show();
+                    profilePhoto.setImageResource(R.drawable.ic_person);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Admin_profile_info", "Failed to delete profile photo: " + e.getMessage());
+                    Toast.makeText(getContext(), "Failed to delete profile photo.", Toast.LENGTH_SHORT).show();
+                });
     }
 }
