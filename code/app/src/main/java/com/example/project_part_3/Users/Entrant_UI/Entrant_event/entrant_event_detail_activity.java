@@ -228,6 +228,7 @@ public class entrant_event_detail_activity extends AppCompatActivity {
                             joinBtn.setEnabled(true);
 
                             joinBtn.setOnClickListener(v -> {
+
                                 joinBtn.setEnabled(false);
                                 joinBtn.setText("Entering…");
 

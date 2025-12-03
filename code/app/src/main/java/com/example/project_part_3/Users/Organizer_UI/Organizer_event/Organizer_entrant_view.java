@@ -98,6 +98,8 @@ public class Organizer_entrant_view extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Log.d("GeoDebug", "onViewCreated: Organizer_entrant_view initialized");
+
         model = new ViewModelProvider(requireActivity()).get(OrganizerSharedViewModel.class);
         db = new Database(FirebaseFirestore.getInstance());
 
@@ -109,16 +111,31 @@ public class Organizer_entrant_view extends Fragment {
         setUpSwitches();
         setUpExportButton(view);
 
-        adapter = new Organizer_entrant_adapter(getContext(), R.layout.organizer_event_entrant_element, displayList, this::declineEntrant);
+        adapter = new Organizer_entrant_adapter(
+                getContext(),
+                R.layout.organizer_event_entrant_element,
+                displayList,
+                this::declineEntrant
+        );
         listView.setAdapter(adapter);
 
+        // Observe selected event
         model.getSelectedEvent().observe(getViewLifecycleOwner(), selectedEvent -> {
             if (selectedEvent != null) {
                 this.event = selectedEvent;
+                Log.d("GeoDebug", "onViewCreated: selectedEvent ID=" + selectedEvent.getId());
+
+                // 1) Populate list of entrants
                 fetchEntrants(selectedEvent);
+
+                // 2) Set up the map for this event and show entrant locations
+                setUpMapForEvent(view, selectedEvent);
+            } else {
+                Log.w("GeoDebug", "onViewCreated: selectedEvent was null");
             }
         });
     }
+
 
     /**
      * Fetches all entrants for the event and populates the masterList.
@@ -326,14 +343,28 @@ public class Organizer_entrant_view extends Fragment {
     }
 
     private void setUpMapForEvent(View root, Event event) {
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.entrant_map_fragment);
+        if (event == null) {
+            Log.w("GeoDebug", "setUpMapForEvent: event is null, aborting");
+            return;
+        }
+
+        Log.d("GeoDebug", "setUpMapForEvent CALLED for event: " + event.getId());
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager()
+                        .findFragmentById(R.id.entrant_map_fragment);
 
         if (mapFragment == null) {
-            Log.d("GeoDebug", "Map fragment not found in layout.");
+            Log.d("GeoDebug", "setUpMapForEvent: Map fragment not found in layout (R.id.entrant_map_fragment).");
             return;
         }
 
         mapFragment.getMapAsync(googleMap -> {
+            Log.d("GeoDebug", "setUpMapForEvent: GoogleMap is ready, loading entrant locations...");
+
+            // Clear any old markers first if user switches events
+            googleMap.clear();
+
             db.getEntrantLocationsForEvent(event.getId())
                     .addOnSuccessListener(docs -> {
                         if (docs == null) {
@@ -341,7 +372,8 @@ public class Organizer_entrant_view extends Fragment {
                             return;
                         }
 
-                        Log.d("GeoDebug", "getEntrantLocationsForEvent: got " + docs.size() + " docs for event " + event.getId());
+                        Log.d("GeoDebug", "getEntrantLocationsForEvent: got "
+                                + docs.size() + " docs for event " + event.getId());
 
                         if (docs.isEmpty()) {
                             Log.d("GeoDebug", "No entrant locations for this event.");
@@ -352,11 +384,13 @@ public class Organizer_entrant_view extends Fragment {
                         boolean hasAny = false;
 
                         for (DocumentSnapshot snap : docs) {
-                            Log.d("GeoDebug", "Location doc: " + snap.getId() + " => " + snap.getData());
+                            Log.d("GeoDebug", "Location doc: " + snap.getId()
+                                    + " => " + snap.getData());
 
                             GeoPoint gp = snap.getGeoPoint("location");
                             if (gp == null) {
-                                Log.d("GeoDebug", "Doc " + snap.getId() + " has no GeoPoint field 'location'");
+                                Log.d("GeoDebug", "Doc " + snap.getId()
+                                        + " has no GeoPoint field 'location'");
                                 continue;
                             }
 
@@ -376,7 +410,9 @@ public class Organizer_entrant_view extends Fragment {
                         if (hasAny) {
                             LatLngBounds bounds = boundsBuilder.build();
                             googleMap.setOnMapLoadedCallback(() ->
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+                                    googleMap.moveCamera(
+                                            CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                                    )
                             );
                         } else {
                             Log.d("GeoDebug", "No valid GeoPoints found in entrant_locations docs.");
@@ -385,7 +421,7 @@ public class Organizer_entrant_view extends Fragment {
                     .addOnFailureListener(e ->
                             Log.e("GeoDebug", "Failed to load entrant locations", e)
                     );
-
         });
     }
+
 }

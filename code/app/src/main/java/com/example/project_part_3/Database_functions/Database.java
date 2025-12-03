@@ -1190,7 +1190,11 @@ public class Database {
             @NonNull String userEmail,
             double lat,
             double lng
-    ){
+    ) {
+        Log.d("GeoDebug", "saveUserLocationForEvent: eventId=" + eventId
+                + ", userEmail=" + userEmail
+                + ", lat=" + lat + ", lng=" + lng);
+
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> {
                     Map<String, Object> data = new HashMap<>();
@@ -1198,24 +1202,39 @@ public class Database {
                     data.put("location", new GeoPoint(lat, lng));
                     data.put("timestamp", FieldValue.serverTimestamp());
 
+                    Log.d("GeoDebug", "Writing entrant_locations doc under eventRef="
+                            + ref.getPath() + " for userEmail=" + userEmail);
+
                     return ref.collection("entrant_locations")
                             .document(userEmail)   // one doc per entrant per event
                             .set(data);
                 });
     }
+
     public Task<List<DocumentSnapshot>> getEntrantLocationsForEvent(@NonNull String eventId) {
+        Log.d("GeoDebug", "getEntrantLocationsForEvent CALLED for eventId=" + eventId);
+
         return findEventDocRefById(eventId)
-                .onSuccessTask(ref -> ref.collection("entrant_locations").get())
+                .onSuccessTask(ref -> {
+                    Log.d("GeoDebug", "getEntrantLocationsForEvent: querying "
+                            + ref.getPath() + "/entrant_locations");
+                    return ref.collection("entrant_locations").get();
+                })
                 .continueWith(task -> {
                     if (!task.isSuccessful() || task.getResult() == null) {
+                        Exception e = task.getException();
+                        Log.e("GeoDebug", "getEntrantLocationsForEvent FAILED for eventId="
+                                + eventId, e);
                         return new ArrayList<DocumentSnapshot>();
                     }
+
                     QuerySnapshot snap = task.getResult();
+                    Log.d("GeoDebug", "getEntrantLocationsForEvent: got "
+                            + snap.size() + " docs for eventId=" + eventId);
                     return new ArrayList<>(snap.getDocuments());
                 });
     }
 
-    // If declined move user from selectedUserIds to declinedUserIds and clean other lists
     public Task<Void> declineLotterySelection(@NonNull String eventId, @NonNull String userEmail) {
         return findEventDocRefById(eventId)
                 .onSuccessTask(ref -> ref.update(
